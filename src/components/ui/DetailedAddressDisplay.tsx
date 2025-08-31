@@ -1,5 +1,6 @@
 import React from 'react';
-import { MapPin, Loader2, AlertCircle } from 'lucide-react';
+import { MapPin, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
+import Button from './Button';
 
 interface DetailedAddressDisplayProps {
   address: string | null;
@@ -7,6 +8,8 @@ interface DetailedAddressDisplayProps {
   error: string | null;
   showIcon?: boolean;
   className?: string;
+  onRetry?: () => void;
+  showRetryButton?: boolean;
 }
 
 const DetailedAddressDisplay: React.FC<DetailedAddressDisplayProps> = ({
@@ -14,7 +17,9 @@ const DetailedAddressDisplay: React.FC<DetailedAddressDisplayProps> = ({
   isLoading,
   error,
   showIcon = true,
-  className = ''
+  className = '',
+  onRetry,
+  showRetryButton = true
 }) => {
   if (isLoading) {
     return (
@@ -29,12 +34,49 @@ const DetailedAddressDisplay: React.FC<DetailedAddressDisplayProps> = ({
     return (
       <div className={`flex items-center gap-2 text-sm text-orange-600 ${className}`}>
         <AlertCircle className="w-4 h-4" />
-        <span>Adresse non disponible</span>
+        <span className="flex-1">
+          {error.includes('Service temporairement indisponible') 
+            ? 'Service temporairement indisponible'
+            : 'Adresse non disponible'
+          }
+        </span>
+        {showRetryButton && onRetry && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onRetry}
+            className="p-1 h-auto text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+          >
+            <RefreshCw className="w-3 h-3" />
+          </Button>
+        )}
       </div>
     );
   }
 
   if (address) {
+    // Vérifier si c'est une adresse de fallback (coordonnées)
+    const isFallbackAddress = address.startsWith('Coordonnées:');
+    
+    if (isFallbackAddress) {
+      return (
+        <div className={`flex items-center gap-2 text-sm text-amber-600 ${className}`}>
+          <MapPin className="w-4 h-4" />
+          <span className="flex-1">Position détectée (adresse en cours de récupération)</span>
+          {showRetryButton && onRetry && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onRetry}
+              className="p-1 h-auto text-amber-600 hover:text-amber-700 hover:bg-amber-50"
+            >
+              <RefreshCw className="w-3 h-3" />
+            </Button>
+          )}
+        </div>
+      );
+    }
+
     // Diviser l'adresse en parties pour un affichage plus structuré
     const addressParts = address.split(',');
     

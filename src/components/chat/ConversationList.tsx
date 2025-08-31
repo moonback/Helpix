@@ -17,14 +17,30 @@ const ConversationList: React.FC<ConversationListProps> = ({ onConversationSelec
     // Charger les conversations au montage du composant
     fetchConversations();
     
-    // Rafraîchir automatiquement toutes les 30 secondes
+    // Rafraîchir automatiquement toutes les 2 minutes (plus raisonnable)
     const interval = setInterval(() => {
-      fetchConversations();
-    }, 30000);
+      // Vérifier que l'utilisateur est actif avant de rafraîchir
+      if (!document.hidden) {
+        fetchConversations();
+      }
+    }, 120000); // 2 minutes au lieu de 30 secondes
     
-    // Nettoyer l'intervalle au démontage
-    return () => clearInterval(interval);
-  }, [fetchConversations]);
+    // Écouter les changements de visibilité de la page
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        // Rafraîchir quand l'utilisateur revient sur la page
+        fetchConversations();
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    // Nettoyer l'intervalle et l'event listener au démontage
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []); // ✅ Dépendances vides - exécution unique au montage
 
   const filteredConversations = conversations.filter(conv =>
     conv.id.toLowerCase().includes(searchTerm.toLowerCase())
@@ -98,7 +114,7 @@ const ConversationList: React.FC<ConversationListProps> = ({ onConversationSelec
         <p className="text-sm text-gray-600 mb-2">Gérez vos conversations et échangez avec d'autres utilisateurs</p>
         <div className="flex items-center justify-center space-x-2 text-xs text-gray-500">
           <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-          <span>Rafraîchissement automatique activé</span>
+          <span>Rafraîchissement automatique (2 min)</span>
         </div>
       </div>
 
