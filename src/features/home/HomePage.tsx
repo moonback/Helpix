@@ -169,12 +169,7 @@ const HomePage: React.FC = () => {
             Découvrez les demandes d'aide autour de vous
           </p>
           
-          {/* Debug: Afficher l'ID utilisateur */}
-          {user && (
-            <div className="mt-2 text-xs text-gray-500 bg-gray-100 p-2 rounded">
-              🔍 Debug: ID utilisateur: <code className="bg-white px-1 rounded">{user.id}</code>
-            </div>
-          )}
+
           
           {/* Localisation Status */}
           <div className="mt-3 flex items-center gap-2">
