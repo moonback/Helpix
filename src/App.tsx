@@ -15,7 +15,6 @@ import ChatPage from '@/features/chat/ChatPage';
 
 // Components
 import BottomNavigation from '@/components/navigation/BottomNavigation';
-import SessionDebugger from '@/components/ui/SessionDebugger';
 
 // Loading component
 const LoadingScreen: React.FC = () => (
@@ -158,8 +157,7 @@ const App: React.FC = () => {
           </Routes>
         </AnimatePresence>
 
-        {/* Composant de débogage (développement uniquement) */}
-        <SessionDebugger />
+
       </div>
     </Router>
   );
