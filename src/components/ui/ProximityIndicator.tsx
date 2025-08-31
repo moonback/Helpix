@@ -1,5 +1,5 @@
 import React from 'react';
-import { MapPin, Navigation } from 'lucide-react';
+import { MapPin, Navigation, MapPinIcon } from 'lucide-react';
 import { calculateDistance, formatDistance } from '@/lib/utils';
 
 interface ProximityIndicatorProps {

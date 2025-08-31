@@ -3,11 +3,14 @@ import { motion } from 'framer-motion';
 import { useTaskStore } from '@/stores/taskStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useGeolocation } from '@/hooks/useGeolocation';
+import { useReverseGeocoding } from '@/hooks/useReverseGeocoding';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
 import ProximityIndicator from '@/components/ui/ProximityIndicator';
 import LocationPermissionBanner from '@/components/ui/LocationPermissionBanner';
+import AddressDisplay from '@/components/ui/AddressDisplay';
+import LocationDisplay from '@/components/ui/LocationDisplay';
 import { calculateDistance, formatDistance } from '@/lib/utils';
 import { 
   Search, 
@@ -29,6 +32,7 @@ const HomePage: React.FC = () => {
   const { tasks, fetchTasks, isLoading, setUserLocation, getTasksByProximity } = useTaskStore();
   const { user, updateUserLocation } = useAuthStore();
   const { latitude, longitude, error: locationError, isLoading: locationLoading, requestLocation } = useGeolocation();
+  const { address, getAddressFromCoords, clearAddress } = useReverseGeocoding();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'local' | 'remote'>('all');
   const [selectedPriority, setSelectedPriority] = useState<'all' | 'low' | 'medium' | 'high' | 'urgent'>('all');
@@ -46,8 +50,10 @@ const HomePage: React.FC = () => {
       if (user) {
         updateUserLocation(latitude, longitude);
       }
+      // Récupérer l'adresse correspondante
+      getAddressFromCoords(latitude, longitude);
     }
-  }, [latitude, longitude, setUserLocation, user, updateUserLocation]);
+  }, [latitude, longitude, setUserLocation, user, updateUserLocation, getAddressFromCoords]);
 
   // Obtenir les tâches filtrées et triées par proximité si activé
   const getFilteredAndSortedTasks = () => {
@@ -141,9 +147,15 @@ const HomePage: React.FC = () => {
                 <span>Localisation en cours...</span>
               </div>
             ) : latitude && longitude ? (
-              <div className="flex items-center gap-2 text-sm text-green-600 bg-green-50 px-3 py-1 rounded-full">
-                <Navigation className="w-4 h-4" />
-                <span>Localisé • {latitude.toFixed(4)}, {longitude.toFixed(4)}</span>
+              <div className="flex items-center gap-2 text-sm bg-green-50 px-3 py-1 rounded-full">
+                <Navigation className="w-4 h-4 text-green-600" />
+                <span className="text-green-600">Localisé •</span>
+                <AddressDisplay
+                  address={address}
+                  isLoading={!address}
+                  error={null}
+                  className="text-green-600"
+                />
               </div>
             ) : locationError ? (
               <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 px-3 py-1 rounded-full">
@@ -338,17 +350,15 @@ const HomePage: React.FC = () => {
                     <span>{task.budget_credits} crédits</span>
                   </div>
                   
-                  <div className="flex items-center gap-2 text-gray-600">
-                    <MapPin className="w-4 h-4" />
-                    <div className="flex flex-col">
-                      <span className="truncate">{task.location}</span>
-                      {latitude && longitude && task.latitude && task.longitude && sortByProximity && (
-                        <span className="text-xs text-primary-600 font-medium">
-                          {formatDistance(calculateDistance(latitude, longitude, task.latitude, task.longitude))}
-                        </span>
-                      )}
-                    </div>
-                  </div>
+                  <LocationDisplay
+                    location={task.location}
+                    latitude={task.latitude}
+                    longitude={task.longitude}
+                    userLat={latitude || undefined}
+                    userLon={longitude || undefined}
+                    showDistance={sortByProximity}
+                    className="text-gray-600"
+                  />
                   
                   {task.deadline && (
                     <div className="flex items-center gap-2 text-gray-600">
