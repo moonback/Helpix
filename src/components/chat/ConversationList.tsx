@@ -59,25 +59,15 @@ const ConversationList: React.FC = () => {
           onClick={() => fetchConversations()}
           className="bg-blue-600 hover:bg-blue-700 text-white"
         >
-          Charger
+          Actualiser
         </Button>
       </div>
 
-      {/* Message de test temporaire */}
-      <Card className="bg-blue-50 border-blue-200">
-        <div className="text-blue-800 p-4">
-          <h3 className="font-semibold mb-2">Système de messagerie en cours de configuration</h3>
-          <p className="text-sm mb-3">
-            Les politiques de sécurité de la base de données sont en cours de correction.
-            Cliquez sur "Charger" pour tester la connexion.
-          </p>
-          <div className="text-xs text-blue-600">
-            <p>• Base de données : ✅ Configurée</p>
-            <p>• Tables : ✅ Créées</p>
-            <p>• Politiques RLS : 🔄 En cours de correction</p>
-          </div>
-        </div>
-      </Card>
+      {/* Titre de la section */}
+      <div className="text-center">
+        <h2 className="text-xl font-semibold text-gray-900 mb-2">💬 Messagerie</h2>
+        <p className="text-sm text-gray-600">Gérez vos conversations et échangez avec d'autres utilisateurs</p>
+      </div>
 
       {/* Affichage des conversations si disponibles */}
       {conversations.length > 0 ? (
