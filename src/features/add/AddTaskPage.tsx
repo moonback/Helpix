@@ -6,6 +6,8 @@ import { useAuthStore } from '@/stores/authStore';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
+import AddressSearch from '@/components/ui/AddressSearch';
+import LocationMap from '@/components/ui/LocationMap';
 import { 
   ArrowLeft, 
   MapPin, 
@@ -35,6 +37,11 @@ const AddTaskPage: React.FC = () => {
     tags: ''
   });
 
+  const [selectedLocation, setSelectedLocation] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -49,7 +56,9 @@ const AddTaskPage: React.FC = () => {
         budget_credits: parseInt(formData.budget_credits),
         required_skills: formData.required_skills.split(',').map(s => s.trim()).filter(Boolean),
         tags: formData.tags.split(',').map(t => t.trim()).filter(Boolean),
-        deadline: formData.deadline || undefined
+        deadline: formData.deadline || undefined,
+        latitude: selectedLocation?.latitude,
+        longitude: selectedLocation?.longitude
       };
 
       await createTask(taskData);
@@ -190,14 +199,24 @@ const AddTaskPage: React.FC = () => {
                 />
               </div>
 
-              <Input
+              <AddressSearch
                 label="Localisation"
                 value={formData.location}
-                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                placeholder="Adresse ou lieu précis"
+                onChange={(address) => setFormData({ ...formData, location: address })}
+                onLocationSelect={(lat, lng) => setSelectedLocation({ latitude: lat, longitude: lng })}
+                placeholder="Rechercher une adresse ou utiliser votre localisation actuelle"
                 required
-                leftIcon={MapPin}
               />
+
+              {/* Carte de localisation */}
+              {selectedLocation && (
+                <LocationMap
+                  latitude={selectedLocation.latitude}
+                  longitude={selectedLocation.longitude}
+                  address={formData.location}
+                  className="mt-4"
+                />
+              )}
 
               <Input
                 label="Compétences requises"
@@ -252,10 +271,23 @@ const AddTaskPage: React.FC = () => {
             size="lg"
             loading={isSubmitting}
             className="w-full"
-            disabled={!formData.title || !formData.description || !formData.estimated_duration || !formData.budget_credits}
+            disabled={
+              !formData.title || 
+              !formData.description || 
+              !formData.estimated_duration || 
+              !formData.budget_credits ||
+              (formData.category === 'local' && !selectedLocation)
+            }
           >
             {isSubmitting ? 'Création...' : 'Créer la tâche'}
           </Button>
+
+          {/* Message d'aide pour la localisation */}
+          {formData.category === 'local' && !selectedLocation && (
+            <div className="text-center text-sm text-amber-600 bg-amber-50 p-3 rounded-lg border border-amber-200">
+              📍 Pour les tâches sur place, une localisation précise est requise
+            </div>
+          )}
         </motion.form>
       </div>
     </div>
