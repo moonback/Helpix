@@ -118,14 +118,22 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
         // Créer une nouvelle conversation
         const { data: newConversation, error: convError } = await supabase
           .from('conversations')
-          .insert({
-            participants: [user.id, receiverId]
-          })
+          .insert({})
           .select()
           .single();
 
         if (convError) throw convError;
         conversationId = newConversation.id;
+        
+        // Créer les participants dans la table conversation_participants
+        const { error: partError } = await supabase
+          .from('conversation_participants')
+          .insert([
+            { conversation_id: conversationId, user_id: user.id },
+            { conversation_id: conversationId, user_id: receiverId }
+          ]);
+        
+        if (partError) throw partError;
         
         // Mettre à jour l'état local
         const newConv: Conversation = {
@@ -248,13 +256,23 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
     try {
       const { data: conversation, error } = await supabase
         .from('conversations')
-        .insert({
-          participants: participantIds
-        })
+        .insert({})
         .select()
         .single();
 
       if (error) throw error;
+
+      // Créer les participants dans la table conversation_participants
+      const { error: partError } = await supabase
+        .from('conversation_participants')
+        .insert(
+          participantIds.map(userId => ({
+            conversation_id: conversation.id,
+            user_id: userId
+          }))
+        );
+      
+      if (partError) throw partError;
 
       const newConversation: Conversation = {
         id: conversation.id,

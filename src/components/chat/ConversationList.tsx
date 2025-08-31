@@ -14,9 +14,7 @@ const ConversationList: React.FC = () => {
   }, [fetchConversations]);
 
   const filteredConversations = conversations.filter(conv =>
-    conv.participants.some(participantId => 
-      participantId.toLowerCase().includes(searchTerm.toLowerCase())
-    )
+    conv.id.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (isLoading) {
@@ -93,7 +91,7 @@ const ConversationList: React.FC = () => {
                     Conversation {conversation.id.slice(0, 8)}...
                   </p>
                   <p className="text-sm text-gray-500">
-                    {conversation.participants.length} participant(s)
+                    Conversation créée le {new Date(conversation.createdAt).toLocaleDateString()}
                   </p>
                   {conversation.lastMessage && (
                     <p className="text-sm text-gray-600 truncate">

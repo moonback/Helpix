@@ -54,8 +54,12 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   const handleSendMessage = async () => {
     if (!conversation || !newMessage.trim() || !user) return;
 
+    // Récupérer l'ID de l'autre participant
     const otherParticipantId = conversation.participants.find(id => id !== user.id);
-    if (!otherParticipantId) return;
+    if (!otherParticipantId) {
+      console.error('Impossible de trouver l\'autre participant');
+      return;
+    }
 
     try {
       await sendMessage(newMessage, otherParticipantId, 'text', attachments);
@@ -131,8 +135,9 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
     );
   }
 
+  // Récupérer le nom de l'autre participant
   const otherParticipantId = conversation.participants.find(id => id !== user?.id);
-  const participantName = otherParticipantId || 'Utilisateur';
+  const participantName = otherParticipantId ? `Utilisateur ${otherParticipantId.slice(0, 8)}...` : 'Utilisateur';
 
   return (
     <div className="h-full flex flex-col">
