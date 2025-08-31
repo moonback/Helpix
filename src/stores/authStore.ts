@@ -13,6 +13,7 @@ interface AuthState {
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   updateProfile: (updates: Partial<User>) => Promise<void>;
+  updateUserLocation: (latitude: number, longitude: number) => Promise<void>;
   setUser: (user: User | null) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
@@ -150,6 +151,32 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     } catch (error) {
       set({
         error: error instanceof Error ? error.message : 'Erreur lors de la mise à jour du profil',
+      });
+    }
+  },
+
+  updateUserLocation: async (latitude: number, longitude: number) => {
+    try {
+      const { user } = get();
+      if (!user) throw new Error('Utilisateur non connecté');
+
+      const { error } = await supabase
+        .from('users')
+        .update({ 
+          location: `${latitude},${longitude}`,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', user.id);
+
+      if (error) throw error;
+
+      // Mettre à jour l'état local
+      set({
+        user: { ...user, location: `${latitude},${longitude}` },
+      });
+    } catch (error) {
+      set({
+        error: error instanceof Error ? error.message : 'Erreur lors de la mise à jour de la localisation',
       });
     }
   },

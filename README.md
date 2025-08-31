@@ -6,6 +6,7 @@ Une plateforme d'entraide mobile-first où les utilisateurs échangent du temps,
 
 - **🔐 Authentification complète** avec Supabase
 - **📱 Interface mobile-first** optimisée pour tous les appareils
+- **🌍 Géolocalisation intelligente** pour afficher les tâches les plus proches
 - **🗺️ Carte interactive** avec Leaflet.js pour localiser les opportunités
 - **💳 Système de crédits** pour gérer les échanges
 - **💬 Chat en temps réel** (mock) pour la communication

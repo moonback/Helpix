@@ -1,15 +1,19 @@
 import { create } from 'zustand';
 import { supabase } from '@/lib/supabase';
 import { Task } from '@/types';
+import { sortTasksByProximity } from '@/lib/utils';
 
 interface TaskStore {
   tasks: Task[];
   isLoading: boolean;
   error: string | null;
+  userLocation: { latitude: number | null; longitude: number | null } | null;
   fetchTasks: () => Promise<void>;
   createTask: (taskData: Partial<Task>) => Promise<void>;
   updateTask: (id: number, updates: Partial<Task>) => Promise<void>;
   deleteTask: (id: number) => Promise<void>;
+  setUserLocation: (latitude: number, longitude: number) => void;
+  getTasksByProximity: () => Task[];
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
 }
@@ -18,6 +22,7 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
   tasks: [],
   isLoading: false,
   error: null,
+  userLocation: null,
 
   fetchTasks: async () => {
     try {
@@ -210,6 +215,19 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
     } finally {
       set({ isLoading: false });
     }
+  },
+
+  setUserLocation: (latitude, longitude) => {
+    set({ userLocation: { latitude, longitude } });
+  },
+
+  getTasksByProximity: () => {
+    const { tasks, userLocation } = get();
+    if (!userLocation || !userLocation.latitude || !userLocation.longitude) {
+      return tasks;
+    }
+
+    return sortTasksByProximity(tasks, userLocation.latitude, userLocation.longitude);
   },
 
   setLoading: (loading) => set({ isLoading: loading }),
