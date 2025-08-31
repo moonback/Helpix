@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
 import { useMessageStore } from '@/stores/messageStore';
-import { Home, Map, Plus, Wallet, User, MessageCircle } from 'lucide-react';
+import { Home, Map, Plus, Wallet, User, MessageCircle, BarChart3 } from 'lucide-react';
 
 const BottomNavigation: React.FC = () => {
   const navigate = useNavigate();
@@ -20,6 +20,7 @@ const BottomNavigation: React.FC = () => {
 
   const tabs = [
     { path: '/', icon: Home, label: 'Accueil' },
+    { path: '/dashboard', icon: BarChart3, label: 'Tableau' },
     { path: '/map', icon: Map, label: 'Carte' },
     { path: '/add', icon: Plus, label: 'Ajouter' },
     { path: '/chat', icon: MessageCircle, label: 'Messages', badge: unreadCount },

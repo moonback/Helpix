@@ -11,6 +11,9 @@ const AddTaskPage = React.lazy(() => import('@/features/add/AddTaskPage'));
 const ChatPage = React.lazy(() => import('@/features/chat/ChatPage'));
 const WalletPage = React.lazy(() => import('@/features/wallet/WalletPage'));
 const ProfilePage = React.lazy(() => import('@/features/profile/ProfilePage'));
+const DashboardPage = React.lazy(() => import('@/features/dashboard/DashboardPage'));
+const TaskDetailPage = React.lazy(() => import('@/features/task-detail/TaskDetailPage'));
+const EditTaskPage = React.lazy(() => import('@/features/edit/EditTaskPage'));
 const Auth = React.lazy(() => import('@/features/auth/Auth'));
 const Onboarding = React.lazy(() => import('@/features/auth/Onboarding'));
 
@@ -96,6 +99,13 @@ const App: React.FC = () => {
                 </div>
               </ProtectedRoute>
             } />
+            <Route path="/create-task" element={
+              <ProtectedRoute>
+                <div className="pb-16">
+                  <AddTaskPage />
+                </div>
+              </ProtectedRoute>
+            } />
             <Route path="/chat" element={
               <ProtectedRoute>
                 <div className="pb-16">
@@ -114,6 +124,27 @@ const App: React.FC = () => {
               <ProtectedRoute>
                 <div className="pb-16">
                   <ProfilePage />
+                </div>
+              </ProtectedRoute>
+            } />
+            <Route path="/dashboard" element={
+              <ProtectedRoute>
+                <div className="pb-16">
+                  <DashboardPage />
+                </div>
+              </ProtectedRoute>
+            } />
+            <Route path="/task/:taskId" element={
+              <ProtectedRoute>
+                <div className="pb-16">
+                  <TaskDetailPage />
+                </div>
+              </ProtectedRoute>
+            } />
+            <Route path="/edit-task/:taskId" element={
+              <ProtectedRoute>
+                <div className="pb-16">
+                  <EditTaskPage />
                 </div>
               </ProtectedRoute>
             } />

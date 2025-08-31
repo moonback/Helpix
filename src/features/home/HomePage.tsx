@@ -33,7 +33,10 @@ import {
   Star,
   TrendingUp,
   Shield,
-  Zap
+  Zap,
+  BarChart3,
+  Eye,
+  Edit
 } from 'lucide-react';
 
 const HomePage: React.FC = () => {
@@ -189,6 +192,10 @@ const HomePage: React.FC = () => {
     navigate(`/edit-task/${taskId}`);
   };
 
+  const handleViewTask = (taskId: number) => {
+    navigate(`/task/${taskId}`);
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center">
@@ -296,9 +303,19 @@ const HomePage: React.FC = () => {
                   Découvrez les opportunités d'entraide autour de vous
                 </p>
               </div>
-              <div className="hidden lg:flex items-center space-x-2">
-                <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="text-sm text-slate-500">En ligne</span>
+              <div className="hidden lg:flex items-center space-x-4">
+                <Button
+                  variant="outline"
+                  onClick={() => navigate('/dashboard')}
+                  className="flex items-center space-x-2"
+                >
+                  <BarChart3 className="w-4 h-4" />
+                  <span>Tableau de bord</span>
+                </Button>
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                  <span className="text-sm text-slate-500">En ligne</span>
+                </div>
               </div>
             </div>
 
@@ -500,7 +517,10 @@ const HomePage: React.FC = () => {
                             <span className="text-2xl">{categoryIcons[task.category]}</span>
                           </div>
                           <div>
-                            <h3 className="text-xl font-bold text-slate-800 mb-1 line-clamp-2">
+                            <h3 
+                              className="text-xl font-bold text-slate-800 mb-1 line-clamp-2 cursor-pointer hover:text-blue-600 transition-colors"
+                              onClick={() => handleViewTask(task.id)}
+                            >
                               {task.title}
                             </h3>
                             <div className="flex items-center space-x-3">
@@ -518,10 +538,18 @@ const HomePage: React.FC = () => {
                           <Button
                             variant="ghost"
                             size="sm"
+                            onClick={() => handleViewTask(task.id)}
+                            className="p-2 text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-xl"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
                             onClick={() => handleEdit(task.id)}
                             className="p-2 text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-xl"
                           >
-                            <Share2 className="w-4 h-4" />
+                            <Edit className="w-4 h-4" />
                           </Button>
                         </div>
                       </div>
