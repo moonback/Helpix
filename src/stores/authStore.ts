@@ -154,6 +154,32 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
+  updateUserLocation: async (latitude: number, longitude: number) => {
+    try {
+      const { user } = get();
+      if (!user) throw new Error('Utilisateur non connecté');
+
+      const { error } = await supabase
+        .from('users')
+        .update({ 
+          location: `${latitude},${longitude}`,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', user.id);
+
+      if (error) throw error;
+
+      // Mettre à jour l'état local
+      set({
+        user: { ...user, location: `${latitude},${longitude}` },
+      });
+    } catch (error) {
+      set({
+        error: error instanceof Error ? error.message : 'Erreur lors de la mise à jour de la localisation',
+      });
+    }
+  },
+
   setUser: (user: User | null) => {
     set({
       user,
