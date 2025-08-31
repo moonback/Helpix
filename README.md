@@ -1,248 +1,365 @@
 # 🤝 Entraide Universelle
 
-Une plateforme d'entraide mobile-first où les utilisateurs échangent du temps, des compétences et des objets dans une économie de proximité mondiale.
+**Une plateforme d'entraide mobile-first où les utilisateurs échangent du temps, des compétences et des objets dans une économie de proximité mondiale.**
+
+[![React](https://img.shields.io/badge/React-18.2.0-blue.svg)](https://reactjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.2.2-blue.svg)](https://www.typescriptlang.org/)
+[![Supabase](https://img.shields.io/badge/Supabase-2.38.5-green.svg)](https://supabase.com/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.3.6-blue.svg)](https://tailwindcss.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## ✨ Fonctionnalités
 
-- **🔐 Authentification complète** avec Supabase
-- **📱 Interface mobile-first** optimisée pour tous les appareils
-- **🌍 Géolocalisation intelligente** pour afficher les tâches les plus proches
-- **🗺️ Carte interactive** avec Leaflet.js pour localiser les opportunités
-- **💳 Système de crédits** pour gérer les échanges
-- **💬 Chat en temps réel** (mock) pour la communication
-- **👤 Profils utilisateurs** avec compétences et objets prêtables
-- **🎯 Gestion des tâches** avec statuts et catégorisation
+### 🔐 **Authentification & Profils**
+- Inscription/Connexion sécurisée avec Supabase Auth
+- Profils utilisateurs avec compétences et objets prêtables
+- Gestion des sessions avec persistance automatique
+- Onboarding intuitif pour les nouveaux utilisateurs
 
-## 🛠️ Tech Stack
+### 📱 **Interface Mobile-First**
+- Design responsive optimisé pour tous les appareils
+- Navigation bottom-tab intuitive
+- Animations fluides avec Framer Motion
+- Composants UI réutilisables et accessibles
 
-- **Frontend** : React 18 + TypeScript + Vite
-- **UI** : TailwindCSS + Framer Motion
-- **Navigation** : React Router v6
-- **État global** : Zustand
-- **Base de données** : Supabase (PostgreSQL)
-- **Authentification** : Supabase Auth
-- **Cartes** : Leaflet.js + React-Leaflet
-- **Icônes** : Lucide React
+### 🌍 **Géolocalisation Intelligente**
+- Détection automatique de la position utilisateur
+- Tri des tâches par proximité géographique
+- Calcul de distances en temps réel
+- Intégration avec OpenStreetMap et Nominatim
 
-## 🚀 Installation
+### 🗺️ **Carte Interactive**
+- Visualisation des tâches sur une carte Leaflet
+- Marqueurs interactifs avec informations détaillées
+- Basculement entre vue carte et vue liste
+- Navigation géographique intuitive
 
-### Prérequis
+### 💳 **Système de Crédits**
+- Économie virtuelle d'entraide
+- Gestion des transactions entre utilisateurs
+- Historique des échanges
+- Système de notation et feedback
 
-- Node.js 18+ 
-- npm ou yarn
-- Compte Supabase
+### 🎯 **Gestion des Tâches**
+- Création/modification/suppression de tâches
+- Catégorisation (sur place / à distance)
+- Système de priorités (faible, moyenne, élevée, urgente)
+- Filtres avancés et recherche textuelle
+- Gestion des compétences requises et tags
 
-### 1. Cloner le projet
+### 💬 **Communication**
+- Chat en temps réel entre utilisateurs
+- Notifications et messages
+- Système de commentaires sur les tâches
 
+## 🛠️ Stack Technique
+
+### **Frontend**
+- **React 18** - Bibliothèque UI avec hooks et composants fonctionnels
+- **TypeScript 5.2** - Typage statique et sécurité du code
+- **Vite 5.0** - Build tool ultra-rapide et HMR
+- **React Router v6** - Navigation SPA avec futures flags
+
+### **UI & Design**
+- **Tailwind CSS 3.3** - Framework CSS utility-first
+- **Framer Motion 10.16** - Animations et transitions fluides
+- **Lucide React** - Icônes SVG modernes et cohérentes
+- **clsx + tailwind-merge** - Gestion intelligente des classes CSS
+
+### **Backend & Base de Données**
+- **Supabase 2.38** - Backend-as-a-Service avec PostgreSQL
+- **PostgreSQL** - Base de données relationnelle robuste
+- **Row Level Security (RLS)** - Sécurité granulaire des données
+- **Real-time subscriptions** - Mises à jour en temps réel
+
+### **État & Gestion des Données**
+- **Zustand 4.4** - Store global léger et performant
+- **Supabase Client** - SDK officiel pour l'API
+- **Hooks personnalisés** - Logique métier réutilisable
+
+### **Cartes & Géolocalisation**
+- **Leaflet 1.9** - Bibliothèque de cartes open-source
+- **React-Leaflet 4.2** - Composants React pour Leaflet
+- **Geolocation API** - Position GPS native du navigateur
+- **Nominatim** - Géocodage inverse via OpenStreetMap
+
+### **Tests & Qualité**
+- **Jest 29.7** - Framework de tests unitaires
+- **React Testing Library** - Tests d'intégration React
+- **ESLint** - Linting et formatage du code
+- **TypeScript strict mode** - Vérifications de type strictes
+
+## 🚀 Prérequis
+
+### **Système**
+- **Node.js** 18.0+ (recommandé: 20.x LTS)
+- **npm** 9.0+ ou **yarn** 1.22+
+- **Git** 2.30+
+
+### **Compte Supabase**
+- Projet Supabase créé sur [supabase.com](https://supabase.com)
+- Clés d'API (URL et clé anonyme)
+- Base de données PostgreSQL configurée
+
+### **Navigateur**
+- **Chrome** 90+, **Firefox** 88+, **Safari** 14+
+- Support de la géolocalisation
+- Support des modules ES6
+
+## 📦 Installation
+
+### 1. **Cloner le projet**
 ```bash
-git clone <votre-repo>
+git clone https://github.com/votre-username/entraide-universelle.git
 cd entraide-universelle
 ```
 
-### 2. Installer les dépendances
-
+### 2. **Installer les dépendances**
 ```bash
 npm install
+# ou
+yarn install
 ```
 
-### 3. Configuration Supabase
-
-1. Créez un projet sur [Supabase](https://supabase.com)
-2. Créez un fichier `.env.local` à la racine :
-
+### 3. **Configuration des variables d'environnement**
+Créer un fichier `.env.local` à la racine :
 ```env
+# Supabase Configuration
 VITE_SUPABASE_URL=https://votre-projet.supabase.co
-VITE_SUPABASE_ANON_KEY=votre-clé-anon
+VITE_SUPABASE_ANON_KEY=votre-clé-anon-supabase
+
+# Configuration optionnelle
+VITE_APP_NAME=Entraide Universelle
+VITE_APP_VERSION=1.0.0
 ```
 
-### 4. Base de données
-
-Exécutez ce SQL dans l'éditeur SQL de Supabase :
-
+### 4. **Configuration de la base de données**
+Exécuter le script SQL dans l'éditeur SQL de Supabase :
 ```sql
--- Table des utilisateurs
-create table users (
-    id uuid primary key default gen_random_uuid(),
-    name text not null,
-    email text unique not null,
-    password_hash text not null,
-    avatar_url text,
-    bio text,
-    location text,
-    credits int default 100,
-    created_at timestamp default now()
-);
-
--- Table des compétences
-create table skills (
-    id serial primary key,
-    user_id uuid references users(id) on delete cascade,
-    skill_name text not null
-);
-
--- Table des objets
-create table items (
-    id serial primary key,
-    user_id uuid references users(id) on delete cascade,
-    item_name text not null,
-    description text,
-    available boolean default true
-);
-
--- Table des tâches
-create table tasks (
-  id serial primary key,
-  user_id uuid references users(id) on delete cascade,
-  title text not null,
-  description text not null,
-  category text check (category in ('local','remote')) default 'local',
-  status text check (status in ('open','in_progress','completed','cancelled')) default 'open',
-  priority text check (priority in ('low','medium','high','urgent')) default 'medium',
-  estimated_duration integer not null, -- en heures
-  location text not null,
-  latitude numeric(10,8),
-  longitude numeric(11,8),
-  required_skills text[] default '{}',
-  budget_credits integer not null default 0,
-  deadline timestamp,
-  tags text[] default '{}',
-  created_at timestamp default now(),
-  updated_at timestamp default now(),
-  assigned_to uuid references users(id),
-  completion_date timestamp,
-  rating integer check (rating >= 1 and rating <= 5),
-  feedback text
-);
-
--- Table des transactions
-create table transactions (
-    id serial primary key,
-    sender_id uuid references users(id) on delete cascade,
-    receiver_id uuid references users(id) on delete cascade,
-    credits int not null,
-    task_id int references tasks(id) on delete set null,
-    created_at timestamp default now()
-);
-
--- Table des messages
-create table messages (
-    id serial primary key,
-    sender_id uuid references users(id) on delete cascade,
-    receiver_id uuid references users(id) on delete cascade,
-    content text not null,
-    created_at timestamp default now()
-);
+-- Voir DB_SCHEMA.md pour le schéma complet
+-- ou exécuter directement le script de création des tables
 ```
 
-### 5. Démarrer l'application
+## 🔧 Configuration
 
+### **Configuration Supabase**
+1. Créer un projet sur [supabase.com](https://supabase.com)
+2. Récupérer l'URL et la clé anonyme dans Settings > API
+3. Configurer l'authentification dans Authentication > Settings
+4. Activer les politiques RLS pour la sécurité
+
+### **Configuration de la géolocalisation**
+- Vérifier que le navigateur supporte l'API Geolocation
+- Configurer les permissions de localisation
+- Tester avec des coordonnées de développement
+
+### **Configuration des cartes**
+- Leaflet utilise OpenStreetMap par défaut (gratuit)
+- Possibilité d'utiliser d'autres providers (Google Maps, Mapbox)
+
+## 🚀 Lancement
+
+### **Développement**
 ```bash
 npm run dev
+# ou
+yarn dev
+```
+L'application sera accessible sur `http://localhost:5173`
+
+### **Build de production**
+```bash
+npm run build
+# ou
+yarn build
 ```
 
-L'application sera accessible sur `http://localhost:3000`
+### **Prévisualisation du build**
+```bash
+npm run preview
+# ou
+yarn preview
+```
 
-## 📱 Structure de l'application
+### **Tests**
+```bash
+# Tests unitaires
+npm test
 
+# Tests en mode watch
+npm run test:watch
+
+# Couverture de code
+npm run test:coverage
+
+# Tests CI
+npm run test:ci
+```
+
+### **Linting**
+```bash
+npm run lint
+# ou
+yarn lint
+```
+
+## 📁 Structure du Projet
+
+```
+entraide-universelle/
+├── 📁 src/                          # Code source principal
+│   ├── 📁 components/               # Composants UI réutilisables
+│   │   ├── 📁 navigation/          # Navigation et routing
+│   │   └── 📁 ui/                  # Composants de base
+│   ├── 📁 features/                 # Fonctionnalités par domaine
+│   │   ├── 📁 auth/                # Authentification
+│   │   ├── 📁 home/                # Page d'accueil
+│   │   ├── 📁 map/                 # Carte interactive
+│   │   ├── 📁 add/                 # Création de tâches
+│   │   ├── 📁 edit/                # Modification de tâches
+│   │   ├── 📁 wallet/              # Gestion des crédits
+│   │   ├── 📁 profile/             # Profil utilisateur
+│   │   └── 📁 chat/                # Système de chat
+│   ├── 📁 hooks/                   # Hooks personnalisés
+│   ├── 📁 stores/                  # Stores Zustand
+│   ├── 📁 lib/                     # Utilitaires et configuration
+│   ├── 📁 types/                   # Types TypeScript
+│   └── 📁 styles/                  # Styles globaux
+├── 📁 docs/                         # Documentation technique
+├── 📁 public/                       # Assets statiques
+├── 📁 tests/                        # Tests et configuration
+├── 📄 package.json                  # Dépendances et scripts
+├── 📄 vite.config.ts               # Configuration Vite
+├── 📄 tailwind.config.js           # Configuration Tailwind
+├── 📄 tsconfig.json                # Configuration TypeScript
+└── 📄 README.md                     # Ce fichier
+```
+
+## 🔐 Variables d'Environnement
+
+| Variable | Description | Requis | Exemple |
+|----------|-------------|---------|---------|
+| `VITE_SUPABASE_URL` | URL de votre projet Supabase | ✅ | `https://abc123.supabase.co` |
+| `VITE_SUPABASE_ANON_KEY` | Clé anonyme Supabase | ✅ | `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...` |
+| `VITE_APP_NAME` | Nom de l'application | ❌ | `Entraide Universelle` |
+| `VITE_APP_VERSION` | Version de l'application | ❌ | `1.0.0` |
+
+## 🧪 Tests
+
+### **Structure des tests**
 ```
 src/
-├── components/          # Composants UI réutilisables
-│   ├── ui/             # Composants de base (Button, Card, Input)
-│   └── navigation/     # Navigation et routing
-├── features/           # Fonctionnalités par domaine
-│   ├── auth/          # Authentification et onboarding
-│   ├── home/          # Page d'accueil et feed
-│   ├── map/           # Carte interactive
-│   ├── add/           # Création de tâches
-│   ├── wallet/        # Gestion des crédits
-│   ├── profile/       # Profil utilisateur
-│   └── chat/          # Système de chat
-├── stores/            # Stores Zustand
-├── lib/               # Configuration et utilitaires
-├── types/             # Types TypeScript
-└── hooks/             # Hooks personnalisés
+├── 📁 __tests__/                    # Tests unitaires
+├── 📁 components/                    # Tests des composants
+├── 📁 hooks/                        # Tests des hooks
+└── 📁 stores/                       # Tests des stores
 ```
 
-## 🎨 Design System
+### **Exécution des tests**
+- **Tests unitaires** : `npm test`
+- **Tests d'intégration** : `npm run test:integration`
+- **Couverture** : `npm run test:coverage`
+- **Tests CI** : `npm run test:ci`
 
-### Couleurs
-
-- **Primary** : Bleu (#0ea5e9) - Actions principales
-- **Secondary** : Gris (#64748b) - Éléments secondaires
-- **Success** : Vert (#10b981) - États positifs
-- **Warning** : Jaune (#f59e0b) - Avertissements
-- **Error** : Rouge (#ef4444) - Erreurs
-
-### Typographie
-
-- **Police** : Inter (Google Fonts)
-- **Tailles** : Mobile-first avec breakpoints Tailwind
-
-### Composants
-
-- **Boutons** : 5 variantes (primary, secondary, outline, ghost, danger)
-- **Cartes** : Avec ombres et animations au hover
-- **Inputs** : Avec validation et états d'erreur
-- **Navigation** : Bottom navigation mobile-first
-
-## 🔧 Scripts disponibles
-
-```bash
-npm run dev          # Démarre le serveur de développement
-npm run build        # Build de production
-npm run preview      # Prévisualise le build
-npm run lint         # Vérifie le code avec ESLint
-```
-
-## 📱 Responsive Design
-
-- **Mobile** : < 768px - Design optimisé tactile
-- **Tablet** : 768px - 1024px - Adaptation tablette
-- **Desktop** : > 1024px - Interface étendue
+### **Configuration Jest**
+- Environnement : `jsdom`
+- Preset : `ts-jest`
+- Setup : `src/setupTests.ts`
+- Coverage : HTML, LCOV, texte
 
 ## 🚀 Déploiement
 
-### Vercel (Recommandé)
+### **Vercel (Recommandé)**
+1. Connecter le repo GitHub à Vercel
+2. Configurer les variables d'environnement
+3. Déploiement automatique à chaque push
 
-1. Connectez votre repo GitHub à Vercel
-2. Ajoutez vos variables d'environnement
-3. Déployez automatiquement
+### **Netlify**
+1. Build command : `npm run build`
+2. Publish directory : `dist`
+3. Variables d'environnement dans l'interface
 
-### Netlify
-
-1. Build : `npm run build`
-2. Dossier de sortie : `dist`
-3. Ajoutez vos variables d'environnement
+### **Supabase Edge Functions**
+1. Déployer les fonctions serverless
+2. Configurer les webhooks
+3. Optimiser les performances
 
 ## 🤝 Contribution
 
+### **Workflow Git**
 1. Fork le projet
-2. Créez une branche feature (`git checkout -b feature/AmazingFeature`)
-3. Commit vos changements (`git commit -m 'Add AmazingFeature'`)
-4. Push vers la branche (`git push origin feature/AmazingFeature`)
-5. Ouvrez une Pull Request
+2. Créer une branche feature : `git checkout -b feature/nouvelle-fonctionnalite`
+3. Commit les changements : `git commit -m 'feat: ajouter nouvelle fonctionnalité'`
+4. Push vers la branche : `git push origin feature/nouvelle-fonctionnalite`
+5. Créer une Pull Request
+
+### **Standards de code**
+- **TypeScript strict** : Tous les fichiers doivent être typés
+- **ESLint** : Respecter les règles de linting
+- **Prettier** : Formatage automatique du code
+- **Conventional Commits** : Messages de commit standardisés
+
+### **Tests**
+- **Couverture minimale** : 80%
+- **Tests unitaires** : Pour tous les composants
+- **Tests d'intégration** : Pour les flux critiques
+- **Tests E2E** : Pour les parcours utilisateur
+
+## 📚 Documentation
+
+- **[ARCHITECTURE.md](docs/ARCHITECTURE.md)** - Architecture technique détaillée
+- **[API_DOCS.md](docs/API_DOCS.md)** - Documentation des endpoints
+- **[DB_SCHEMA.md](docs/DB_SCHEMA.md)** - Schéma de la base de données
+- **[ROADMAP.md](docs/ROADMAP.md)** - Plan de développement futur
+- **[CONTRIBUTING.md](docs/CONTRIBUTING.md)** - Guide de contribution
+
+## 🐛 Dépannage
+
+### **Problèmes courants**
+
+#### **Erreur de connexion Supabase**
+```bash
+# Vérifier les variables d'environnement
+echo $VITE_SUPABASE_URL
+echo $VITE_SUPABASE_ANON_KEY
+
+# Vérifier la configuration dans src/lib/supabase.ts
+```
+
+#### **Problème de géolocalisation**
+- Vérifier les permissions du navigateur
+- Tester avec HTTPS (requis en production)
+- Vérifier la console pour les erreurs
+
+#### **Erreurs de build**
+```bash
+# Nettoyer le cache
+rm -rf node_modules package-lock.json
+npm install
+
+# Vérifier la version de Node.js
+node --version  # Doit être >= 18.0.0
+```
 
 ## 📄 Licence
 
-Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
+Ce projet est sous licence **MIT**. Voir le fichier [LICENSE](LICENSE) pour plus de détails.
 
-## 🆘 Support
+## 🙏 Remerciements
 
-Pour toute question ou problème :
+- **Supabase** pour l'infrastructure backend
+- **Vercel** pour l'hébergement et le déploiement
+- **OpenStreetMap** pour les données cartographiques
+- **Communauté open-source** pour les bibliothèques utilisées
 
-1. Vérifiez la documentation Supabase
-2. Consultez les issues GitHub
-3. Créez une nouvelle issue si nécessaire
+## 📞 Support
 
-## 🔮 Roadmap
-
-- [ ] Notifications push
-- [ ] Système de notation et avis
-- [ ] Intégration paiements
-- [ ] Mode hors ligne
-- [ ] API publique
-- [ ] Applications mobiles natives
+- **Issues GitHub** : [Créer une issue](https://github.com/votre-username/entraide-universelle/issues)
+- **Discussions** : [Forum GitHub](https://github.com/votre-username/entraide-universelle/discussions)
+- **Documentation** : [Wiki du projet](https://github.com/votre-username/entraide-universelle/wiki)
 
 ---
 
 **Développé avec ❤️ pour créer une communauté d'entraide mondiale**
+
+*Dernière mise à jour : Janvier 2024*
