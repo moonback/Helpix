@@ -1,387 +1,360 @@
--- 🚀 Script de Configuration du Système de Messagerie - Entraide Universelle
--- Ce script crée toutes les tables et politiques nécessaires pour le système de messagerie
+-- =====================================================
+-- SYSTÈME DE MESSAGERIE COMPLET - SETUP CORRIGÉ
+-- =====================================================
 
--- ============================================================================
--- 1. CRÉATION DES TABLES
--- ============================================================================
+-- 1. CRÉATION DES TABLES DE MESSAGERIE
+-- =====================================================
 
 -- Table des conversations
 CREATE TABLE IF NOT EXISTS conversations (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- Table des participants aux conversations
 CREATE TABLE IF NOT EXISTS conversation_participants (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  conversation_id UUID REFERENCES conversations(id) ON DELETE CASCADE,
-  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-  joined_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  UNIQUE(conversation_id, user_id)
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    conversation_id UUID NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    joined_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    UNIQUE(conversation_id, user_id)
 );
 
--- Mise à jour de la table messages existante
-ALTER TABLE messages 
-ADD COLUMN IF NOT EXISTS conversation_id UUID REFERENCES conversations(id) ON DELETE CASCADE,
-ADD COLUMN IF NOT EXISTS type TEXT CHECK (type IN ('text', 'image', 'file')) DEFAULT 'text',
-ADD COLUMN IF NOT EXISTS timestamp TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-ADD COLUMN IF NOT EXISTS isRead BOOLEAN DEFAULT FALSE;
+-- 2. MODIFICATION DE LA TABLE MESSAGES EXISTANTE
+-- =====================================================
 
--- Table des pièces jointes
+-- D'abord, supprimer les contraintes existantes si elles existent
+DO $$ 
+BEGIN
+    -- Supprimer la contrainte de clé étrangère si elle existe
+    IF EXISTS (
+        SELECT 1 FROM information_schema.table_constraints 
+        WHERE constraint_name = 'messages_sender_id_fkey' 
+        AND table_name = 'messages'
+    ) THEN
+        ALTER TABLE messages DROP CONSTRAINT messages_sender_id_fkey;
+    END IF;
+    
+    IF EXISTS (
+        SELECT 1 FROM information_schema.table_constraints 
+        WHERE constraint_name = 'messages_receiver_id_fkey' 
+        AND table_name = 'messages'
+    ) THEN
+        ALTER TABLE messages DROP CONSTRAINT messages_receiver_id_fkey;
+    END IF;
+    
+    -- Supprimer la contrainte de clé primaire si elle existe
+    IF EXISTS (
+        SELECT 1 FROM information_schema.table_constraints 
+        WHERE constraint_name = 'messages_pkey' 
+        AND table_name = 'messages'
+    ) THEN
+        ALTER TABLE messages DROP CONSTRAINT messages_pkey;
+    END IF;
+END $$;
+
+-- Créer une nouvelle colonne id de type UUID
+ALTER TABLE messages ADD COLUMN IF NOT EXISTS new_id UUID DEFAULT gen_random_uuid();
+
+-- Mettre à jour les nouvelles colonnes id avec des UUIDs uniques
+UPDATE messages SET new_id = gen_random_uuid() WHERE new_id IS NULL;
+
+-- Supprimer l'ancienne colonne id
+ALTER TABLE messages DROP COLUMN id;
+
+-- Renommer la nouvelle colonne
+ALTER TABLE messages RENAME COLUMN new_id TO id;
+
+-- Ajouter la contrainte de clé primaire
+ALTER TABLE messages ADD PRIMARY KEY (id);
+
+-- Ajouter les nouvelles colonnes nécessaires
+ALTER TABLE messages ADD COLUMN IF NOT EXISTS conversation_id UUID REFERENCES conversations(id) ON DELETE CASCADE;
+ALTER TABLE messages ADD COLUMN IF NOT EXISTS type TEXT DEFAULT 'text' CHECK (type IN ('text', 'image', 'file'));
+ALTER TABLE messages ADD COLUMN IF NOT EXISTS timestamp TIMESTAMP WITH TIME ZONE DEFAULT NOW();
+ALTER TABLE messages ADD COLUMN IF NOT EXISTS "isRead" BOOLEAN DEFAULT FALSE;
+
+-- Recréer les contraintes de clé étrangère pour sender_id et receiver_id
+ALTER TABLE messages ADD CONSTRAINT messages_sender_id_fkey 
+    FOREIGN KEY (sender_id) REFERENCES auth.users(id) ON DELETE CASCADE;
+ALTER TABLE messages ADD CONSTRAINT messages_receiver_id_fkey 
+    FOREIGN KEY (receiver_id) REFERENCES auth.users(id) ON DELETE CASCADE;
+
+-- 3. CRÉATION DE LA TABLE DES PIÈCES JOINTES
+-- =====================================================
+
 CREATE TABLE IF NOT EXISTS attachments (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  message_id UUID REFERENCES messages(id) ON DELETE CASCADE,
-  file_name TEXT NOT NULL,
-  file_url TEXT NOT NULL,
-  file_type TEXT NOT NULL,
-  file_size INTEGER NOT NULL,
-  uploaded_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    message_id UUID NOT NULL REFERENCES messages(id) ON DELETE CASCADE,
+    file_name TEXT NOT NULL,
+    file_url TEXT NOT NULL,
+    file_type TEXT NOT NULL,
+    file_size INTEGER NOT NULL,
+    uploaded_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- ============================================================================
--- 2. CRÉATION DES INDEX
--- ============================================================================
+-- 4. CRÉATION DES INDEXES
+-- =====================================================
 
 -- Index pour les conversations
-CREATE INDEX IF NOT EXISTS idx_conversations_created_at ON conversations(created_at);
 CREATE INDEX IF NOT EXISTS idx_conversations_updated_at ON conversations(updated_at);
 
 -- Index pour les participants
 CREATE INDEX IF NOT EXISTS idx_conversation_participants_conversation_id ON conversation_participants(conversation_id);
 CREATE INDEX IF NOT EXISTS idx_conversation_participants_user_id ON conversation_participants(user_id);
-CREATE UNIQUE INDEX IF NOT EXISTS idx_conversation_participants_unique ON conversation_participants(conversation_id, user_id);
 
 -- Index pour les messages
 CREATE INDEX IF NOT EXISTS idx_messages_conversation_id ON messages(conversation_id);
 CREATE INDEX IF NOT EXISTS idx_messages_sender_id ON messages(sender_id);
 CREATE INDEX IF NOT EXISTS idx_messages_receiver_id ON messages(receiver_id);
 CREATE INDEX IF NOT EXISTS idx_messages_timestamp ON messages(timestamp);
-CREATE INDEX IF NOT EXISTS idx_messages_conversation_timestamp ON messages(conversation_id, timestamp);
-CREATE INDEX IF NOT EXISTS idx_messages_isRead ON messages(isRead);
+CREATE INDEX IF NOT EXISTS idx_messages_is_read ON messages("isRead");
 
 -- Index pour les pièces jointes
 CREATE INDEX IF NOT EXISTS idx_attachments_message_id ON attachments(message_id);
 CREATE INDEX IF NOT EXISTS idx_attachments_file_type ON attachments(file_type);
-CREATE INDEX IF NOT EXISTS idx_attachments_uploaded_at ON attachments(uploaded_at);
 
--- ============================================================================
--- 3. TRIGGERS ET FONCTIONS
--- ============================================================================
+-- 5. CRÉATION DES TRIGGERS
+-- =====================================================
 
--- Fonction pour mettre à jour updated_at automatiquement
+-- Fonction pour mettre à jour updated_at
 CREATE OR REPLACE FUNCTION update_conversation_updated_at()
 RETURNS TRIGGER AS $$
 BEGIN
-  UPDATE conversations 
-  SET updated_at = NOW() 
-  WHERE id = NEW.conversation_id;
-  RETURN NEW;
+    UPDATE conversations 
+    SET updated_at = NOW() 
+    WHERE id = NEW.conversation_id;
+    RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger pour mettre à jour updated_at des conversations
-DROP TRIGGER IF EXISTS update_conversation_updated_at_trigger ON messages;
-CREATE TRIGGER update_conversation_updated_at_trigger
-  AFTER INSERT OR UPDATE ON messages
-  FOR EACH ROW
-  EXECUTE FUNCTION update_conversation_updated_at();
+DROP TRIGGER IF EXISTS trigger_update_conversation_updated_at ON messages;
+CREATE TRIGGER trigger_update_conversation_updated_at
+    AFTER INSERT OR UPDATE ON messages
+    FOR EACH ROW
+    EXECUTE FUNCTION update_conversation_updated_at();
 
--- Fonction pour créer automatiquement les participants d'une conversation
+-- Fonction pour créer automatiquement les participants
 CREATE OR REPLACE FUNCTION create_conversation_participants()
 RETURNS TRIGGER AS $$
 BEGIN
-  -- Ajouter automatiquement l'expéditeur et le destinataire comme participants
-  INSERT INTO conversation_participants (conversation_id, user_id)
-  VALUES (NEW.conversation_id, NEW.sender_id)
-  ON CONFLICT (conversation_id, user_id) DO NOTHING;
-  
-  INSERT INTO conversation_participants (conversation_id, user_id)
-  VALUES (NEW.conversation_id, NEW.receiver_id)
-  ON CONFLICT (conversation_id, user_id) DO NOTHING;
-  
-  RETURN NEW;
+    -- Insérer l'expéditeur
+    INSERT INTO conversation_participants (conversation_id, user_id)
+    VALUES (NEW.conversation_id, NEW.sender_id)
+    ON CONFLICT (conversation_id, user_id) DO NOTHING;
+    
+    -- Insérer le destinataire (si différent de l'expéditeur)
+    IF NEW.receiver_id IS NOT NULL AND NEW.receiver_id != NEW.sender_id THEN
+        INSERT INTO conversation_participants (conversation_id, user_id)
+        VALUES (NEW.conversation_id, NEW.receiver_id)
+        ON CONFLICT (conversation_id, user_id) DO NOTHING;
+    END IF;
+    
+    RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger pour créer automatiquement les participants
-DROP TRIGGER IF EXISTS create_conversation_participants_trigger ON messages;
-CREATE TRIGGER create_conversation_participants_trigger
-  AFTER INSERT ON messages
-  FOR EACH ROW
-  EXECUTE FUNCTION create_conversation_participants();
+DROP TRIGGER IF EXISTS trigger_create_conversation_participants ON messages;
+CREATE TRIGGER trigger_create_conversation_participants
+    AFTER INSERT ON messages
+    FOR EACH ROW
+    EXECUTE FUNCTION create_conversation_participants();
 
--- ============================================================================
--- 4. ACTIVATION DU RLS (ROW LEVEL SECURITY)
--- ============================================================================
+-- 6. ACTIVATION DE RLS ET CRÉATION DES POLITIQUES
+-- =====================================================
 
 -- Activer RLS sur toutes les tables
 ALTER TABLE conversations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE conversation_participants ENABLE ROW LEVEL SECURITY;
+ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE attachments ENABLE ROW LEVEL SECURITY;
 
--- ============================================================================
--- 5. POLITIQUES DE SÉCURITÉ
--- ============================================================================
-
 -- Politiques pour les conversations
-DROP POLICY IF EXISTS "Users can view their conversations" ON conversations;
-CREATE POLICY "Users can view their conversations" ON conversations
-  FOR SELECT USING (
-    auth.uid() IN (
-      SELECT user_id FROM conversation_participants 
-      WHERE conversation_id = conversations.id
-    )
-  );
+CREATE POLICY "Users can view conversations they participate in" ON conversations
+    FOR SELECT USING (
+        EXISTS (
+            SELECT 1 FROM conversation_participants 
+            WHERE conversation_id = id AND user_id = auth.uid()
+        )
+    );
 
-DROP POLICY IF EXISTS "Users can create conversations" ON conversations;
 CREATE POLICY "Users can create conversations" ON conversations
-  FOR INSERT WITH CHECK (true);
+    FOR INSERT WITH CHECK (true);
 
 -- Politiques pour les participants
-DROP POLICY IF EXISTS "Users can view conversation participants" ON conversation_participants;
-CREATE POLICY "Users can view conversation participants" ON conversation_participants
-  FOR SELECT USING (
-    auth.uid() IN (
-      SELECT cp2.user_id FROM conversation_participants cp2
-      WHERE cp2.conversation_id = conversation_participants.conversation_id
-    )
-  );
+CREATE POLICY "Users can view participants of their conversations" ON conversation_participants
+    FOR SELECT USING (
+        EXISTS (
+            SELECT 1 FROM conversation_participants cp
+            WHERE cp.conversation_id = conversation_id AND cp.user_id = auth.uid()
+        )
+    );
 
-DROP POLICY IF EXISTS "Users can add themselves to conversations" ON conversation_participants;
-CREATE POLICY "Users can add themselves to conversations" ON conversation_participants
-  FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can join conversations" ON conversation_participants
+    FOR INSERT WITH CHECK (true);
 
 -- Politiques pour les messages
-DROP POLICY IF EXISTS "Users can view messages in their conversations" ON messages;
 CREATE POLICY "Users can view messages in their conversations" ON messages
-  FOR SELECT USING (
-    auth.uid() IN (
-      SELECT user_id FROM conversation_participants 
-      WHERE conversation_id = messages.conversation_id
-    )
-  );
+    FOR SELECT USING (
+        EXISTS (
+            SELECT 1 FROM conversation_participants 
+            WHERE conversation_id = messages.conversation_id AND user_id = auth.uid()
+        )
+    );
 
-DROP POLICY IF EXISTS "Users can send messages" ON messages;
-CREATE POLICY "Users can send messages" ON messages
-  FOR INSERT WITH CHECK (auth.uid() = sender_id);
+CREATE POLICY "Users can send messages to conversations they participate in" ON messages
+    FOR INSERT WITH CHECK (
+        EXISTS (
+            SELECT 1 FROM conversation_participants 
+            WHERE conversation_id = messages.conversation_id AND user_id = auth.uid()
+        )
+    );
 
-DROP POLICY IF EXISTS "Users can update their own messages" ON messages;
 CREATE POLICY "Users can update their own messages" ON messages
-  FOR UPDATE USING (auth.uid() = sender_id);
+    FOR UPDATE USING (sender_id = auth.uid());
 
 -- Politiques pour les pièces jointes
-DROP POLICY IF EXISTS "Users can view attachments in their conversations" ON attachments;
 CREATE POLICY "Users can view attachments in their conversations" ON attachments
-  FOR SELECT USING (
-    auth.uid() IN (
-      SELECT cp.user_id FROM conversation_participants cp
-      JOIN messages m ON m.conversation_id = cp.conversation_id
-      WHERE m.id = attachments.message_id
-    )
-  );
+    FOR SELECT USING (
+        EXISTS (
+            SELECT 1 FROM messages m
+            JOIN conversation_participants cp ON m.conversation_id = cp.conversation_id
+            WHERE m.id = attachments.message_id AND cp.user_id = auth.uid()
+        )
+    );
 
-DROP POLICY IF EXISTS "Users can upload attachments to their messages" ON attachments;
 CREATE POLICY "Users can upload attachments to their messages" ON attachments
-  FOR INSERT WITH CHECK (
-    auth.uid() IN (
-      SELECT sender_id FROM messages WHERE id = attachments.message_id
-    )
-  );
+    FOR INSERT WITH CHECK (
+        EXISTS (
+            SELECT 1 FROM messages m
+            JOIN conversation_participants cp ON m.conversation_id = cp.conversation_id
+            WHERE m.id = attachments.message_id AND cp.user_id = auth.uid()
+        )
+    );
 
--- ============================================================================
--- 6. CONFIGURATION DU STOCKAGE
--- ============================================================================
+-- 7. CONFIGURATION DU STOCKAGE SUPABASE
+-- =====================================================
 
--- Créer le bucket pour les pièces jointes des messages
-INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
-VALUES (
-  'message-attachments',
-  'message-attachments',
-  false,
-  10485760, -- 10MB
-  ARRAY['image/*', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain']
-) ON CONFLICT (id) DO NOTHING;
+-- Créer le bucket pour les pièces jointes
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('message-attachments', 'message-attachments', false)
+ON CONFLICT (id) DO NOTHING;
 
 -- Politiques de stockage pour les pièces jointes
-DROP POLICY IF EXISTS "Users can upload message attachments" ON storage.objects;
-CREATE POLICY "Users can upload message attachments" ON storage.objects
-  FOR INSERT WITH CHECK (
-    bucket_id = 'message-attachments' AND
-    auth.uid() IN (
-      SELECT sender_id FROM messages 
-      WHERE id::text = (storage.foldername(name))[2]
-    )
-  );
+CREATE POLICY "Users can upload attachments" ON storage.objects
+    FOR INSERT WITH CHECK (
+        bucket_id = 'message-attachments' AND
+        auth.uid()::text = (storage.foldername(name))[1]
+    );
 
-DROP POLICY IF EXISTS "Users can view message attachments" ON storage.objects;
-CREATE POLICY "Users can view message attachments" ON storage.objects
-  FOR SELECT USING (
-    bucket_id = 'message-attachments' AND
-    auth.uid() IN (
-      SELECT cp.user_id FROM conversation_participants cp
-      JOIN messages m ON m.conversation_id = cp.conversation_id
-      WHERE m.id::text = (storage.foldername(name))[2]
-    )
-  );
+CREATE POLICY "Users can view attachments in their conversations" ON storage.objects
+    FOR SELECT USING (
+        bucket_id = 'message-attachments' AND
+        EXISTS (
+            SELECT 1 FROM attachments a
+            JOIN messages m ON a.message_id = m.id
+            JOIN conversation_participants cp ON m.conversation_id = cp.conversation_id
+            WHERE a.file_url LIKE '%' || name || '%' AND cp.user_id = auth.uid()
+        )
+    );
 
--- ============================================================================
--- 7. FONCTIONS UTILES
--- ============================================================================
+-- 8. FONCTIONS UTILES
+-- =====================================================
 
--- Fonction pour obtenir les conversations d'un utilisateur avec le dernier message
+-- Fonction pour obtenir les conversations d'un utilisateur
 CREATE OR REPLACE FUNCTION get_user_conversations(user_uuid UUID)
 RETURNS TABLE (
-  conversation_id UUID,
-  other_user_id UUID,
-  other_user_name TEXT,
-  last_message_content TEXT,
-  last_message_timestamp TIMESTAMP WITH TIME ZONE,
-  unread_count BIGINT
+    conversation_id UUID,
+    other_user_id UUID,
+    other_user_name TEXT,
+    last_message_text TEXT,
+    last_message_time TIMESTAMP WITH TIME ZONE,
+    unread_count BIGINT
 ) AS $$
 BEGIN
-  RETURN QUERY
-  SELECT 
-    c.id as conversation_id,
-    cp2.user_id as other_user_id,
-    u.name as other_user_name,
-    m.content as last_message_content,
-    m.timestamp as last_message_timestamp,
-    COUNT(CASE WHEN m2.isRead = false AND m2.receiver_id = user_uuid THEN 1 END) as unread_count
-  FROM conversations c
-  JOIN conversation_participants cp ON c.id = cp.conversation_id
-  JOIN conversation_participants cp2 ON c.id = cp2.conversation_id
-  JOIN auth.users u ON cp2.user_id = u.id
-  LEFT JOIN LATERAL (
-    SELECT content, timestamp
-    FROM messages 
-    WHERE conversation_id = c.id 
-    ORDER BY timestamp DESC 
-    LIMIT 1
-  ) m ON true
-  LEFT JOIN messages m2 ON c.id = m2.conversation_id
-  WHERE cp.user_id = user_uuid AND cp2.user_id != user_uuid
-  GROUP BY c.id, cp2.user_id, u.name, m.content, m.timestamp
-  ORDER BY m.timestamp DESC NULLS LAST;
+    RETURN QUERY
+    SELECT 
+        c.id as conversation_id,
+        cp2.user_id as other_user_id,
+        p.raw_user_meta_data->>'full_name' as other_user_name,
+        m.content as last_message_text,
+        m.timestamp as last_message_time,
+        COUNT(CASE WHEN m."isRead" = false AND m.receiver_id = user_uuid THEN 1 END) as unread_count
+    FROM conversations c
+    JOIN conversation_participants cp1 ON c.id = cp1.conversation_id
+    JOIN conversation_participants cp2 ON c.id = cp2.conversation_id
+    JOIN auth.users p ON cp2.user_id = p.id
+    LEFT JOIN LATERAL (
+        SELECT content, timestamp, "isRead", receiver_id
+        FROM messages 
+        WHERE conversation_id = c.id 
+        ORDER BY timestamp DESC 
+        LIMIT 1
+    ) m ON true
+    WHERE cp1.user_id = user_uuid AND cp2.user_id != user_uuid
+    GROUP BY c.id, cp2.user_id, p.raw_user_meta_data->>'full_name', m.content, m.timestamp
+    ORDER BY m.timestamp DESC NULLS LAST;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Fonction pour marquer tous les messages d'une conversation comme lus
+-- Fonction pour marquer une conversation comme lue
 CREATE OR REPLACE FUNCTION mark_conversation_as_read(conv_id UUID, user_uuid UUID)
 RETURNS VOID AS $$
 BEGIN
-  UPDATE messages 
-  SET "isRead" = true 
-  WHERE conversation_id = conv_id 
+    UPDATE messages 
+    SET "isRead" = true 
+    WHERE conversation_id = conv_id 
     AND receiver_id = user_uuid 
     AND "isRead" = false;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- ============================================================================
--- 8. VUES UTILES
--- ============================================================================
+-- 9. DONNÉES DE TEST (OPTIONNEL)
+-- =====================================================
 
--- Vue des conversations avec informations utilisateur
-CREATE OR REPLACE VIEW conversations_with_users AS
-SELECT 
-  c.id,
-  c.created_at,
-  c.updated_at,
-  array_agg(u.name) as participant_names,
-  array_agg(u.id) as participant_ids
-FROM conversations c
-JOIN conversation_participants cp ON c.id = cp.conversation_id
-JOIN auth.users u ON cp.user_id = u.id
-GROUP BY c.id, c.created_at, c.updated_at;
+-- Insérer quelques conversations de test si nécessaire
+-- (Décommentez si vous voulez des données de test)
 
--- Vue des messages avec informations utilisateur
-CREATE OR REPLACE VIEW messages_with_users AS
-SELECT 
-  m.*,
-  sender.name as sender_name,
-  receiver.name as receiver_name
-FROM messages m
-JOIN auth.users sender ON m.sender_id = sender.id
-JOIN auth.users receiver ON m.receiver_id = receiver.id;
-
--- ============================================================================
--- 9. MIGRATION DES DONNÉES EXISTANTES (si nécessaire)
--- ============================================================================
-
--- Si vous avez des messages existants, vous pouvez les migrer vers le nouveau système
--- Cette section est optionnelle et dépend de votre structure existante
-
--- Exemple de migration (à adapter selon votre cas) :
 /*
--- Créer des conversations pour les messages existants
-INSERT INTO conversations (id, created_at, updated_at)
-SELECT DISTINCT 
-  gen_random_uuid(),
-  MIN(created_at),
-  MAX(created_at)
-FROM messages
-GROUP BY sender_id, receiver_id;
+INSERT INTO conversations (id) VALUES 
+    (gen_random_uuid()),
+    (gen_random_uuid());
 
--- Mettre à jour les messages existants avec les conversation_id
-UPDATE messages 
-SET conversation_id = c.id
+-- Insérer des participants de test
+INSERT INTO conversation_participants (conversation_id, user_id)
+SELECT c.id, u.id
 FROM conversations c
-JOIN conversation_participants cp ON c.id = cp.conversation_id
-WHERE cp.user_id = messages.sender_id OR cp.user_id = messages.receiver_id;
+CROSS JOIN auth.users u
+LIMIT 4;
 */
 
--- ============================================================================
--- 10. VÉRIFICATION DE LA CONFIGURATION
--- ============================================================================
+-- 10. VÉRIFICATION FINALE
+-- =====================================================
 
--- Vérifier que toutes les tables sont créées
+-- Vérifier que toutes les tables ont été créées
 SELECT 
-  table_name,
-  table_type
-FROM information_schema.tables 
-WHERE table_schema = 'public' 
-  AND table_name IN ('conversations', 'conversation_participants', 'attachments')
-ORDER BY table_name;
+    table_name,
+    column_name,
+    data_type,
+    is_nullable
+FROM information_schema.columns 
+WHERE table_name IN ('conversations', 'conversation_participants', 'messages', 'attachments')
+ORDER BY table_name, ordinal_position;
 
--- Vérifier que RLS est activé
+-- Vérifier les contraintes de clé étrangère
 SELECT 
-  schemaname,
-  tablename,
-  rowsecurity
-FROM pg_tables 
-WHERE tablename IN ('conversations', 'conversation_participants', 'attachments', 'messages');
-
--- Vérifier les politiques créées
-SELECT 
-  schemaname,
-  tablename,
-  policyname,
-  permissive,
-  roles,
-  cmd,
-  qual,
-  with_check
-FROM pg_policies 
-WHERE tablename IN ('conversations', 'conversation_participants', 'attachments', 'messages')
-ORDER BY tablename, policyname;
-
--- ============================================================================
--- ✅ CONFIGURATION TERMINÉE
--- ============================================================================
-
--- Le système de messagerie est maintenant configuré et prêt à être utilisé !
--- 
--- Fonctionnalités disponibles :
--- ✅ Conversations entre utilisateurs
--- ✅ Messages texte, images et fichiers
--- ✅ Statuts de lecture
--- ✅ Pièces jointes sécurisées
--- ✅ Politiques de sécurité RLS
--- ✅ Index optimisés pour les performances
--- 
--- Prochaines étapes :
--- 1. Tester la création de conversations
--- 2. Tester l'envoi de messages
--- 3. Tester l'upload de pièces jointes
--- 4. Vérifier les politiques de sécurité
+    tc.table_name,
+    tc.constraint_name,
+    kcu.column_name,
+    ccu.table_name AS foreign_table_name,
+    ccu.column_name AS foreign_column_name
+FROM information_schema.table_constraints AS tc
+JOIN information_schema.key_column_usage AS kcu
+    ON tc.constraint_name = kcu.constraint_name
+JOIN information_schema.constraint_column_usage AS ccu
+    ON ccu.constraint_name = tc.constraint_name
+WHERE tc.constraint_type = 'FOREIGN KEY'
+    AND tc.table_name IN ('conversations', 'conversation_participants', 'messages', 'attachments');
