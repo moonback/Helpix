@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Coins, TrendingUp, TrendingDown, ArrowRight, Gift, Users } from 'lucide-react';
+import { TrendingUp, TrendingDown, ArrowRight, Gift, Users } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import { useAuthStore } from '@/stores/authStore';

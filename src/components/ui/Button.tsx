@@ -7,7 +7,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   size?: 'sm' | 'md' | 'lg';
   loading?: boolean;
   icon?: React.ReactNode;
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -49,7 +49,13 @@ const Button: React.FC<ButtonProps> = ({
       disabled={disabled || loading}
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
-      {...props}
+      type={props.type}
+      onClick={props.onClick}
+      onKeyDown={props.onKeyDown}
+      onFocus={props.onFocus}
+      onBlur={props.onBlur}
+      onMouseEnter={props.onMouseEnter}
+      onMouseLeave={props.onMouseLeave}
     >
       {loading && (
         <motion.div
@@ -58,7 +64,7 @@ const Button: React.FC<ButtonProps> = ({
           animate={{ opacity: 1 }}
         />
       )}
-      {icon && !loading && <span className="mr-2">{icon}</span>}
+      {icon && !loading && <span className={children ? "mr-2" : ""}>{icon}</span>}
       {children}
     </motion.button>
   );

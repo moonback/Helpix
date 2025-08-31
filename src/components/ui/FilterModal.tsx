@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Filter, MapPin, Monitor, Search, AlertTriangle, Clock, Tag } from 'lucide-react';
+import { X, Filter, MapPin, AlertTriangle } from 'lucide-react';
 import Button from './Button';
 
 interface FilterModalProps {

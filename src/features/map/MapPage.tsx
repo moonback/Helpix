@@ -43,7 +43,7 @@ const LocationMarker: React.FC = () => {
 };
 
 const MapPage: React.FC = () => {
-  const { tasks, fetchTasks } = useTaskStore();
+  const { fetchTasks } = useTaskStore();
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [mapView, setMapView] = useState<'map' | 'list'>('map');
 
@@ -52,7 +52,7 @@ const MapPage: React.FC = () => {
   }, [fetchTasks]);
 
   // Données mockées pour la démonstration
-  const mockTasks = [
+  const mockTasks: MapTask[] = [
     {
       id: 1,
       title: 'Aide au jardinage',
@@ -85,8 +85,30 @@ const MapPage: React.FC = () => {
     },
   ];
 
-  const handleTaskClick = (task: Task) => {
-    setSelectedTask(task);
+  // Type partiel pour les tâches de la carte
+  type MapTask = Pick<Task, 'id' | 'title' | 'description' | 'category' | 'status' | 'created_at' | 'user_id'> & {
+    location: { lat: number; lng: number };
+  };
+
+  const handleTaskClick = (task: MapTask) => {
+    // Créer une tâche complète avec des valeurs par défaut pour les propriétés manquantes
+    const fullTask: Task = {
+      ...task,
+      priority: 'medium',
+      estimated_duration: 2,
+      required_skills: ['Général'],
+      budget_credits: 50,
+      tags: ['aide'],
+      location: 'Localisation',
+      latitude: task.location.lat,
+      longitude: task.location.lng,
+      updated_at: task.created_at,
+      assigned_to: undefined,
+      completion_date: undefined,
+      rating: undefined,
+      feedback: undefined
+    };
+    setSelectedTask(fullTask);
   };
 
   const handleMapViewToggle = () => {
