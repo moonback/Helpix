@@ -60,9 +60,27 @@ const HomePage: React.FC = () => {
     }
   }, [latitude, longitude, setUserLocation, user, updateUserLocation, getAddressFromCoords]);
 
+  // Validation des tâches pour s'assurer qu'elles ont toutes les propriétés nécessaires
+  const validateTask = (task: any) => {
+    return task && 
+           task.id && 
+           task.title && 
+           task.description && 
+           task.category && 
+           task.priority && 
+           task.location &&
+           task.required_skills &&
+           task.tags &&
+           task.estimated_duration !== undefined &&
+           task.budget_credits !== undefined;
+  };
+
   // Obtenir les tâches filtrées et triées par proximité si activé
   const getFilteredAndSortedTasks = () => {
     let filteredTasks = tasks.filter(task => {
+      // Valider d'abord la tâche
+      if (!validateTask(task)) return false;
+      
       const matchesSearch = task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            task.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            task.location.toLowerCase().includes(searchTerm.toLowerCase());
@@ -76,6 +94,9 @@ const HomePage: React.FC = () => {
     // Trier par proximité si activé et si on a la localisation
     if (sortByProximity && latitude && longitude) {
       filteredTasks = getTasksByProximity().filter(task => {
+        // Valider d'abord la tâche
+        if (!validateTask(task)) return false;
+        
         const matchesSearch = task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                              task.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
                              task.location.toLowerCase().includes(searchTerm.toLowerCase());
@@ -314,7 +335,7 @@ const HomePage: React.FC = () => {
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-gradient-to-br from-primary-400 to-primary-600 rounded-full flex items-center justify-center text-white font-semibold">
-                      {task.user_id.charAt(0).toUpperCase()}
+                      {task.user_id ? task.user_id.charAt(0).toUpperCase() : '?'}
                     </div>
                     <div>
                       <h3 className="font-semibold text-gray-900">{task.title}</h3>
@@ -380,7 +401,7 @@ const HomePage: React.FC = () => {
                 </div>
 
                 {/* Skills and Tags */}
-                {task.required_skills.length > 0 && (
+                {task.required_skills && task.required_skills.length > 0 && (
                   <div className="flex items-center gap-2">
                     <Target className="w-4 h-4 text-gray-400" />
                     <div className="flex flex-wrap gap-1">
@@ -393,7 +414,7 @@ const HomePage: React.FC = () => {
                   </div>
                 )}
 
-                {task.tags.length > 0 && (
+                {task.tags && task.tags.length > 0 && (
                   <div className="flex items-center gap-2">
                     <Tag className="w-4 h-4 text-gray-400" />
                     <div className="flex flex-wrap gap-1">
