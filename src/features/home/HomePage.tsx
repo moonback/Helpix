@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useTaskStore } from '@/stores/taskStore';
 import { useAuthStore } from '@/stores/authStore';
+import { useMessageStore } from '@/stores/messageStore';
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { useReverseGeocoding } from '@/hooks/useReverseGeocoding';
 import Button from '@/components/ui/Button';
@@ -33,6 +34,7 @@ const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const { tasks, fetchTasks, isLoading, setUserLocation, getTasksByProximity } = useTaskStore();
   const { user, updateUserLocation } = useAuthStore();
+  const { createConversation } = useMessageStore();
   const { latitude, longitude, error: locationError, isLoading: locationLoading, requestLocation } = useGeolocation();
   const { address, getAddressFromCoords } = useReverseGeocoding();
   const [searchTerm, setSearchTerm] = useState('');
@@ -130,14 +132,70 @@ const HomePage: React.FC = () => {
     remote: '💻'
   };
 
-  const handleHelp = (taskId: number) => {
-    console.log('Offrir de l\'aide pour la tâche:', taskId);
-    // TODO: Implémenter la logique d'aide
+  const handleHelp = async (taskId: number) => {
+    if (!user) {
+      console.log('Utilisateur non connecté');
+      return;
+    }
+
+    try {
+      // Trouver la tâche pour récupérer le propriétaire
+      const task = tasks.find(t => t.id === taskId);
+      if (!task) {
+        console.error('Tâche non trouvée');
+        return;
+      }
+
+      // Vérifier que l'utilisateur n'est pas le propriétaire de la tâche
+      if (task.user_id === user.id) {
+        console.log('Vous ne pouvez pas vous aider vous-même');
+        return;
+      }
+
+      console.log('Offrir de l\'aide pour la tâche:', taskId);
+      
+      // Créer une conversation pour discuter de l'aide
+      await createConversation([user.id, task.user_id]);
+      
+      // Rediriger vers la page de chat
+      navigate('/chat');
+      
+    } catch (error) {
+      console.error('Erreur lors de la création de la conversation:', error);
+    }
   };
 
-  const handleRequest = (taskId: number) => {
-    console.log('Demander de l\'aide pour la tâche:', taskId);
-    // TODO: Implémenter la logique de demande
+  const handleRequest = async (taskId: number) => {
+    if (!user) {
+      console.log('Utilisateur non connecté');
+      return;
+    }
+
+    try {
+      // Trouver la tâche pour récupérer le propriétaire
+      const task = tasks.find(t => t.id === taskId);
+      if (!task) {
+        console.error('Tâche non trouvée');
+        return;
+      }
+
+      // Vérifier que l'utilisateur n'est pas le propriétaire de la tâche
+      if (task.user_id === user.id) {
+        console.log('Vous ne pouvez pas vous contacter vous-même');
+        return;
+      }
+
+      console.log('Création d\'une conversation avec le propriétaire de la tâche:', taskId);
+      
+      // Créer une nouvelle conversation avec le propriétaire
+      await createConversation([user.id, task.user_id]);
+      
+      // Rediriger vers la page de chat
+      navigate('/chat');
+      
+    } catch (error) {
+      console.error('Erreur lors de la création de la conversation:', error);
+    }
   };
 
   const handleEdit = (taskId: number) => {
@@ -462,7 +520,7 @@ const HomePage: React.FC = () => {
                     onClick={() => handleRequest(task.id)}
                     className="flex-1"
                   >
-                    💬 Demander
+                    💬 Contacter
                   </Button>
                 </div>
 
