@@ -9,6 +9,7 @@ import Auth from '@/features/auth/Auth';
 import HomePage from '@/features/home/HomePage';
 import MapPage from '@/features/map/MapPage';
 import AddTaskPage from '@/features/add/AddTaskPage';
+import EditTaskPage from '@/features/edit/EditTaskPage';
 import WalletPage from '@/features/wallet/WalletPage';
 import ProfilePage from '@/features/profile/ProfilePage';
 import ChatPage from '@/features/chat/ChatPage';
@@ -117,6 +118,16 @@ const App: React.FC = () => {
               element={
                 <ProtectedRoute>
                   <AddTaskPage />
+                  <BottomNavigation />
+                </ProtectedRoute>
+              }
+            />
+            
+            <Route
+              path="/edit-task/:taskId"
+              element={
+                <ProtectedRoute>
+                  <EditTaskPage />
                   <BottomNavigation />
                 </ProtectedRoute>
               }

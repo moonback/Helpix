@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 import { MapPin, Navigation, ExternalLink } from 'lucide-react';
 
 interface LocationMapProps {

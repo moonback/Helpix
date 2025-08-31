@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useTaskStore } from '@/stores/taskStore';
 import { useAuthStore } from '@/stores/authStore';
@@ -14,12 +14,14 @@ import {
   Target, 
   DollarSign, 
   Calendar,
-  Tag
+  Tag,
+  Trash2
 } from 'lucide-react';
 
-const AddTaskPage: React.FC = () => {
+const EditTaskPage: React.FC = () => {
   const navigate = useNavigate();
-  const { createTask } = useTaskStore();
+  const { taskId } = useParams<{ taskId: string }>();
+  const { tasks, updateTask, deleteTask, isLoading } = useTaskStore();
   const { user } = useAuthStore();
   
   const [formData, setFormData] = useState({
@@ -41,14 +43,55 @@ const AddTaskPage: React.FC = () => {
   } | null>(null);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [task, setTask] = useState<any>(null);
+
+  // Charger la tâche existante
+  useEffect(() => {
+    if (taskId && tasks.length > 0) {
+      const foundTask = tasks.find(t => t.id === parseInt(taskId));
+      if (foundTask) {
+        setTask(foundTask);
+        
+        // Vérifier que l'utilisateur est le propriétaire
+        if (user && foundTask.user_id !== user.id) {
+          navigate('/');
+          return;
+        }
+
+        // Pré-remplir le formulaire
+        setFormData({
+          title: foundTask.title || '',
+          description: foundTask.description || '',
+          category: foundTask.category || 'local',
+          priority: foundTask.priority || 'medium',
+          estimated_duration: foundTask.estimated_duration?.toString() || '',
+          location: foundTask.location || '',
+          required_skills: foundTask.required_skills?.join(', ') || '',
+          budget_credits: foundTask.budget_credits?.toString() || '',
+          deadline: foundTask.deadline ? new Date(foundTask.deadline).toISOString().slice(0, 16) : '',
+          tags: foundTask.tags?.join(', ') || ''
+        });
+
+        // Définir la localisation si elle existe
+        if (foundTask.latitude && foundTask.longitude) {
+          setSelectedLocation({
+            latitude: foundTask.latitude,
+            longitude: foundTask.longitude
+          });
+        }
+      }
+    }
+  }, [taskId, tasks, user, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
+    if (!user || !task) return;
 
     setIsSubmitting(true);
     try {
-      const taskData = {
+      const updatedTaskData = {
+        ...task,
         ...formData,
         estimated_duration: parseInt(formData.estimated_duration),
         budget_credits: parseInt(formData.budget_credits),
@@ -56,15 +99,30 @@ const AddTaskPage: React.FC = () => {
         tags: formData.tags.split(',').map(t => t.trim()).filter(Boolean),
         deadline: formData.deadline || undefined,
         latitude: selectedLocation?.latitude,
-        longitude: selectedLocation?.longitude
+        longitude: selectedLocation?.longitude,
+        updated_at: new Date().toISOString()
       };
 
-      await createTask(taskData);
+      await updateTask(task.id, updatedTaskData);
       navigate('/');
     } catch (error) {
-      console.error('Erreur lors de la création de la tâche:', error);
+      console.error('Erreur lors de la modification de la tâche:', error);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!task || !confirm('Êtes-vous sûr de vouloir supprimer cette tâche ?')) return;
+
+    setIsDeleting(true);
+    try {
+      await deleteTask(task.id);
+      navigate('/');
+    } catch (error) {
+      console.error('Erreur lors de la suppression de la tâche:', error);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -82,6 +140,17 @@ const AddTaskPage: React.FC = () => {
     urgent: '🔴'
   };
 
+  if (isLoading || !task) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary-50 to-primary-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Chargement de la tâche...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 to-primary-100 pb-20">
       {/* Header */}
@@ -96,7 +165,7 @@ const AddTaskPage: React.FC = () => {
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <h1 className="text-lg font-semibold text-gray-900">
-            Nouvelle Tâche
+            Modifier la Tâche
           </h1>
           <div className="w-10" />
         </div>
@@ -262,23 +331,36 @@ const AddTaskPage: React.FC = () => {
             </div>
           </Card>
 
-          {/* Bouton de soumission */}
-          <Button
-            type="submit"
-            variant="primary"
-            size="lg"
-            loading={isSubmitting}
-            className="w-full"
-            disabled={
-              !formData.title || 
-              !formData.description || 
-              !formData.estimated_duration || 
-              !formData.budget_credits ||
-              (formData.category === 'local' && !selectedLocation)
-            }
-          >
-            {isSubmitting ? 'Création...' : 'Créer la tâche'}
-          </Button>
+          {/* Boutons d'action */}
+          <div className="flex gap-3">
+            <Button
+              type="submit"
+              variant="primary"
+              size="lg"
+              loading={isSubmitting}
+              className="flex-1"
+              disabled={
+                !formData.title || 
+                !formData.description || 
+                !formData.estimated_duration || 
+                !formData.budget_credits ||
+                (formData.category === 'local' && !selectedLocation)
+              }
+            >
+              {isSubmitting ? 'Modification...' : '💾 Sauvegarder'}
+            </Button>
+
+            <Button
+              type="button"
+              variant="danger"
+              size="lg"
+              onClick={handleDelete}
+              loading={isDeleting}
+              className="px-6"
+            >
+              {isDeleting ? 'Suppression...' : <Trash2 className="w-5 h-5" />}
+            </Button>
+          </div>
 
           {/* Message d'aide pour la localisation */}
           {formData.category === 'local' && !selectedLocation && (
@@ -292,4 +374,4 @@ const AddTaskPage: React.FC = () => {
   );
 };
 
-export default AddTaskPage;
+export default EditTaskPage;

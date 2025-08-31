@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useTaskStore } from '@/stores/taskStore';
 import { useAuthStore } from '@/stores/authStore';
@@ -7,9 +8,7 @@ import { useReverseGeocoding } from '@/hooks/useReverseGeocoding';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
-import ProximityIndicator from '@/components/ui/ProximityIndicator';
 import LocationPermissionBanner from '@/components/ui/LocationPermissionBanner';
-import AddressDisplay from '@/components/ui/AddressDisplay';
 import DetailedAddressDisplay from '@/components/ui/DetailedAddressDisplay';
 import LocationDisplay from '@/components/ui/LocationDisplay';
 import FilterModal from '@/components/ui/FilterModal';
@@ -18,8 +17,6 @@ import FilterBadge from '@/components/ui/FilterBadge';
 import { calculateDistance, formatDistance } from '@/lib/utils';
 import { 
   Search, 
-  Filter, 
-  MapPin, 
   Clock, 
   DollarSign, 
   Target,
@@ -33,10 +30,11 @@ import {
 } from 'lucide-react';
 
 const HomePage: React.FC = () => {
+  const navigate = useNavigate();
   const { tasks, fetchTasks, isLoading, setUserLocation, getTasksByProximity } = useTaskStore();
   const { user, updateUserLocation } = useAuthStore();
   const { latitude, longitude, error: locationError, isLoading: locationLoading, requestLocation } = useGeolocation();
-  const { address, getAddressFromCoords, clearAddress } = useReverseGeocoding();
+  const { address, getAddressFromCoords } = useReverseGeocoding();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'local' | 'remote'>('all');
   const [selectedPriority, setSelectedPriority] = useState<'all' | 'low' | 'medium' | 'high' | 'urgent'>('all');
@@ -140,6 +138,12 @@ const HomePage: React.FC = () => {
   const handleRequest = (taskId: number) => {
     console.log('Demander de l\'aide pour la tâche:', taskId);
     // TODO: Implémenter la logique de demande
+  };
+
+  const handleEdit = (taskId: number) => {
+    console.log('Modifier la tâche:', taskId);
+    // TODO: Naviguer vers la page de modification
+    navigate(`/edit-task/${taskId}`);
   };
 
   if (isLoading) {
@@ -429,6 +433,19 @@ const HomePage: React.FC = () => {
 
                 {/* Actions */}
                 <div className="flex gap-3 pt-2">
+                  {/* Bouton de modification pour le propriétaire de la tâche */}
+                  {user && task.user_id === user.id && (
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => handleEdit(task.id)}
+                      className="flex-1"
+                    >
+                      ✏️ Modifier
+                    </Button>
+                  )}
+                  
+                  {/* Boutons d'aide et de demande pour tous les utilisateurs */}
                   <Button
                     variant="primary"
                     size="sm"

@@ -5,7 +5,7 @@ import Button from './Button';
 interface FilterButtonProps {
   onClick: () => void;
   activeFiltersCount?: number;
-  variant?: 'default' | 'outline' | 'ghost';
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
   size?: 'sm' | 'md' | 'lg';
   className?: string;
 }
