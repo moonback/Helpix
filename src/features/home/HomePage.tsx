@@ -12,6 +12,9 @@ import LocationPermissionBanner from '@/components/ui/LocationPermissionBanner';
 import AddressDisplay from '@/components/ui/AddressDisplay';
 import DetailedAddressDisplay from '@/components/ui/DetailedAddressDisplay';
 import LocationDisplay from '@/components/ui/LocationDisplay';
+import FilterModal from '@/components/ui/FilterModal';
+import FilterButton from '@/components/ui/FilterButton';
+import FilterBadge from '@/components/ui/FilterBadge';
 import { calculateDistance, formatDistance } from '@/lib/utils';
 import { 
   Search, 
@@ -38,6 +41,7 @@ const HomePage: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'local' | 'remote'>('all');
   const [selectedPriority, setSelectedPriority] = useState<'all' | 'low' | 'medium' | 'high' | 'urgent'>('all');
   const [sortByProximity, setSortByProximity] = useState(true);
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
 
   useEffect(() => {
     fetchTasks();
@@ -194,7 +198,7 @@ const HomePage: React.FC = () => {
 
       {/* Search and Filters */}
       <div className="p-4 space-y-4">
-        <div className="flex gap-2">
+        <div className="flex gap-3">
           <div className="flex-1">
             <Input
               placeholder="Rechercher une tâche..."
@@ -203,56 +207,61 @@ const HomePage: React.FC = () => {
               leftIcon={Search}
             />
           </div>
-          <Button variant="outline" size="sm" className="px-3">
-            <Filter className="w-4 h-4" />
-          </Button>
+                      <FilterButton
+              onClick={() => setIsFilterModalOpen(true)}
+              activeFiltersCount={
+                (selectedCategory !== 'all' ? 1 : 0) + 
+                (selectedPriority !== 'all' ? 1 : 0)
+              }
+              className="bg-white hover:bg-gray-50 border-gray-200 hover:border-primary-300 transition-all duration-200"
+            />
         </div>
 
-        {/* Category Filter */}
-        <div className="flex gap-2 overflow-x-auto pb-2">
-          {[
-            { key: 'all', label: 'Toutes', icon: '🔍' },
-            { key: 'local', label: 'Sur place', icon: '📍' },
-            { key: 'remote', label: 'À distance', icon: '💻' }
-          ].map((category) => (
-            <button
-              key={category.key}
-              onClick={() => setSelectedCategory(category.key as 'all' | 'local' | 'remote')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
-                selectedCategory === category.key
-                  ? 'bg-primary-500 text-white shadow-md'
-                  : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
-              }`}
-            >
-              <span>{category.icon}</span>
-              {category.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Priority Filter */}
-        <div className="flex gap-2 overflow-x-auto pb-2">
-          {[
-            { key: 'all', label: 'Toutes', icon: '🔍' },
-            { key: 'urgent', label: 'Urgentes', icon: '🔴' },
-            { key: 'high', label: 'Élevées', icon: '🟠' },
-            { key: 'medium', label: 'Moyennes', icon: '🟡' },
-            { key: 'low', label: 'Faibles', icon: '🟢' }
-          ].map((priority) => (
-            <button
-              key={priority.key}
-              onClick={() => setSelectedPriority(priority.key as 'all' | 'low' | 'medium' | 'high' | 'urgent')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
-                selectedPriority === priority.key
-                  ? 'bg-primary-500 text-white shadow-md'
-                  : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
-              }`}
-            >
-              <span>{priority.icon}</span>
-              {priority.label}
-            </button>
-          ))}
-        </div>
+        {/* Active Filters Display */}
+        {(selectedCategory !== 'all' || selectedPriority !== 'all') && (
+          <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-medium text-gray-700">Filtres actifs :</h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setSelectedCategory('all');
+                  setSelectedPriority('all');
+                }}
+                className="text-xs text-gray-500 hover:text-gray-700"
+              >
+                Effacer tout
+              </Button>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {selectedCategory !== 'all' && (
+                <FilterBadge
+                  icon={selectedCategory === 'local' ? '📍' : '💻'}
+                  label={selectedCategory === 'local' ? 'Sur place' : 'À distance'}
+                  onRemove={() => setSelectedCategory('all')}
+                  variant="primary"
+                />
+              )}
+              {selectedPriority !== 'all' && (
+                <FilterBadge
+                  icon={priorityIcons[selectedPriority]}
+                  label={
+                    selectedPriority === 'urgent' ? 'Urgentes' : 
+                    selectedPriority === 'high' ? 'Élevées' : 
+                    selectedPriority === 'medium' ? 'Moyennes' : 'Faibles'
+                  }
+                  onRemove={() => setSelectedPriority('all')}
+                  variant={
+                    selectedPriority === 'urgent' ? 'danger' :
+                    selectedPriority === 'high' ? 'warning' :
+                    selectedPriority === 'medium' ? 'secondary' : 'success'
+                  }
+                />
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Proximity Toggle */}
         {latitude && longitude && (
@@ -430,6 +439,16 @@ const HomePage: React.FC = () => {
           ))
         )}
       </div>
+
+      {/* Filter Modal */}
+      <FilterModal
+        isOpen={isFilterModalOpen}
+        onClose={() => setIsFilterModalOpen(false)}
+        selectedCategory={selectedCategory}
+        selectedPriority={selectedPriority}
+        onCategoryChange={setSelectedCategory}
+        onPriorityChange={setSelectedPriority}
+      />
     </div>
   );
 };
