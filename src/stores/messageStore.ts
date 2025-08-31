@@ -224,6 +224,9 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
 
       // Marquer comme lu pour l'expéditeur
       await get().markAsRead(message.id);
+      
+      // Rafraîchir automatiquement les conversations pour synchroniser l'état
+      await get().fetchConversations();
     } catch (error: any) {
       set({ error: error.message });
     }
@@ -247,6 +250,9 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
 
       // Mettre à jour le compteur de messages non lus
       get().updateUnreadCount();
+      
+      // Rafraîchir automatiquement pour synchroniser l'état
+      await get().fetchConversations();
     } catch (error: any) {
       set({ error: error.message });
     }
@@ -287,6 +293,9 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
         conversations: [newConversation, ...state.conversations],
         currentConversation: newConversation
       }));
+      
+      // Rafraîchir automatiquement pour synchroniser l'état
+      await get().fetchConversations();
     } catch (error: any) {
       set({ error: error.message });
     }
@@ -306,6 +315,9 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
         currentConversation: state.currentConversation?.id === conversationId ? null : state.currentConversation,
         messages: state.currentConversation?.id === conversationId ? [] : state.messages
       }));
+      
+      // Rafraîchir automatiquement pour synchroniser l'état
+      await get().fetchConversations();
     } catch (error: any) {
       set({ error: error.message });
     }

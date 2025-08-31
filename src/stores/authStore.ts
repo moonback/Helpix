@@ -193,18 +193,44 @@ export const useAuthStore = create<AuthState>()(
           const { user } = get();
           if (!user) throw new Error('Utilisateur non connecté');
 
-          const { error } = await supabase
+          // Vérifier si le profil existe déjà
+          const { data: existingUser, error: checkError } = await supabase
             .from('users')
-            .update(updates)
-            .eq('id', user.id);
+            .select('id')
+            .eq('id', user.id)
+            .single();
 
-          if (error) throw error;
+          if (checkError && checkError.code === 'PGRST116') {
+            // L'utilisateur n'existe pas, le créer
+            const { error: createError } = await supabase
+              .from('users')
+              .insert({
+                id: user.id,
+                email: user.email,
+                name: user.name || 'Utilisateur',
+                ...updates,
+                created_at: new Date().toISOString()
+              });
+
+            if (createError) throw createError;
+          } else if (checkError) {
+            throw checkError;
+          } else {
+            // L'utilisateur existe, le mettre à jour
+            const { error: updateError } = await supabase
+              .from('users')
+              .update(updates)
+              .eq('id', user.id);
+
+            if (updateError) throw updateError;
+          }
 
           // Mettre à jour l'état local
           set({
             user: { ...user, ...updates },
           });
         } catch (error) {
+          console.error('Erreur lors de la mise à jour du profil:', error);
           set({
             error: error instanceof Error ? error.message : 'Erreur lors de la mise à jour du profil',
           });
@@ -216,21 +242,46 @@ export const useAuthStore = create<AuthState>()(
           const { user } = get();
           if (!user) throw new Error('Utilisateur non connecté');
 
-          const { error } = await supabase
+          // Vérifier si le profil existe déjà
+          const { data: existingUser, error: checkError } = await supabase
             .from('users')
-            .update({ 
-              location: `${latitude},${longitude}`,
-              updated_at: new Date().toISOString()
-            })
-            .eq('id', user.id);
+            .select('id')
+            .eq('id', user.id)
+            .single();
 
-          if (error) throw error;
+          if (checkError && checkError.code === 'PGRST116') {
+            // L'utilisateur n'existe pas, le créer
+            const { error: createError } = await supabase
+              .from('users')
+              .insert({
+                id: user.id,
+                email: user.email,
+                name: user.name || 'Utilisateur',
+                location: `${latitude},${longitude}`,
+                created_at: new Date().toISOString()
+              });
+
+            if (createError) throw createError;
+          } else if (checkError) {
+            throw checkError;
+          } else {
+            // L'utilisateur existe, le mettre à jour
+            const { error: updateError } = await supabase
+              .from('users')
+              .update({ 
+                location: `${latitude},${longitude}`
+              })
+              .eq('id', user.id);
+
+            if (updateError) throw updateError;
+          }
 
           // Mettre à jour l'état local
           set({
             user: { ...user, location: `${latitude},${longitude}` },
           });
         } catch (error) {
+          console.error('Erreur lors de la mise à jour de la localisation:', error);
           set({
             error: error instanceof Error ? error.message : 'Erreur lors de la mise à jour de la localisation',
           });

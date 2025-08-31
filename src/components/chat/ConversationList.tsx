@@ -4,13 +4,26 @@ import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
 
-const ConversationList: React.FC = () => {
+interface ConversationListProps {
+  onConversationSelect: (conversation: any) => void;
+  onCreateNewChat?: () => void;
+}
+
+const ConversationList: React.FC<ConversationListProps> = ({ onConversationSelect, onCreateNewChat }) => {
   const { conversations, isLoading, error, fetchConversations } = useMessageStore();
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
-    // Désactiver temporairement le fetch automatique pour éviter les erreurs
-    // fetchConversations();
+    // Charger les conversations au montage du composant
+    fetchConversations();
+    
+    // Rafraîchir automatiquement toutes les 30 secondes
+    const interval = setInterval(() => {
+      fetchConversations();
+    }, 30000);
+    
+    // Nettoyer l'intervalle au démontage
+    return () => clearInterval(interval);
   }, [fetchConversations]);
 
   const filteredConversations = conversations.filter(conv =>
@@ -58,46 +71,91 @@ const ConversationList: React.FC = () => {
         <Button 
           onClick={() => fetchConversations()}
           className="bg-blue-600 hover:bg-blue-700 text-white"
+          disabled={isLoading}
         >
-          Actualiser
+          {isLoading ? (
+            <div className="flex items-center space-x-2">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+              <span>Chargement...</span>
+            </div>
+          ) : (
+            'Actualiser'
+          )}
         </Button>
+        {onCreateNewChat && (
+          <Button 
+            onClick={onCreateNewChat}
+            className="bg-green-600 hover:bg-green-700 text-white"
+          >
+            +
+          </Button>
+        )}
       </div>
 
       {/* Titre de la section */}
       <div className="text-center">
         <h2 className="text-xl font-semibold text-gray-900 mb-2">💬 Messagerie</h2>
-        <p className="text-sm text-gray-600">Gérez vos conversations et échangez avec d'autres utilisateurs</p>
+        <p className="text-sm text-gray-600 mb-2">Gérez vos conversations et échangez avec d'autres utilisateurs</p>
+        <div className="flex items-center justify-center space-x-2 text-xs text-gray-500">
+          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+          <span>Rafraîchissement automatique activé</span>
+        </div>
       </div>
 
       {/* Affichage des conversations si disponibles */}
       {conversations.length > 0 ? (
         <div className="space-y-2">
+          <div className="flex items-center justify-between">
           <h3 className="font-semibold text-gray-700">Conversations ({conversations.length})</h3>
+          <div className="text-xs text-gray-500">
+            Dernière mise à jour : {new Date().toLocaleTimeString()}
+          </div>
+        </div>
           {filteredConversations.map((conversation) => (
-            <Card key={conversation.id} className="p-3 hover:bg-gray-50 cursor-pointer">
+            <Card 
+              key={conversation.id} 
+              className="p-3 hover:bg-blue-50 hover:border-blue-200 cursor-pointer transition-all duration-200 transform hover:scale-[1.02] border-2 border-transparent"
+              onClick={() => onConversationSelect(conversation)}
+            >
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium text-gray-900">
-                    Conversation {conversation.id.slice(0, 8)}...
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    Conversation créée le {new Date(conversation.createdAt).toLocaleDateString()}
-                  </p>
+                <div className="flex-1">
+                  <div className="flex items-center space-x-2 mb-1">
+                    <div className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center">
+                      <span className="text-white font-medium text-xs">
+                        {conversation.participants?.length || 0}
+                      </span>
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900">
+                        Conversation avec {conversation.participants?.length || 0} participant(s)
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        Créée le {new Date(conversation.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
                   {conversation.lastMessage && (
-                    <p className="text-sm text-gray-600 truncate">
-                      {conversation.lastMessage.content}
-                    </p>
+                    <div className="mt-2">
+                      <p className="text-sm text-gray-600 truncate">
+                        <span className="font-medium">Dernier message :</span> {conversation.lastMessage.content}
+                      </p>
+                    </div>
                   )}
                 </div>
-                <div className="text-right">
+                <div className="text-right flex flex-col items-end space-y-1">
                   <p className="text-xs text-gray-400">
-                    {new Date(conversation.updatedAt).toLocaleDateString()}
+                    Modifiée le {new Date(conversation.updatedAt).toLocaleDateString()}
                   </p>
-                  {conversation.unreadCount > 0 && (
-                    <span className="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-500 rounded-full">
-                      {conversation.unreadCount}
-                    </span>
-                  )}
+                  <div className="flex items-center space-x-2">
+                    {conversation.unreadCount > 0 && (
+                      <span className="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-500 rounded-full">
+                        {conversation.unreadCount}
+                      </span>
+                    )}
+                    <div className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
+                      Cliquer pour ouvrir
+                    </div>
+                  </div>
                 </div>
               </div>
             </Card>
