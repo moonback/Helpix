@@ -1,241 +1,148 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
-import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Send, Phone, Video, MoreVertical } from 'lucide-react';
-import Button from '@/components/ui/Button';
+import React, { useState, useEffect } from 'react';
+import { useMessageStore } from '@/stores/messageStore';
 import { useAuthStore } from '@/stores/authStore';
-
-interface Message {
-  id: number;
-  content: string;
-  sender_id: string;
-  timestamp: string;
-  isOwn: boolean;
-}
-
-interface ChatUser {
-  id: string;
-  name: string;
-  avatar: string;
-  online: boolean;
-}
+import { Conversation } from '@/types';
+import { ConversationList } from '@/components/chat/ConversationList';
+import { ChatWindow } from '@/components/chat/ChatWindow';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Card } from '@/components/ui/Card';
+import { Search, UserPlus, MessageCircle } from 'lucide-react';
 
 const ChatPage: React.FC = () => {
-  const navigate = useNavigate();
-  const { userId } = useParams();
+  const { currentConversation, setCurrentConversation } = useMessageStore();
   const { user } = useAuthStore();
-  const [message, setMessage] = useState('');
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [chatUser, setChatUser] = useState<ChatUser | null>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [showNewChat, setShowNewChat] = useState(false);
+  const [searchUser, setSearchUser] = useState('');
+  const [selectedUserId, setSelectedUserId] = useState<string>('');
 
-  // Données mockées pour la démonstration
-  useEffect(() => {
-    // Simuler un utilisateur de chat
-    setChatUser({
-      id: userId || '1',
-      name: 'Marie Dupont',
-      avatar: '👩‍💼',
-      online: true,
-    });
-
-    // Simuler des messages
-    setMessages([
-      {
-        id: 1,
-        content: 'Bonjour ! J\'ai vu votre demande d\'aide pour le jardinage',
-        sender_id: userId || '1',
-        timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
-        isOwn: false,
-      },
-      {
-        id: 2,
-        content: 'Bonjour Marie ! Oui, j\'aurais vraiment besoin d\'aide',
-        sender_id: user?.id || '2',
-        timestamp: new Date(Date.now() - 25 * 60 * 1000).toISOString(),
-        isOwn: true,
-      },
-      {
-        id: 3,
-        content: 'Je peux vous aider samedi matin si ça vous convient ?',
-        sender_id: userId || '1',
-        timestamp: new Date(Date.now() - 20 * 60 * 1000).toISOString(),
-        isOwn: false,
-      },
-      {
-        id: 4,
-        content: 'Parfait ! Samedi matin à 9h ça vous va ?',
-        sender_id: user?.id || '2',
-        timestamp: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
-        isOwn: true,
-      },
-      {
-        id: 5,
-        content: 'Oui parfait ! Je serai là à 9h. À bientôt !',
-        sender_id: userId || '1',
-        timestamp: new Date(Date.now() - 10 * 60 * 1000).toISOString(),
-        isOwn: false,
-      },
-    ]);
-  }, [userId, user?.id]);
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  const handleConversationSelect = (conversation: Conversation) => {
+    setCurrentConversation(conversation);
   };
 
-  const handleSendMessage = () => {
-    if (!message.trim()) return;
-
-    const newMessage: Message = {
-      id: Date.now(),
-      content: message.trim(),
-      sender_id: user?.id || '2',
-      timestamp: new Date().toISOString(),
-      isOwn: true,
-    };
-
-    setMessages(prev => [...prev, newMessage]);
-    setMessage('');
-
-    // Simuler une réponse après 2 secondes
-    setTimeout(() => {
-      const reply: Message = {
-        id: Date.now() + 1,
-        content: 'Message reçu ! Je vous réponds dans quelques instants.',
-        sender_id: userId || '1',
-        timestamp: new Date().toISOString(),
-        isOwn: false,
-      };
-      setMessages(prev => [...prev, reply]);
-    }, 2000);
+  const handleBack = () => {
+    setCurrentConversation(null);
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
+  const handleCreateNewChat = () => {
+    setShowNewChat(true);
+  };
+
+  const handleStartChat = async () => {
+    if (!selectedUserId.trim() || !user) return;
+
+    try {
+      // Créer une nouvelle conversation
+      await useMessageStore.getState().createConversation([user.id, selectedUserId]);
+      setShowNewChat(false);
+      setSearchUser('');
+      setSelectedUserId('');
+    } catch (error) {
+      console.error('Erreur lors de la création de la conversation:', error);
     }
   };
 
-  const formatTime = (timestamp: string) => {
-    const date = new Date(timestamp);
-    const now = new Date();
-    const diffTime = Math.abs(now.getTime() - date.getTime());
-    const diffHours = Math.ceil(diffTime / (1000 * 60 * 60));
-
-    if (diffHours < 1) {
-      return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-    } else if (diffHours < 24) {
-      return `Hier ${date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`;
-    } else {
-      return date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
-    }
+  const handleCancelNewChat = () => {
+    setShowNewChat(false);
+    setSearchUser('');
+    setSelectedUserId('');
   };
 
-  if (!chatUser) {
-    return <div>Chargement...</div>;
-  }
-
-  return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Header */}
-      <motion.header
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-white shadow-sm border-b border-gray-200 px-4 py-3"
-      >
-        <div className="flex items-center gap-3">
+  // Composant pour créer un nouveau chat
+  const NewChatForm = () => (
+    <div className="h-full flex flex-col">
+      <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex items-center space-x-3">
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => navigate(-1)}
-            icon={<ArrowLeft size={20} />}
-          />
-          
-          <div className="flex items-center gap-3 flex-1">
-            <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center text-xl">
-              {chatUser.avatar}
-            </div>
-            <div>
-              <h2 className="font-semibold text-gray-900">{chatUser.name}</h2>
-              <div className="flex items-center gap-1">
-                <div className={`w-2 h-2 rounded-full ${chatUser.online ? 'bg-green-500' : 'bg-gray-400'}`} />
-                <span className="text-sm text-gray-500">
-                  {chatUser.online ? 'En ligne' : 'Hors ligne'}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" icon={<Phone size={18} />} />
-            <Button variant="ghost" size="sm" icon={<Video size={18} />} />
-            <Button variant="ghost" size="sm" icon={<MoreVertical size={18} />} />
-          </div>
-        </div>
-      </motion.header>
-
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
-        {messages.map((msg, index) => (
-          <motion.div
-            key={msg.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
-            className={`flex ${msg.isOwn ? 'justify-end' : 'justify-start'}`}
+            onClick={handleCancelNewChat}
+            className="p-2"
           >
-            <div
-              className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${
-                msg.isOwn
-                  ? 'bg-primary-600 text-white rounded-br-md'
-                  : 'bg-white text-gray-900 rounded-bl-md border border-gray-200'
-              }`}
-            >
-              <p className="text-sm">{msg.content}</p>
-              <div className={`text-xs mt-1 ${
-                msg.isOwn ? 'text-primary-100' : 'text-gray-500'
-              }`}>
-                {formatTime(msg.timestamp)}
-              </div>
-            </div>
-          </motion.div>
-        ))}
-        <div ref={messagesEndRef} />
+            ←
+          </Button>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+            Nouveau chat
+          </h2>
+        </div>
       </div>
 
-      {/* Input */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-white border-t border-gray-200 px-4 py-3"
-      >
-        <div className="flex items-center gap-3">
-          <div className="flex-1 relative">
-            <textarea
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Tapez votre message..."
-              rows={1}
-              className="w-full px-4 py-2 border border-gray-300 rounded-full resize-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-              style={{ minHeight: '44px', maxHeight: '120px' }}
+      <div className="flex-1 p-4">
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Rechercher un utilisateur
+            </label>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Input
+                type="text"
+                placeholder="Entrez l'ID ou l'email de l'utilisateur..."
+                value={searchUser}
+                onChange={(e) => setSearchUser(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              ID de l'utilisateur
+            </label>
+            <Input
+              type="text"
+              placeholder="ID de l'utilisateur"
+              value={selectedUserId}
+              onChange={(e) => setSelectedUserId(e.target.value)}
             />
           </div>
-          
-          <Button
-            onClick={handleSendMessage}
-            disabled={!message.trim()}
-            size="lg"
-            className="w-12 h-12 rounded-full p-0"
-            icon={<Send size={20} />}
+
+          <div className="pt-4">
+            <Button
+              onClick={handleStartChat}
+              disabled={!selectedUserId.trim()}
+              className="w-full"
+            >
+              <MessageCircle className="h-4 w-4 mr-2" />
+              Commencer la conversation
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="h-full flex">
+      {/* Sidebar - Liste des conversations */}
+      <div className="w-full md:w-80 border-r border-gray-200 dark:border-gray-700">
+        {showNewChat ? (
+          <NewChatForm />
+        ) : (
+          <ConversationList
+            onConversationSelect={handleConversationSelect}
+            onCreateNewChat={handleCreateNewChat}
+          />
+        )}
+      </div>
+
+      {/* Zone de chat principale */}
+      <div className="flex-1 hidden md:block">
+        <ChatWindow
+          conversation={currentConversation}
+          onBack={handleBack}
+        />
+      </div>
+
+      {/* Version mobile - Chat plein écran */}
+      {currentConversation && (
+        <div className="fixed inset-0 z-50 bg-white dark:bg-gray-900 md:hidden">
+          <ChatWindow
+            conversation={currentConversation}
+            onBack={handleBack}
           />
         </div>
-      </motion.div>
+      )}
     </div>
   );
 };

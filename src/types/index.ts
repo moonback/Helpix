@@ -63,11 +63,72 @@ export interface Transaction {
 
 // Types de messages
 export interface Message {
-  id: number;
+  id: string;
   sender_id: string;
   receiver_id: string;
   content: string;
-  created_at: string;
+  type: 'text' | 'image' | 'file';
+  timestamp: string;
+  isRead: boolean;
+  attachments?: Attachment[];
+}
+
+export interface Conversation {
+  id: string;
+  participants: string[];
+  lastMessage?: Message;
+  unreadCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Attachment {
+  id: string;
+  messageId: string;
+  fileName: string;
+  fileUrl: string;
+  fileType: string;
+  fileSize: number;
+  uploadedAt: string;
+}
+
+export interface ChatUser {
+  id: string;
+  name: string;
+  avatar_url?: string;
+  online: boolean;
+  lastSeen?: string;
+}
+
+export interface Notification {
+  id: string;
+  userId: string;
+  type: 'new_message' | 'task_update' | 'proximity_alert' | 'reminder' | 'rating_received' | 'system_alert';
+  title: string;
+  message: string;
+  data?: Record<string, any>;
+  isRead: boolean;
+  createdAt: string;
+  expiresAt?: string;
+}
+
+export interface MessageStore {
+  conversations: Conversation[];
+  currentConversation: Conversation | null;
+  messages: Message[];
+  isLoading: boolean;
+  error: string | null;
+  unreadCount: number;
+  
+  // Actions
+  fetchConversations: () => Promise<void>;
+  fetchMessages: (conversationId: string) => Promise<void>;
+  sendMessage: (content: string, receiverId: string, type?: 'text' | 'image' | 'file', attachments?: File[]) => Promise<void>;
+  markAsRead: (messageId: string) => Promise<void>;
+  createConversation: (participantIds: string[]) => Promise<void>;
+  deleteConversation: (conversationId: string) => Promise<void>;
+  setCurrentConversation: (conversation: Conversation | null) => void;
+  updateUnreadCount: () => void;
 }
 
 // Types d'authentification

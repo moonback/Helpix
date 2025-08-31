@@ -22,19 +22,42 @@ La base de données Entraide Universelle utilise **PostgreSQL** hébergé sur Su
 └─────────────┘    │ latitude    │    ┌─────────────┐
                    │ longitude   │    │   messages  │
 ┌─────────────┐    │ skills[]    │    ├─────────────┤
-│   skills    │    │ tags[]      │    │ sender_id(FK)│
-├─────────────┤    │ budget      │    │ receiver_id │
-│ user_id (FK)│◄───│ deadline    │    │ content     │
-│ skill_name  │    │ assigned_to │    │ created_at  │
-└─────────────┘    │ rating      │    └─────────────┘
-                   └─────────────┘
+│   skills    │    │ tags[]      │    │ conversation_id(FK)│
+├─────────────┤    │ budget      │    │ sender_id(FK)│
+│ user_id (FK)│◄───│ deadline    │    │ receiver_id │
+│ skill_name  │    │ assigned_to │    │ content     │
+└─────────────┘    │ rating      │    │ type        │
+                   └─────────────┘    │ timestamp   │
+┌─────────────┐                       │ isRead      │
+│    items    │                       └─────────────┘
+├─────────────┤                       │
+│ user_id (FK)│                       ┌─────────────┐
+│ item_name   │                       │conversations│
+│ description │                       ├─────────────┤
+│ available   │                       │ id (PK)     │
+└─────────────┘                       │ created_at  │
+                                      │ updated_at  │
+                                      └─────────────┘
+                                              │
+                                              │
+                                      ┌─────────────┐
+                                      │conversation_│
+                                      │participants │
+                                      ├─────────────┤
+                                      │conversation_id(FK)│
+                                      │ user_id (FK)│
+                                      └─────────────┘
+
 ┌─────────────┐
-│    items    │
+│ attachments │
 ├─────────────┤
-│ user_id (FK)│
-│ item_name   │
-│ description │
-│ available   │
+│ id (PK)     │
+│ message_id(FK)│
+│ file_name   │
+│ file_url    │
+│ file_type   │
+│ file_size   │
+│ uploaded_at │
 └─────────────┘
 ```
 
@@ -44,7 +67,9 @@ La base de données Entraide Universelle utilise **PostgreSQL** hébergé sur Su
 - **users** → **skills** : Un utilisateur peut avoir plusieurs compétences (1:N)
 - **users** → **items** : Un utilisateur peut prêter plusieurs objets (1:N)
 - **users** → **transactions** : Un utilisateur peut être expéditeur ou destinataire (N:N)
-- **users** → **messages** : Un utilisateur peut envoyer/recevoir plusieurs messages (N:N)
+- **conversations** → **conversation_participants** : Une conversation peut avoir plusieurs participants (1:N)
+- **conversations** → **messages** : Une conversation peut contenir plusieurs messages (1:N)
+- **messages** → **attachments** : Un message peut avoir plusieurs pièces jointes (1:N)
 - **tasks** → **transactions** : Une tâche peut générer plusieurs transactions (1:N)
 
 ## 📋 Tables Détaillées
@@ -345,33 +370,40 @@ CREATE POLICY "Users can create transactions" ON transactions
 
 ### **6. Table `messages` - Messages**
 
-**Description :** Stocke les conversations entre utilisateurs.
+**Description :** Stocke les messages des conversations entre utilisateurs.
 
 ```sql
 CREATE TABLE messages (
-  id SERIAL PRIMARY KEY,
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  conversation_id UUID REFERENCES conversations(id) ON DELETE CASCADE,
   sender_id UUID REFERENCES users(id) ON DELETE CASCADE,
   receiver_id UUID REFERENCES users(id) ON DELETE CASCADE,
   content TEXT NOT NULL,
-  created_at TIMESTAMP DEFAULT NOW()
+  type TEXT CHECK (type IN ('text', 'image', 'file')) DEFAULT 'text',
+  timestamp TIMESTAMP DEFAULT NOW(),
+  isRead BOOLEAN DEFAULT FALSE
 );
 ```
 
 **Colonnes :**
 | Colonne | Type | Contrainte | Description |
 |---------|------|------------|-------------|
-| `id` | SERIAL | PRIMARY KEY | Identifiant unique du message |
+| `id` | UUID | PRIMARY KEY | Identifiant unique du message |
+| `conversation_id` | UUID | FOREIGN KEY | Conversation à laquelle appartient le message |
 | `sender_id` | UUID | FOREIGN KEY | Expéditeur du message |
 | `receiver_id` | UUID | FOREIGN KEY | Destinataire du message |
-| `content` | TEXT | NOT NULL | Contenu du message |
-| `created_at` | TIMESTAMP | DEFAULT NOW() | Date d'envoi |
+| `content` | TEXT | NOT NULL | Contenu du message (texte, URL d'image, etc.) |
+| `type` | TEXT | CHECK | Type : 'text', 'image', 'file' |
+| `timestamp` | TIMESTAMP | DEFAULT NOW() | Date d'envoi |
+| `isRead` | BOOLEAN | DEFAULT FALSE | Statut de lecture |
 
 **Index recommandés :**
 ```sql
+CREATE INDEX idx_messages_conversation_id ON messages(conversation_id);
 CREATE INDEX idx_messages_sender_id ON messages(sender_id);
 CREATE INDEX idx_messages_receiver_id ON messages(receiver_id);
-CREATE INDEX idx_messages_created_at ON messages(created_at);
-CREATE INDEX idx_messages_conversation ON messages(sender_id, receiver_id, created_at);
+CREATE INDEX idx_messages_timestamp ON messages(timestamp);
+CREATE INDEX idx_messages_conversation_timestamp ON messages(conversation_id, timestamp);
 ```
 
 **Politiques RLS :**
@@ -380,11 +412,166 @@ CREATE INDEX idx_messages_conversation ON messages(sender_id, receiver_id, creat
 ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
 
 -- Politiques de sécurité
-CREATE POLICY "Users can view own messages" ON messages
-  FOR SELECT USING (auth.uid() = sender_id OR auth.uid() = receiver_id);
+CREATE POLICY "Users can view messages in their conversations" ON messages
+  FOR SELECT USING (
+    auth.uid() IN (
+      SELECT user_id FROM conversation_participants 
+      WHERE conversation_id = messages.conversation_id
+    )
+  );
 
 CREATE POLICY "Users can send messages" ON messages
   FOR INSERT WITH CHECK (auth.uid() = sender_id);
+
+CREATE POLICY "Users can update their own messages" ON messages
+  FOR UPDATE USING (auth.uid() = sender_id);
+```
+
+### **7. Table `conversations` - Conversations**
+
+**Description :** Stocke les conversations entre utilisateurs.
+
+```sql
+CREATE TABLE conversations (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+```
+
+**Colonnes :**
+| Colonne | Type | Contrainte | Description |
+|---------|------|------------|-------------|
+| `id` | UUID | PRIMARY KEY | Identifiant unique de la conversation |
+| `created_at` | TIMESTAMP | DEFAULT NOW() | Date de création |
+| `updated_at` | TIMESTAMP | DEFAULT NOW() | Date de dernière modification |
+
+**Index recommandés :**
+```sql
+CREATE INDEX idx_conversations_created_at ON conversations(created_at);
+CREATE INDEX idx_conversations_updated_at ON conversations(updated_at);
+```
+
+**Politiques RLS :**
+```sql
+-- Activer RLS
+ALTER TABLE conversations ENABLE ROW LEVEL SECURITY;
+
+-- Politiques de sécurité
+CREATE POLICY "Users can view their conversations" ON conversations
+  FOR SELECT USING (
+    auth.uid() IN (
+      SELECT user_id FROM conversation_participants 
+      WHERE conversation_id = conversations.id
+    )
+  );
+
+CREATE POLICY "Users can create conversations" ON conversations
+  FOR INSERT WITH CHECK (true);
+```
+
+### **8. Table `conversation_participants` - Participants aux Conversations**
+
+**Description :** Stocke les participants de chaque conversation (relation many-to-many).
+
+```sql
+CREATE TABLE conversation_participants (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  conversation_id UUID REFERENCES conversations(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  joined_at TIMESTAMP DEFAULT NOW(),
+  UNIQUE(conversation_id, user_id)
+);
+```
+
+**Colonnes :**
+| Colonne | Type | Contrainte | Description |
+|---------|------|------------|-------------|
+| `id` | UUID | PRIMARY KEY | Identifiant unique de la participation |
+| `conversation_id` | UUID | FOREIGN KEY | Conversation |
+| `user_id` | UUID | FOREIGN KEY | Participant |
+| `joined_at` | TIMESTAMP | DEFAULT NOW() | Date d'ajout à la conversation |
+
+**Index recommandés :**
+```sql
+CREATE INDEX idx_conversation_participants_conversation_id ON conversation_participants(conversation_id);
+CREATE INDEX idx_conversation_participants_user_id ON conversation_participants(user_id);
+CREATE UNIQUE INDEX idx_conversation_participants_unique ON conversation_participants(conversation_id, user_id);
+```
+
+**Politiques RLS :**
+```sql
+-- Activer RLS
+ALTER TABLE conversation_participants ENABLE ROW LEVEL SECURITY;
+
+-- Politiques de sécurité
+CREATE POLICY "Users can view conversation participants" ON conversation_participants
+  FOR SELECT USING (
+    auth.uid() IN (
+      SELECT user_id FROM conversation_participants cp2
+      WHERE cp2.conversation_id = conversation_participants.conversation_id
+    )
+  );
+
+CREATE POLICY "Users can add themselves to conversations" ON conversation_participants
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+```
+
+### **9. Table `attachments` - Pièces Jointes**
+
+**Description :** Stocke les pièces jointes des messages (images, fichiers).
+
+```sql
+CREATE TABLE attachments (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  message_id UUID REFERENCES messages(id) ON DELETE CASCADE,
+  file_name TEXT NOT NULL,
+  file_url TEXT NOT NULL,
+  file_type TEXT NOT NULL,
+  file_size INTEGER NOT NULL,
+  uploaded_at TIMESTAMP DEFAULT NOW()
+);
+```
+
+**Colonnes :**
+| Colonne | Type | Contrainte | Description |
+|---------|------|------------|-------------|
+| `id` | UUID | PRIMARY KEY | Identifiant unique de la pièce jointe |
+| `message_id` | UUID | FOREIGN KEY | Message auquel est attaché le fichier |
+| `file_name` | TEXT | NOT NULL | Nom original du fichier |
+| `file_url` | TEXT | NOT NULL | URL du fichier dans le stockage |
+| `file_type` | TEXT | NOT NULL | Type MIME du fichier |
+| `file_size` | INTEGER | NOT NULL | Taille du fichier en bytes |
+| `uploaded_at` | TIMESTAMP | DEFAULT NOW() | Date d'upload |
+
+**Index recommandés :**
+```sql
+CREATE INDEX idx_attachments_message_id ON attachments(message_id);
+CREATE INDEX idx_attachments_file_type ON attachments(file_type);
+CREATE INDEX idx_attachments_uploaded_at ON attachments(uploaded_at);
+```
+
+**Politiques RLS :**
+```sql
+-- Activer RLS
+ALTER TABLE attachments ENABLE ROW LEVEL SECURITY;
+
+-- Politiques de sécurité
+CREATE POLICY "Users can view attachments in their conversations" ON attachments
+  FOR SELECT USING (
+    auth.uid() IN (
+      SELECT cp.user_id FROM conversation_participants cp
+      JOIN messages m ON m.conversation_id = cp.conversation_id
+      WHERE m.id = attachments.message_id
+    )
+  );
+
+CREATE POLICY "Users can upload attachments to their messages" ON attachments
+  FOR INSERT WITH CHECK (
+    auth.uid() IN (
+      SELECT sender_id FROM messages WHERE id = attachments.message_id
+    )
+  );
 ```
 
 ## 🔐 Sécurité et Contraintes
