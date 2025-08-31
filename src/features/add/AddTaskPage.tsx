@@ -50,14 +50,23 @@ const AddTaskPage: React.FC = () => {
     try {
       const taskData = {
         ...formData,
+        user_id: user.id, // Ajouter l'ID utilisateur UUID
+        status: 'open', // Statut par défaut
         estimated_duration: parseInt(formData.estimated_duration),
         budget_credits: parseInt(formData.budget_credits),
         required_skills: formData.required_skills.split(',').map(s => s.trim()).filter(Boolean),
         tags: formData.tags.split(',').map(t => t.trim()).filter(Boolean),
         deadline: formData.deadline || undefined,
         latitude: selectedLocation?.latitude,
-        longitude: selectedLocation?.longitude
+        longitude: selectedLocation?.longitude,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       };
+
+      // Debug: afficher les données de la tâche
+      console.log('Création de tâche avec données:', taskData);
+      console.log('ID utilisateur:', user.id);
+      console.log('Type ID utilisateur:', typeof user.id);
 
       await createTask(taskData);
       navigate('/');
@@ -100,6 +109,15 @@ const AddTaskPage: React.FC = () => {
           </h1>
           <div className="w-10" />
         </div>
+        
+        {/* Debug: Afficher l'ID utilisateur */}
+        {user && (
+          <div className="px-4 pb-2">
+            <div className="text-xs text-gray-500 bg-gray-100 p-2 rounded">
+              🔍 Debug: ID utilisateur: <code className="bg-white px-1 rounded">{user.id}</code>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="p-4 space-y-4">
