@@ -1,0 +1,267 @@
+# 🚀 Règles Cursor pour Entraide Universelle
+
+## 📋 Vue d'ensemble du projet
+
+Ce projet est une plateforme d'entraide géolocalisée construite avec :
+- **Frontend** : React 18 + TypeScript + Vite
+- **Backend** : Supabase (PostgreSQL + Auth + Real-time)
+- **UI** : Tailwind CSS + Framer Motion
+- **State** : Zustand + React Query
+- **Géolocalisation** : Leaflet.js + React-Leaflet
+
+## 🎯 Règles générales
+
+### Architecture et patterns
+- Suivez une **architecture feature-based** avec des composants réutilisables
+- Utilisez des **hooks personnalisés** pour la logique métier
+- Privilégiez la **composition de composants** plutôt que l'héritage
+- Maintenez une **séparation claire** entre UI, logique et données
+
+### Code quality
+- **TypeScript strict** : Utilisez toujours des types explicites
+- **ESLint + Prettier** : Respectez les règles de formatage
+- **Tests** : Écrivez des tests pour les composants et hooks
+- **Documentation** : Ajoutez des commentaires JSDoc pour les fonctions publiques
+
+## 🔧 Règles spécifiques par technologie
+
+### React
+- Utilisez des **fonctional components** avec hooks
+- **React.memo** pour les composants qui re-render souvent
+- **useCallback** et **useMemo** pour optimiser les performances
+- **Custom hooks** pour la logique réutilisable
+- **Error boundaries** pour la gestion d'erreurs
+
+### TypeScript
+- **Interfaces** plutôt que types pour les objets
+- **Generics** pour les composants et hooks réutilisables
+- **Utility types** (Pick, Omit, Partial, etc.)
+- **Strict null checks** activés
+- **Exhaustive checks** pour les unions
+
+### Tailwind CSS
+- **Utility-first** : Privilégiez les classes Tailwind
+- **Responsive** : Utilisez les breakpoints (sm:, md:, lg:, xl:)
+- **Dark mode** : Supportez `dark:` classes
+- **Custom classes** : Créez des composants réutilisables
+- **Accessibilité** : Utilisez les classes d'accessibilité
+
+### Zustand
+- **Stores séparés** par domaine métier
+- **Actions claires** avec des noms descriptifs
+- **Middleware persist** pour la persistance
+- **Immutabilité** : Ne modifiez jamais l'état directement
+
+## 📁 Structure des fichiers
+
+### Organisation
+```
+src/
+├── components/          # Composants UI réutilisables
+│   ├── ui/             # Composants de base (Button, Input, etc.)
+│   └── layout/         # Composants de mise en page
+├── features/            # Fonctionnalités par domaine
+│   ├── auth/           # Authentification
+│   ├── tasks/          # Gestion des tâches
+│   └── profile/        # Profil utilisateur
+├── hooks/               # Hooks personnalisés
+├── stores/              # Stores Zustand
+├── lib/                 # Utilitaires et configurations
+├── types/               # Types TypeScript globaux
+└── styles/              # Styles globaux et Tailwind
+```
+
+### Nommage
+- **Composants** : PascalCase (ex: `TaskCard.tsx`)
+- **Hooks** : camelCase avec préfixe `use` (ex: `useAuth.ts`)
+- **Stores** : camelCase avec suffixe `Store` (ex: `taskStore.ts`)
+- **Types** : PascalCase (ex: `TaskStatus`)
+- **Interfaces** : PascalCase avec préfixe `I` optionnel (ex: `ITask`)
+
+## 🧪 Tests et qualité
+
+### Tests
+- **React Testing Library** pour les composants
+- **Jest** pour les tests unitaires
+- **Coverage** : Minimum 80%
+- **Mocks** pour Supabase et autres services externes
+- **Tests d'intégration** pour les flux critiques
+
+### Linting
+- **ESLint** avec règles strictes
+- **Prettier** pour le formatage
+- **Husky** pour les pre-commit hooks
+- **Conventional Commits** pour les messages de commit
+
+## 🔒 Sécurité et performance
+
+### Sécurité
+- **Validation** des données côté client ET serveur
+- **Sanitisation** des entrées utilisateur
+- **RLS** (Row Level Security) pour Supabase
+- **HTTPS** obligatoire en production
+- **Headers de sécurité** appropriés
+
+### Performance
+- **Code splitting** avec React.lazy
+- **Memoization** des composants coûteux
+- **Debouncing** pour les recherches et filtres
+- **Lazy loading** des images et composants
+- **Optimisation des bundles** avec Vite
+
+## 🌍 Géolocalisation
+
+### Règles spécifiques
+- **Permission** : Demandez toujours l'autorisation de localisation
+- **Fallback** : Gérez les cas où la géolocalisation échoue
+- **Performance** : Cachez les coordonnées et distances calculées
+- **Accessibilité** : Fournissez des alternatives textuelles
+- **Privacy** : Respectez le RGPD et les préférences utilisateur
+
+## 📱 Responsive et accessibilité
+
+### Responsive
+- **Mobile-first** : Commencez par mobile
+- **Breakpoints** : Utilisez les breakpoints Tailwind
+- **Touch-friendly** : Boutons et interactions adaptés au tactile
+- **Performance mobile** : Optimisez pour les connexions lentes
+
+### Accessibilité
+- **ARIA labels** pour les éléments interactifs
+- **Navigation clavier** complète
+- **Contraste** suffisant (WCAG AA minimum)
+- **Screen readers** : Testez avec des lecteurs d'écran
+- **Focus management** : Gestion claire du focus
+
+## 🚀 Déploiement et CI/CD
+
+### Environnements
+- **Development** : Variables d'environnement locales
+- **Staging** : Tests et validation
+- **Production** : Déploiement sécurisé
+
+### Variables d'environnement
+```bash
+# Supabase
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_anon_key
+
+# Géolocalisation
+VITE_MAP_TILE_URL=your_map_tiles_url
+VITE_NOMINATIM_URL=https://nominatim.openstreetmap.org
+
+# Analytics (optionnel)
+VITE_ANALYTICS_ID=your_analytics_id
+```
+
+## 📚 Documentation
+
+### Standards
+- **README.md** : Documentation principale du projet
+- **JSDoc** : Commentaires pour toutes les fonctions publiques
+- **ARCHITECTURE.md** : Architecture technique détaillée
+- **API_DOCS.md** : Documentation des endpoints
+- **CHANGELOG.md** : Historique des changements
+
+### Commentaires
+```typescript
+/**
+ * Calcule la distance entre deux points géographiques
+ * @param lat1 - Latitude du premier point
+ * @param lng1 - Longitude du premier point
+ * @param lat2 - Latitude du second point
+ * @param lng2 - Longitude du second point
+ * @returns Distance en kilomètres
+ * @example
+ * const distance = calculateDistance(48.8566, 2.3522, 43.2965, 5.3698);
+ */
+export const calculateDistance = (lat1: number, lng1: number, lat2: number, lng2: number): number => {
+  // Implémentation...
+};
+```
+
+## 🎨 UI/UX Guidelines
+
+### Design System
+- **Cohérence** : Utilisez les composants UI existants
+- **Thème** : Support du mode clair/sombre
+- **Couleurs** : Palette de couleurs définie
+- **Typographie** : Hiérarchie claire des textes
+- **Espacement** : Système d'espacement cohérent
+
+### Composants
+- **Réutilisables** : Créez des composants génériques
+- **Props** : Interfaces claires et validation
+- **Variants** : Support de différentes variantes
+- **Accessibilité** : ARIA labels et navigation clavier
+
+## 🔄 Workflow de développement
+
+### Branches
+- **main** : Code de production
+- **develop** : Branche de développement
+- **feature/** : Nouvelles fonctionnalités
+- **fix/** : Corrections de bugs
+- **hotfix/** : Corrections urgentes
+
+### Commits
+- **Conventional Commits** : feat:, fix:, docs:, style:, refactor:, test:, chore:
+- **Messages clairs** : Description concise du changement
+- **Scope** : Indiquez le domaine affecté
+
+## 📊 Monitoring et analytics
+
+### Performance
+- **Core Web Vitals** : LCP, FID, CLS
+- **Bundle analyzer** : Surveillez la taille des bundles
+- **Lighthouse** : Tests de performance réguliers
+
+### Erreurs
+- **Error tracking** : Capturez et loggez les erreurs
+- **User feedback** : Collectez les retours utilisateurs
+- **Analytics** : Suivez l'usage des fonctionnalités
+
+## 🎯 Priorités de développement
+
+### MVP (Terminé)
+- Authentification utilisateur
+- CRUD des tâches
+- Géolocalisation basique
+- Interface responsive
+
+### V1.0 (En cours)
+- Système de messagerie
+- Notifications en temps réel
+- Système de notation
+- Filtres avancés
+
+### Futures versions
+- Paiements et transactions
+- Applications mobiles
+- IA et recommandations
+- Internationalisation
+
+---
+
+## 💡 Conseils pour Cursor
+
+1. **Utilisez les raccourcis** : Cmd/Ctrl + K pour les commandes
+2. **Copilot Chat** : Posez des questions sur le code
+3. **Refactoring** : Utilisez les outils de refactoring intégrés
+4. **Debugging** : Intégration avec les outils de debug
+5. **Git** : Gestion Git intégrée
+6. **Terminal** : Terminal intégré pour les commandes
+7. **Extensions** : Installez les extensions utiles (ESLint, Prettier, etc.)
+
+## 🚨 Règles strictes
+
+- **NE JAMAIS** committer du code non testé
+- **NE JAMAIS** exposer des clés API dans le code
+- **NE JAMAIS** ignorer les erreurs TypeScript
+- **TOUJOURS** valider les données utilisateur
+- **TOUJOURS** gérer les cas d'erreur
+- **TOUJOURS** tester sur mobile et desktop
+
+---
+
+**Ces règles garantissent la qualité, la maintenabilité et la scalabilité du projet Entraide Universelle.**
