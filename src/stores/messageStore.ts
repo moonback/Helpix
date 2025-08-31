@@ -2,6 +2,8 @@ import { create } from 'zustand';
 import { supabase } from '@/lib/supabase';
 import { Message, Conversation, MessageStore } from '@/types';
 
+// Store Zustand pour la gestion des messages
+
 export const useMessageStore = create<MessageStore>((set, get) => ({
   conversations: [],
   currentConversation: null,
@@ -17,48 +19,71 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Utilisateur non authentifié');
 
-      // Récupérer les conversations de l'utilisateur
-      const { data: conversations, error } = await supabase
+      // Récupérer d'abord les conversations de l'utilisateur
+      const { data: conversations, error: convError } = await supabase
         .from('conversations')
-        .select(`
-          *,
-          participants:conversation_participants(user_id),
-          lastMessage:messages(
-            id,
-            content,
-            timestamp,
-            sender_id,
-            type
-          )
-        `)
-        .contains('participants', [user.id])
+        .select('*')
         .order('updated_at', { ascending: false });
 
-      if (error) throw error;
+      if (convError) throw convError;
 
-      // Traiter les conversations
-      const processedConversations: Conversation[] = (conversations || []).map(conv => ({
-        id: conv.id,
-        participants: conv.participants?.map((p: any) => p.user_id) || [],
-        lastMessage: conv.lastMessage?.[0] ? {
-          id: conv.lastMessage[0].id,
-          sender_id: conv.lastMessage[0].sender_id,
-          receiver_id: '',
-          content: conv.lastMessage[0].content,
-          type: conv.lastMessage[0].type || 'text',
-          timestamp: conv.lastMessage[0].timestamp,
-          isRead: false
-        } : undefined,
-        unreadCount: 0, // Sera mis à jour séparément
-        createdAt: conv.created_at,
-        updatedAt: conv.updated_at
-      }));
+      // Récupérer les participants pour chaque conversation
+      const { data: participants, error: partError } = await supabase
+        .from('conversation_participants')
+        .select('*')
+        .in('conversation_id', conversations?.map(c => c.id) || []);
 
-      set({ conversations: processedConversations, isLoading: false });
+      if (partError) throw partError;
+
+      // Filtrer les conversations où l'utilisateur est participant
+      const userConversations = conversations?.filter(conv => 
+        participants?.some(p => p.conversation_id === conv.id && p.user_id === user.id)
+      ) || [];
+
+      // Récupérer le dernier message pour chaque conversation
+      const conversationsWithMessages = await Promise.all(
+        userConversations.map(async (conv) => {
+          if (!conv.id) return null;
+          
+          const { data: lastMessage } = await supabase
+            .from('messages')
+            .select('id, content, timestamp, sender_id, type')
+            .eq('conversation_id', conv.id)
+            .order('timestamp', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
+          // Récupérer les participants de cette conversation
+          const convParticipants = participants?.filter(p => p.conversation_id === conv.id) || [];
+          
+          return {
+            id: conv.id,
+            participants: convParticipants.map(p => p.user_id),
+            lastMessage: lastMessage ? {
+              id: lastMessage.id,
+              sender_id: lastMessage.sender_id,
+              receiver_id: '', // Sera rempli plus tard si nécessaire
+              content: lastMessage.content,
+              type: lastMessage.type || 'text',
+              timestamp: lastMessage.timestamp,
+              isRead: false
+            } : undefined,
+            unreadCount: 0, // Sera mis à jour séparément
+            createdAt: conv.created_at || new Date().toISOString(),
+            updatedAt: conv.updated_at || new Date().toISOString()
+          };
+        })
+      );
+
+      // Filtrer les conversations null
+      const validConversations = conversationsWithMessages.filter((conv): conv is NonNullable<typeof conv> => conv !== null);
+
+      set({ conversations: validConversations, isLoading: false });
       
       // Mettre à jour le compteur de messages non lus
       get().updateUnreadCount();
     } catch (error: any) {
+      console.error('Erreur lors de la récupération des conversations:', error);
       set({ error: error.message, isLoading: false });
     }
   },
@@ -104,7 +129,7 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
         
         // Mettre à jour l'état local
         const newConv: Conversation = {
-          id: conversationId,
+          id: conversationId!, // Utiliser l'assertion non-null car on vient de l'assigner
           participants: [user.id, receiverId],
           lastMessage: undefined,
           unreadCount: 0,
@@ -116,6 +141,11 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
           conversations: [newConv, ...state.conversations],
           currentConversation: newConv
         }));
+      }
+
+      // Vérifier que conversationId est défini avant de continuer
+      if (!conversationId) {
+        throw new Error('Impossible de créer ou récupérer une conversation');
       }
 
       // Créer le message

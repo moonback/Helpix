@@ -54,10 +54,8 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 const App: React.FC = () => {
   const { isAuthenticated } = useAuth();
   
-  // Initialiser la messagerie en temps réel si l'utilisateur est connecté
-  if (isAuthenticated) {
-    useRealtimeMessages();
-  }
+  // Initialiser la messagerie en temps réel (le hook gère lui-même l'état d'authentification)
+  useRealtimeMessages();
 
   return (
     <Router>

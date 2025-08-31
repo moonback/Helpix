@@ -2,9 +2,9 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useMessageStore } from '@/stores/messageStore';
 import { useAuthStore } from '@/stores/authStore';
 import { Conversation, Message, Attachment } from '@/types';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { Card } from '@/components/ui/Card';
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
+import Card from '@/components/ui/Card';
 import { 
   Send, 
   Paperclip, 
@@ -20,7 +20,7 @@ interface ChatWindowProps {
   onBack: () => void;
 }
 
-export const ChatWindow: React.FC<ChatWindowProps> = ({
+const ChatWindow: React.FC<ChatWindowProps> = ({
   conversation,
   onBack
 }) => {
@@ -314,3 +314,5 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
     </div>
   );
 };
+
+export default ChatWindow;

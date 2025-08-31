@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useMessageStore } from '@/stores/messageStore';
 import { useAuthStore } from '@/stores/authStore';
 import { Conversation } from '@/types';
-import { ConversationList } from '@/components/chat/ConversationList';
-import { ChatWindow } from '@/components/chat/ChatWindow';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { Card } from '@/components/ui/Card';
+import ConversationList from '@/components/chat/ConversationList';
+import ChatWindow from '@/components/chat/ChatWindow';
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
+import Card from '@/components/ui/Card';
 import { Search, UserPlus, MessageCircle } from 'lucide-react';
 
 const ChatPage: React.FC = () => {
