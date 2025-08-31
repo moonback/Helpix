@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
 import { User } from '@/types';
 import { supabase } from '@/lib/supabase';
 
@@ -17,182 +18,247 @@ interface AuthState {
   setUser: (user: User | null) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
+  initializeAuth: () => Promise<void>;
 }
 
-export const useAuthStore = create<AuthState>((set, get) => ({
-  user: null,
-  isLoading: false,
-  isAuthenticated: false,
-  error: null,
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set, get) => ({
+      user: null,
+      isLoading: true, // Commencer en chargement
+      isAuthenticated: false,
+      error: null,
 
-  signUp: async (email: string, password: string, name: string) => {
-    try {
-      set({ isLoading: true, error: null });
-      
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            name,
-          },
-        },
-      });
+      // Initialisation de l'authentification au démarrage
+      initializeAuth: async () => {
+        try {
+          set({ isLoading: true, error: null });
+          
+          // Récupérer la session actuelle
+          const { data: { session }, error } = await supabase.auth.getSession();
+          
+          if (error) {
+            console.error('Erreur lors de la récupération de la session:', error);
+            set({ isLoading: false, isAuthenticated: false, user: null });
+            return;
+          }
 
-      if (error) throw error;
+          if (session?.user) {
+            // Récupérer le profil utilisateur depuis la base de données
+            const { data: userData, error: profileError } = await supabase
+              .from('users')
+              .select('*')
+              .eq('id', session.user.id)
+              .single();
 
-      if (data.user) {
-        // Créer l'utilisateur dans notre table users
-        const { error: profileError } = await supabase
-          .from('users')
-          .insert([
-            {
-              id: data.user.id,
-              name,
-              email,
-              password_hash: '', // Supabase gère le hash
-              credits: 100, // Crédits de bienvenue
+            if (profileError) {
+              console.error('Erreur lors de la récupération du profil:', profileError);
+              set({ isLoading: false, isAuthenticated: false, user: null });
+              return;
+            }
+
+            if (userData) {
+              set({
+                user: userData,
+                isAuthenticated: true,
+                isLoading: false,
+                error: null,
+              });
+            } else {
+              set({ isLoading: false, isAuthenticated: false, user: null });
+            }
+          } else {
+            set({ isLoading: false, isAuthenticated: false, user: null });
+          }
+        } catch (error) {
+          console.error('Erreur lors de l\'initialisation de l\'authentification:', error);
+          set({
+            error: error instanceof Error ? error.message : 'Erreur lors de l\'initialisation',
+            isLoading: false,
+            isAuthenticated: false,
+            user: null,
+          });
+        }
+      },
+
+      signUp: async (email: string, password: string, name: string) => {
+        try {
+          set({ isLoading: true, error: null });
+          
+          const { data, error } = await supabase.auth.signUp({
+            email,
+            password,
+            options: {
+              data: {
+                name,
+              },
             },
-          ]);
+          });
 
-        if (profileError) throw profileError;
+          if (error) throw error;
 
-        // Récupérer l'utilisateur créé
-        const { data: userData } = await supabase
-          .from('users')
-          .select('*')
-          .eq('id', data.user.id)
-          .single();
+          if (data.user) {
+            // Créer l'utilisateur dans notre table users
+            const { error: profileError } = await supabase
+              .from('users')
+              .insert([
+                {
+                  id: data.user.id,
+                  name,
+                  email,
+                  password_hash: '', // Supabase gère le hash
+                  credits: 100, // Crédits de bienvenue
+                },
+              ]);
 
-        if (userData) {
+            if (profileError) throw profileError;
+
+            // Récupérer l'utilisateur créé
+            const { data: userData } = await supabase
+              .from('users')
+              .select('*')
+              .eq('id', data.user.id)
+              .single();
+
+            if (userData) {
+              set({
+                user: userData,
+                isAuthenticated: true,
+                isLoading: false,
+              });
+            }
+          }
+        } catch (error) {
           set({
-            user: userData,
-            isAuthenticated: true,
+            error: error instanceof Error ? error.message : 'Erreur lors de l\'inscription',
             isLoading: false,
           });
         }
-      }
-    } catch (error) {
-      set({
-        error: error instanceof Error ? error.message : 'Erreur lors de l\'inscription',
-        isLoading: false,
-      });
-    }
-  },
+      },
 
-  signIn: async (email: string, password: string) => {
-    try {
-      set({ isLoading: true, error: null });
-      
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      signIn: async (email: string, password: string) => {
+        try {
+          set({ isLoading: true, error: null });
+          
+          const { data, error } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+          });
 
-      if (error) throw error;
+          if (error) throw error;
 
-      if (data.user) {
-        // Récupérer le profil utilisateur
-        const { data: userData } = await supabase
-          .from('users')
-          .select('*')
-          .eq('id', data.user.id)
-          .single();
+          if (data.user) {
+            // Récupérer le profil utilisateur
+            const { data: userData } = await supabase
+              .from('users')
+              .select('*')
+              .eq('id', data.user.id)
+              .single();
 
-        if (userData) {
+            if (userData) {
+              set({
+                user: userData,
+                isAuthenticated: true,
+                isLoading: false,
+              });
+            }
+          }
+        } catch (error) {
           set({
-            user: userData,
-            isAuthenticated: true,
+            error: error instanceof Error ? error.message : 'Erreur lors de la connexion',
             isLoading: false,
           });
         }
-      }
-    } catch (error) {
-      set({
-        error: error instanceof Error ? error.message : 'Erreur lors de la connexion',
-        isLoading: false,
-      });
+      },
+
+      signOut: async () => {
+        try {
+          set({ isLoading: true });
+          await supabase.auth.signOut();
+          set({
+            user: null,
+            isAuthenticated: false,
+            isLoading: false,
+          });
+        } catch (error) {
+          set({
+            error: error instanceof Error ? error.message : 'Erreur lors de la déconnexion',
+            isLoading: false,
+          });
+        }
+      },
+
+      updateProfile: async (updates: Partial<User>) => {
+        try {
+          const { user } = get();
+          if (!user) throw new Error('Utilisateur non connecté');
+
+          const { error } = await supabase
+            .from('users')
+            .update(updates)
+            .eq('id', user.id);
+
+          if (error) throw error;
+
+          // Mettre à jour l'état local
+          set({
+            user: { ...user, ...updates },
+          });
+        } catch (error) {
+          set({
+            error: error instanceof Error ? error.message : 'Erreur lors de la mise à jour du profil',
+          });
+        }
+      },
+
+      updateUserLocation: async (latitude: number, longitude: number) => {
+        try {
+          const { user } = get();
+          if (!user) throw new Error('Utilisateur non connecté');
+
+          const { error } = await supabase
+            .from('users')
+            .update({ 
+              location: `${latitude},${longitude}`,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', user.id);
+
+          if (error) throw error;
+
+          // Mettre à jour l'état local
+          set({
+            user: { ...user, location: `${latitude},${longitude}` },
+          });
+        } catch (error) {
+          set({
+            error: error instanceof Error ? error.message : 'Erreur lors de la mise à jour de la localisation',
+          });
+        }
+      },
+
+      setUser: (user: User | null) => {
+        set({
+          user,
+          isAuthenticated: !!user,
+        });
+      },
+
+      setLoading: (loading: boolean) => {
+        set({ isLoading: loading });
+      },
+
+      setError: (error: string | null) => {
+        set({ error });
+      },
+    }),
+    {
+      name: 'entraide-universelle-auth', // Clé de stockage unique
+      storage: createJSONStorage(() => localStorage),
+      partialize: (state) => ({
+        user: state.user,
+        isAuthenticated: state.isAuthenticated,
+      }),
     }
-  },
-
-  signOut: async () => {
-    try {
-      set({ isLoading: true });
-      await supabase.auth.signOut();
-      set({
-        user: null,
-        isAuthenticated: false,
-        isLoading: false,
-      });
-    } catch (error) {
-      set({
-        error: error instanceof Error ? error.message : 'Erreur lors de la déconnexion',
-        isLoading: false,
-      });
-    }
-  },
-
-  updateProfile: async (updates: Partial<User>) => {
-    try {
-      const { user } = get();
-      if (!user) throw new Error('Utilisateur non connecté');
-
-      const { error } = await supabase
-        .from('users')
-        .update(updates)
-        .eq('id', user.id);
-
-      if (error) throw error;
-
-      // Mettre à jour l'état local
-      set({
-        user: { ...user, ...updates },
-      });
-    } catch (error) {
-      set({
-        error: error instanceof Error ? error.message : 'Erreur lors de la mise à jour du profil',
-      });
-    }
-  },
-
-  updateUserLocation: async (latitude: number, longitude: number) => {
-    try {
-      const { user } = get();
-      if (!user) throw new Error('Utilisateur non connecté');
-
-      const { error } = await supabase
-        .from('users')
-        .update({ 
-          location: `${latitude},${longitude}`,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', user.id);
-
-      if (error) throw error;
-
-      // Mettre à jour l'état local
-      set({
-        user: { ...user, location: `${latitude},${longitude}` },
-      });
-    } catch (error) {
-      set({
-        error: error instanceof Error ? error.message : 'Erreur lors de la mise à jour de la localisation',
-      });
-    }
-  },
-
-  setUser: (user: User | null) => {
-    set({
-      user,
-      isAuthenticated: !!user,
-    });
-  },
-
-  setLoading: (loading: boolean) => {
-    set({ isLoading: loading });
-  },
-
-  setError: (error: string | null) => {
-    set({ error });
-  },
-}));
+  )
+);

@@ -1,8 +1,7 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useAuthStore } from '@/stores/authStore';
-import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/hooks/useAuth';
 
 // Pages
 import Onboarding from '@/features/auth/Onboarding';
@@ -16,6 +15,7 @@ import ChatPage from '@/features/chat/ChatPage';
 
 // Components
 import BottomNavigation from '@/components/navigation/BottomNavigation';
+import SessionDebugger from '@/components/ui/SessionDebugger';
 
 // Loading component
 const LoadingScreen: React.FC = () => (
@@ -36,7 +36,7 @@ const LoadingScreen: React.FC = () => (
 
 // Protected route component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isAuthenticated, isLoading } = useAuthStore();
+  const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
     return <LoadingScreen />;
@@ -51,7 +51,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 
 // Public route component (redirects if already authenticated)
 const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isAuthenticated, isLoading } = useAuthStore();
+  const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
     return <LoadingScreen />;
@@ -65,65 +65,11 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 };
 
 const App: React.FC = () => {
-  const { setUser, setLoading } = useAuthStore();
-
-  useEffect(() => {
-    // Vérifier la session Supabase au démarrage
-    const checkSession = async () => {
-      try {
-        setLoading(true);
-        
-        const { data: { session } } = await supabase.auth.getSession();
-        
-        if (session?.user) {
-          // Récupérer le profil utilisateur
-          const { data: userData } = await supabase
-            .from('users')
-            .select('*')
-            .eq('id', session.user.id)
-            .single();
-
-          if (userData) {
-            setUser(userData);
-          }
-        }
-      } catch (error) {
-        console.error('Erreur lors de la vérification de la session:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    checkSession();
-
-    // Écouter les changements d'authentification
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (event === 'SIGNED_IN' && session?.user) {
-          try {
-            const { data: userData } = await supabase
-              .from('users')
-              .select('*')
-              .eq('id', session.user.id)
-              .single();
-
-            if (userData) {
-              setUser(userData);
-            }
-          } catch (error) {
-            console.error('Erreur lors de la récupération du profil:', error);
-          }
-        } else if (event === 'SIGNED_OUT') {
-          setUser(null);
-        }
-      }
-    );
-
-    return () => subscription.unsubscribe();
-  }, [setUser, setLoading]);
+  // Utiliser le hook useAuth pour la gestion automatique de l'authentification
+  useAuth();
 
   return (
-    <Router>
+    <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <div className="App">
         <AnimatePresence mode="wait">
           <Routes>
@@ -211,6 +157,9 @@ const App: React.FC = () => {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </AnimatePresence>
+
+        {/* Composant de débogage (développement uniquement) */}
+        <SessionDebugger />
       </div>
     </Router>
   );
