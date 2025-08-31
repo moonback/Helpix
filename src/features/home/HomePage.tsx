@@ -10,6 +10,7 @@ import Input from '@/components/ui/Input';
 import ProximityIndicator from '@/components/ui/ProximityIndicator';
 import LocationPermissionBanner from '@/components/ui/LocationPermissionBanner';
 import AddressDisplay from '@/components/ui/AddressDisplay';
+import DetailedAddressDisplay from '@/components/ui/DetailedAddressDisplay';
 import LocationDisplay from '@/components/ui/LocationDisplay';
 import { calculateDistance, formatDistance } from '@/lib/utils';
 import { 
@@ -150,10 +151,11 @@ const HomePage: React.FC = () => {
               <div className="flex items-center gap-2 text-sm bg-green-50 px-3 py-1 rounded-full">
                 <Navigation className="w-4 h-4 text-green-600" />
                 <span className="text-green-600">Localisé •</span>
-                <AddressDisplay
+                <DetailedAddressDisplay
                   address={address}
                   isLoading={!address}
                   error={null}
+                  showIcon={false}
                   className="text-green-600"
                 />
               </div>

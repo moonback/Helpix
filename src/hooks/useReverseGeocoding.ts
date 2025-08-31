@@ -43,33 +43,48 @@ export const useReverseGeocoding = (): UseReverseGeocodingReturn => {
         throw new Error(data.error);
       }
 
-      // Construire une adresse lisible
+      // Construire une adresse lisible et complète
       let address = '';
+      let streetAddress = '';
+      let cityInfo = '';
       
       if (data.address) {
         const addr = data.address;
         
-        // Construire l'adresse de manière logique
+        // Construire l'adresse de rue
         if (addr.house_number && addr.road) {
-          address += `${addr.house_number} ${addr.road}`;
+          streetAddress = `${addr.house_number} ${addr.road}`;
         } else if (addr.road) {
-          address += addr.road;
+          streetAddress = addr.road;
         }
         
+        // Construire les informations de ville
         if (addr.postcode && addr.city) {
-          address += address ? `, ${addr.postcode} ${addr.city}` : `${addr.postcode} ${addr.city}`;
+          cityInfo = `${addr.postcode} ${addr.city}`;
         } else if (addr.city) {
-          address += address ? `, ${addr.city}` : addr.city;
+          cityInfo = addr.city;
         }
         
-        if (addr.country && address) {
+        // Assembler l'adresse complète
+        if (streetAddress && cityInfo) {
+          address = `${streetAddress}, ${cityInfo}`;
+        } else if (streetAddress) {
+          address = streetAddress;
+        } else if (cityInfo) {
+          address = cityInfo;
+        }
+        
+        // Ajouter le pays si différent de la France
+        if (addr.country && addr.country !== 'France' && address) {
           address += `, ${addr.country}`;
         }
       }
 
       // Si pas d'adresse détaillée, utiliser le nom d'affichage
       if (!address && data.display_name) {
-        address = data.display_name.split(',').slice(0, 3).join(',');
+        const parts = data.display_name.split(',');
+        // Prendre les 3 premières parties pour éviter une adresse trop longue
+        address = parts.slice(0, 3).join(',').trim();
       }
 
       setState({
