@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import { useAuthStore } from '@/stores/authStore';
 
 const Auth: React.FC = () => {
-  const [isLogin, setIsLogin] = useState(true);
+  const location = useLocation();
+  const [isLogin, setIsLogin] = useState(location.pathname === '/login');
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -17,6 +18,11 @@ const Auth: React.FC = () => {
 
   const navigate = useNavigate();
   const { signIn, signUp, isLoading, error } = useAuthStore();
+
+  // Mettre à jour l'état basé sur l'URL
+  useEffect(() => {
+    setIsLogin(location.pathname === '/login');
+  }, [location.pathname]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,7 +35,7 @@ const Auth: React.FC = () => {
       }
       
       // Redirection après authentification réussie
-      navigate('/');
+      navigate('/home');
     } catch (error) {
       // L'erreur est gérée par le store
     }
@@ -140,7 +146,13 @@ const Auth: React.FC = () => {
           <div className="text-center">
             <button
               type="button"
-              onClick={() => setIsLogin(!isLogin)}
+              onClick={() => {
+                if (isLogin) {
+                  navigate('/register');
+                } else {
+                  navigate('/login');
+                }
+              }}
               className="text-primary-600 hover:text-primary-700 text-sm font-medium transition-colors"
             >
               {isLogin 

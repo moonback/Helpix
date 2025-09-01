@@ -5,6 +5,7 @@ import { useRealtimeMessages } from '@/hooks/useRealtimeMessages';
 import BottomNavigation from '@/components/navigation/BottomNavigation';
 
 // Lazy loading des pages
+const LandingPage = React.lazy(() => import('@/features/landing/LandingPage'));
 const HomePage = React.lazy(() => import('@/features/home/HomePage'));
 const MapPage = React.lazy(() => import('@/features/map/MapPage'));
 const AddTaskPage = React.lazy(() => import('@/features/add/AddTaskPage'));
@@ -34,7 +35,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/auth" replace />;
+    return <Navigate to="/landing" replace />;
   }
 
   return <>{children}</>;
@@ -48,7 +49,7 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   }
 
   if (isAuthenticated) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/home" replace />;
   }
 
   return <>{children}</>;
@@ -65,7 +66,29 @@ const App: React.FC = () => {
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <Suspense fallback={<LoadingScreen />}>
           <Routes>
+            {/* Landing page pour les non-connectés */}
+            <Route path="/" element={
+              <PublicRoute>
+                <LandingPage />
+              </PublicRoute>
+            } />
+            <Route path="/landing" element={
+              <PublicRoute>
+                <LandingPage />
+              </PublicRoute>
+            } />
+            
             {/* Routes publiques */}
+            <Route path="/login" element={
+              <PublicRoute>
+                <Auth />
+              </PublicRoute>
+            } />
+            <Route path="/register" element={
+              <PublicRoute>
+                <Auth />
+              </PublicRoute>
+            } />
             <Route path="/auth" element={
               <PublicRoute>
                 <Auth />
@@ -78,7 +101,7 @@ const App: React.FC = () => {
             } />
 
             {/* Routes protégées */}
-            <Route path="/" element={
+            <Route path="/home" element={
               <ProtectedRoute>
                 <div className="pb-16">
                   <HomePage />
