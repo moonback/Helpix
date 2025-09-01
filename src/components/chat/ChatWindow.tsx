@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { useMessageStore } from '@/stores/messageStore';
 import { useAuthStore } from '@/stores/authStore';
 import { Conversation, Message } from '@/types';
@@ -79,8 +80,9 @@ const customStyles = `
 
   .message-bubble {
     position: relative;
-    overflow: hidden;
+    overflow: visible;
     transition: all 0.3s ease;
+    z-index: 40;
   }
 
   .message-bubble:hover {
@@ -205,6 +207,18 @@ const customStyles = `
   }
 `;
 
+// Modal générique pour les menus (portal vers body)
+const MenuModal: React.FC<{ onClose: () => void; children: React.ReactNode }> = ({ onClose, children }) => {
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={onClose}>
+      <div className="message-modal-content w-full sm:max-w-xs bg-white dark:bg-slate-800 rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
+        {children}
+      </div>
+    </div>,
+    document.body
+  );
+};
+
 const ChatWindow: React.FC<ChatWindowProps> = ({
   conversation,
   onBack
@@ -256,7 +270,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
-      if (!target.closest('.message-menu') && !target.closest('.menu-trigger')) {
+      if (!target.closest('.message-modal-content') && !target.closest('.menu-trigger')) {
         setShowMessageMenu(null);
       }
       if (!target.closest('.emoji-picker') && !target.closest('.emoji-trigger')) {
@@ -267,6 +281,16 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
   }, []);
+
+  // Lock scroll quand le modal est ouvert
+  useEffect(() => {
+    if (showMessageMenu) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [showMessageMenu]);
 
   // Marquer les messages comme lus
   useEffect(() => {
@@ -448,8 +472,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   };
 
   // Filtrage des messages pour la recherche
-  const filteredMessages = searchQuery 
-    ? messages.filter(message => 
+  const filteredMessages: Message[] = searchQuery 
+    ? messages.filter((message: Message) => 
         message.content.toLowerCase().includes(searchQuery.toLowerCase())
       )
     : messages;
@@ -482,7 +506,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   return (
     <>
       <style>{customStyles}</style>
-      <div className="h-full w-full flex flex-col bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 overflow-hidden">
+      <div className="relative h-full w-full flex flex-col bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 overflow-visible">
         
         {/* Header amélioré */}
         <div className="glass-effect border-b border-white/20 dark:border-slate-700/50">
@@ -611,16 +635,16 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
       {/* Messages */}
         <div 
           ref={messagesContainerRef}
-          className="flex-1 overflow-hidden p-4 md:p-6 space-y-5 md:space-y-6 bg-gradient-to-b from-transparent to-gray-50/30 dark:to-slate-800/30 h-full"
+          className="relative flex-1 overflow-visible p-4 md:p-6 space-y-5 md:space-y-6 bg-gradient-to-b from-transparent to-gray-50/30 dark:to-slate-800/30 h-full"
         >
-          {isLoading ? (
-            <div className="flex items-center justify-center h-32">
+        {isLoading ? (
+          <div className="flex items-center justify-center h-32">
               <div className="animate-spin rounded-full h-8 w-8 border-4 border-blue-500 border-t-transparent"></div>
-            </div>
-          ) : error ? (
+          </div>
+        ) : error ? (
             <div className="text-center text-red-500 bg-red-50 dark:bg-red-900/20 p-4 rounded-xl">
-              <p>Erreur: {error}</p>
-            </div>
+            <p>Erreur: {error}</p>
+          </div>
           ) : filteredMessages.length === 0 ? (
             <div className="h-full flex items-center justify-center">
               <div className="text-center space-y-6 max-w-md mx-auto px-6">
@@ -641,14 +665,14 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                   </p>
                 </div>
               </div>
-            </div>
-          ) : (
-            filteredMessages.slice(-8).map((message, index) => {
-              const isOwnMessage = message.sender_id === user?.id;
+          </div>
+        ) : (
+            filteredMessages.slice(-8).map((message: Message, index: number) => {
+            const isOwnMessage = message.sender_id === user?.id;
               const showAvatar = index === 0 || filteredMessages[index - 1]?.sender_id !== message.sender_id;
-              return (
-                <div
-                  key={message.id}
+            return (
+              <div
+                key={message.id}
                   className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'} animate-fadeInUp`}
                   style={{ animationDelay: `${index * 0.05}s` }}
                 >
@@ -696,7 +720,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                     ) : (
                       /* Message normal */
                       <div
-                        className={`message-bubble px-4 py-3 rounded-2xl shadow-lg ${
+                        className={`message-bubble group px-4 py-3 rounded-2xl shadow-lg ${
                     isOwnMessage
                             ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white'
                             : 'bg-white dark:bg-slate-700 text-gray-900 dark:text-white border border-gray-100 dark:border-slate-600'
@@ -779,30 +803,40 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                                     variant="ghost"
                                     size="sm"
                                     onClick={() => toggleMessageMenu(message.id)}
-                                    className="p-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-blue-400/30 text-blue-100"
+                                    className="p-1 rounded-lg md:opacity-0 opacity-100 group-hover:opacity-100 focus:opacity-100 active:opacity-100 transition-opacity hover:bg-blue-400/30 text-blue-100"
                                     title="Plus d'options"
                                   >
                                     <MoreVertical className="h-3 w-3" />
                                   </Button>
                                   
-                                  {/* Menu contextuel */}
+                                  {/* Menu en modal (portal) */}
                                   {showMessageMenu === message.id && (
-                                    <div className="message-menu absolute top-8 right-0 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-xl shadow-2xl py-2 z-20 min-w-[140px] animate-fadeInUp">
-                                      <button
-                                        onClick={() => handleCopyMessage(message.content)}
-                                        className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 flex items-center space-x-2 transition-colors"
-                                      >
-                                        <Copy className="h-4 w-4" />
-                                        <span>Copier</span>
-                                      </button>
-                                      <button
-                                        onClick={() => handleDeleteMessage(message.id)}
-                                        className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center space-x-2 transition-colors"
-                                      >
-                                        <Trash2 className="h-4 w-4" />
-                                        <span>Supprimer</span>
-                                      </button>
-                                    </div>
+                                    <MenuModal onClose={() => setShowMessageMenu(null)}>
+                                      <div className="py-2 animate-fadeInUp">
+                                        <button
+                                          onClick={() => handleCopyMessage(message.content)}
+                                          className="w-full px-4 py-3 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 flex items-center space-x-2 transition-colors"
+                                        >
+                                          <Copy className="h-4 w-4" />
+                                          <span>Copier</span>
+                                        </button>
+                                        <button
+                                          onClick={() => handleDeleteMessage(message.id)}
+                                          className="w-full px-4 py-3 text-left text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center space-x-2 transition-colors"
+                                        >
+                                          <Trash2 className="h-4 w-4" />
+                                          <span>Supprimer</span>
+                                        </button>
+                                      </div>
+                                      <div className="border-t border-gray-200 dark:border-slate-600">
+                                        <button
+                                          onClick={() => setShowMessageMenu(null)}
+                                          className="w-full px-4 py-3 text-center text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+                                        >
+                                          Annuler
+                                        </button>
+                                      </div>
+                                    </MenuModal>
                                   )}
                                 </div>
                               </>
@@ -942,31 +976,31 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
               </div>
               
               {/* Champ de saisie */}
-              <div className="flex-1">
-                <Input
-                  value={newMessage}
+          <div className="flex-1">
+            <Input
+              value={newMessage}
                   onChange={(e) => handleInputChange(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  placeholder="Tapez votre message..."
-                  multiline
-                  rows={1}
+              onKeyPress={handleKeyPress}
+              placeholder="Tapez votre message..."
+              multiline
+              rows={1}
                   className="min-h-[40px] max-h-32 bg-gray-50 dark:bg-slate-800 border-gray-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
-                />
-              </div>
-              
+            />
+          </div>
+          
               {/* Bouton d'envoi */}
-              <Button
-                onClick={handleSendMessage}
-                disabled={!newMessage.trim() && attachments.length === 0}
-                size="sm"
+          <Button
+            onClick={handleSendMessage}
+            disabled={!newMessage.trim() && attachments.length === 0}
+            size="sm"
                 className={`px-4 py-2 rounded-xl transition-all transform hover:scale-105 ${
                   newMessage.trim() || attachments.length > 0
                     ? 'bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white shadow-lg hover:shadow-xl'
                     : 'bg-gray-200 dark:bg-slate-700 text-gray-400 cursor-not-allowed'
                 }`}
-              >
-                <Send className="h-4 w-4" />
-              </Button>
+          >
+            <Send className="h-4 w-4" />
+          </Button>
             </div>
           </div>
         </div>

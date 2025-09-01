@@ -10,7 +10,6 @@ import {
   CheckSquare, 
   Square, 
   Search,
-  Plus,
   MessageSquare,
   Users,
   Pin,
@@ -28,7 +27,6 @@ import {
 
 interface ConversationListProps {
   onConversationSelect: (conversation: any) => void;
-  onCreateNewChat?: () => void;
   isMultiSelectMode?: boolean;
   selectedConversations?: Set<string>;
   onSelectConversation?: (conversationId: string) => void;
@@ -43,7 +41,6 @@ type FilterOption = 'all' | 'unread' | 'favorites' | 'archived';
 
 const ConversationList: React.FC<ConversationListProps> = ({ 
   onConversationSelect,
-  onCreateNewChat,
   isMultiSelectMode = false,
   selectedConversations = new Set(),
   onSelectConversation,
@@ -122,7 +119,7 @@ const ConversationList: React.FC<ConversationListProps> = ({
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
-      if (!target.closest('.context-menu-trigger')) {
+      if (!target.closest('.conv-modal-content') && !target.closest('.context-menu-trigger')) {
         setShowContextMenu(null);
       }
     };
@@ -130,6 +127,16 @@ const ConversationList: React.FC<ConversationListProps> = ({
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
   }, []);
+
+  // Forcer le body à n’avoir aucun scroll pendant l’ouverture du modal pour éviter un décalage et bloquer le fond.
+  useEffect(() => {
+    if (showContextMenu) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [showContextMenu]);
 
   // Filtrage et tri des conversations
   const filteredAndSortedConversations = useMemo(() => {
@@ -495,15 +502,6 @@ const ConversationList: React.FC<ConversationListProps> = ({
                 <Filter className="w-5 h-5" />
               </Button>
               
-              {onCreateNewChat && (
-                <Button
-                  onClick={onCreateNewChat}
-                  className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-xl px-4 py-2 shadow-lg hover:shadow-xl transition-all"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Nouveau
-                </Button>
-              )}
             </div>
           </div>
           
@@ -635,7 +633,8 @@ const ConversationList: React.FC<ConversationListProps> = ({
                       ? 'bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-700' 
                       : 'bg-white/30 dark:bg-slate-800/30 border border-white/20 dark:border-slate-700/30'
                   }`}
-                  style={{ animationDelay: `${index * 0.05}s` }}
+                  style={showContextMenu === conversation.id ? { transform: 'none' } : undefined}
+                  
                   onClick={() => {
                     if (isMultiSelectMode) {
                       onSelectConversation?.(conversation.id);
@@ -718,7 +717,7 @@ const ConversationList: React.FC<ConversationListProps> = ({
                           {conversation.isMuted && (
                             <VolumeX className="w-4 h-4 text-gray-400" />
                           )}
-                          {!isMultiSelectMode && hoveredConversation === conversation.id && (
+                          {!isMultiSelectMode && (
                             <div className="context-menu-trigger relative">
                               <Button
                                 variant="ghost"
@@ -733,77 +732,90 @@ const ConversationList: React.FC<ConversationListProps> = ({
                               >
                                 <MoreVertical className="w-4 h-4" />
                               </Button>
-                              
-                              {/* Menu contextuel */}
+
+                              {/* Menu en modal */}
                               {showContextMenu === conversation.id && (
-                                <div className="context-menu absolute right-0 top-8 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-xl shadow-2xl py-2 z-20 min-w-[180px]">
-                                  {conversation.unreadCount > 0 && (
-                                    <button
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleContextMenuAction('markAsRead', conversation.id);
-                                      }}
-                                      className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 flex items-center space-x-2 transition-colors"
-                                    >
-                                      <Eye className="w-4 h-4" />
-                                      <span>Marquer comme lu</span>
-                                    </button>
-                                  )}
-                                  
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleContextMenuAction('favorite', conversation.id);
-                                    }}
-                                    className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 flex items-center space-x-2 transition-colors"
-                                  >
-                                    <Star className={`w-4 h-4 ${conversation.isFavorite ? 'text-yellow-500 fill-current' : ''}`} />
-                                    <span>{conversation.isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}</span>
-                                  </button>
-                                  
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleContextMenuAction('mute', conversation.id);
-                                    }}
-                                    className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 flex items-center space-x-2 transition-colors"
-                                  >
-                                    {conversation.isMuted ? (
-                                      <>
-                                        <Volume2 className="w-4 h-4" />
-                                        <span>Réactiver les notifications</span>
-                                      </>
-                                    ) : (
-                                      <>
-                                        <VolumeX className="w-4 h-4" />
-                                        <span>Désactiver les notifications</span>
-                                      </>
-                                    )}
-                                  </button>
-                                  
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleContextMenuAction('archive', conversation.id);
-                                    }}
-                                    className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 flex items-center space-x-2 transition-colors"
-                                  >
-                                    <Archive className="w-4 h-4" />
-                                    <span>{conversation.isArchived ? 'Désarchiver' : 'Archiver'}</span>
-                                  </button>
-                                  
-                                  <hr className="my-1 border-gray-200 dark:border-slate-600" />
-                                  
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleContextMenuAction('delete', conversation.id);
-                                    }}
-                                    className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center space-x-2 transition-colors"
-                                  >
-                                    <Trash2 className="w-4 h-4" />
-                                    <span>Supprimer</span>
-                                  </button>
+                                <div className="fixed inset-0 z-[9999] bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+                                  <div className="conv-modal-content w-full sm:max-w-xs bg-white dark:bg-slate-800 rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden">
+                                    <div className="py-2">
+                                      {conversation.unreadCount > 0 && (
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleContextMenuAction('markAsRead', conversation.id);
+                                          }}
+                                          className="w-full px-4 py-3 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 flex items-center space-x-2 transition-colors"
+                                        >
+                                          <Eye className="w-4 h-4" />
+                                          <span>Marquer comme lu</span>
+                                        </button>
+                                      )}
+
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleContextMenuAction('favorite', conversation.id);
+                                        }}
+                                        className="w-full px-4 py-3 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 flex items-center space-x-2 transition-colors"
+                                      >
+                                        <Star className={`w-4 h-4 ${conversation.isFavorite ? 'text-yellow-500 fill-current' : ''}`} />
+                                        <span>{conversation.isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}</span>
+                                      </button>
+
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleContextMenuAction('mute', conversation.id);
+                                        }}
+                                        className="w-full px-4 py-3 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 flex items-center space-x-2 transition-colors"
+                                      >
+                                        {conversation.isMuted ? (
+                                          <>
+                                            <Volume2 className="w-4 h-4" />
+                                            <span>Réactiver les notifications</span>
+                                          </>
+                                        ) : (
+                                          <>
+                                            <VolumeX className="w-4 h-4" />
+                                            <span>Désactiver les notifications</span>
+                                          </>
+                                        )}
+                                      </button>
+
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleContextMenuAction('archive', conversation.id);
+                                        }}
+                                        className="w-full px-4 py-3 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 flex items-center space-x-2 transition-colors"
+                                      >
+                                        <Archive className="w-4 h-4" />
+                                        <span>{conversation.isArchived ? 'Désarchiver' : 'Archiver'}</span>
+                                      </button>
+
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleContextMenuAction('delete', conversation.id);
+                                        }}
+                                        className="w-full px-4 py-3 text-left text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center space-x-2 transition-colors"
+                                      >
+                                        <Trash2 className="w-4 h-4" />
+                                        <span>Supprimer</span>
+                                      </button>
+                                    </div>
+                                    <div className="border-t border-gray-200 dark:border-slate-600">
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setShowContextMenu(null);
+                                        }}
+                                        className="w-full px-4 py-3 text-center text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+                                      >
+                                        Annuler
+                                      </button>
+                                    </div>
+                                  </div>
                                 </div>
                               )}
                             </div>
@@ -830,20 +842,12 @@ const ConversationList: React.FC<ConversationListProps> = ({
                   <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
                     {searchTerm 
                       ? `Aucune conversation ne correspond à "${searchTerm}"`
-                      : 'Commencez une nouvelle conversation pour échanger avec d\'autres utilisateurs'
+                      : 'Les nouvelles conversations se créent depuis les tâches'
                     }
                   </p>
                 </div>
                 
-                {!searchTerm && onCreateNewChat && (
-                  <Button
-                    onClick={onCreateNewChat}
-                    className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
-                  >
-                    <Plus className="w-5 h-5 mr-2" />
-                    Créer une nouvelle conversation
-                  </Button>
-                )}
+                {/* CTA création retiré */}
                 
                 {searchTerm && (
                   <Button
