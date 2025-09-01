@@ -456,11 +456,28 @@ const DashboardPage: React.FC = () => {
               {/* Liste des tâches */}
               <div className="space-y-4">
                 {searchResults.map((task) => (
-                  <Card key={task.id} className="p-6 hover:shadow-lg transition-shadow">
+                  <Card 
+                    key={task.id} 
+                    className={`p-6 hover:shadow-lg transition-shadow ${
+                      task.status === 'completed' 
+                        ? 'bg-gray-50 border-gray-200 opacity-75' 
+                        : 'bg-white'
+                    }`}
+                  >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center space-x-3 mb-3">
-                          <h3 className="text-lg font-semibold text-gray-900">{task.title}</h3>
+                          {task.status === 'completed' && (
+                            <div className="flex items-center space-x-1 text-green-600">
+                              <CheckCircle className="w-5 h-5" />
+                              <span className="text-sm font-medium">Terminée</span>
+                            </div>
+                          )}
+                          <h3 className={`text-lg font-semibold ${
+                            task.status === 'completed' ? 'text-gray-500' : 'text-gray-900'
+                          }`}>
+                            {task.title}
+                          </h3>
                           <span className={`px-2 py-1 rounded-full text-xs font-medium border ${statusColors[task.status]}`}>
                             {getStatusIcon(task.status)} {task.status}
                           </span>
@@ -472,22 +489,34 @@ const DashboardPage: React.FC = () => {
                           </span>
                         </div>
                         
-                        <p className="text-gray-600 mb-4">{task.description}</p>
+                        <p className={`mb-4 ${
+                          task.status === 'completed' ? 'text-gray-400' : 'text-gray-600'
+                        }`}>
+                          {task.description}
+                        </p>
                         
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                          <div className="flex items-center space-x-2 text-sm text-gray-600">
+                          <div className={`flex items-center space-x-2 text-sm ${
+                            task.status === 'completed' ? 'text-gray-400' : 'text-gray-600'
+                          }`}>
                             <Clock className="w-4 h-4" />
                             <span>{task.estimated_duration}h</span>
                           </div>
-                          <div className="flex items-center space-x-2 text-sm text-gray-600">
+                          <div className={`flex items-center space-x-2 text-sm ${
+                            task.status === 'completed' ? 'text-gray-400' : 'text-gray-600'
+                          }`}>
                             <Target className="w-4 h-4" />
                             <span>{task.progress_percentage}%</span>
                           </div>
-                          <div className="flex items-center space-x-2 text-sm text-gray-600">
+                          <div className={`flex items-center space-x-2 text-sm ${
+                            task.status === 'completed' ? 'text-gray-400' : 'text-gray-600'
+                          }`}>
                             <Calendar className="w-4 h-4" />
                             <span>{task.deadline ? new Date(task.deadline).toLocaleDateString() : 'Aucune'}</span>
                           </div>
-                          <div className="flex items-center space-x-2 text-sm text-gray-600">
+                          <div className={`flex items-center space-x-2 text-sm ${
+                            task.status === 'completed' ? 'text-gray-400' : 'text-gray-600'
+                          }`}>
                             <Users className="w-4 h-4" />
                             <span>{task.assigned_to ? 'Assignée' : 'Non assignée'}</span>
                           </div>
@@ -496,17 +525,33 @@ const DashboardPage: React.FC = () => {
                         {/* Barre de progression */}
                         <div className="mb-4">
                           <div className="flex items-center justify-between mb-2">
-                            <span className="text-sm font-medium text-gray-700">Progression</span>
-                            <span className="text-sm text-gray-600">{task.progress_percentage}%</span>
+                            <span className={`text-sm font-medium ${
+                              task.status === 'completed' ? 'text-gray-400' : 'text-gray-700'
+                            }`}>
+                              Progression
+                            </span>
+                            <span className={`text-sm ${
+                              task.status === 'completed' ? 'text-gray-400' : 'text-gray-600'
+                            }`}>
+                              {task.progress_percentage}%
+                            </span>
                           </div>
-                          <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div className={`w-full rounded-full h-2 ${
+                            task.status === 'completed' ? 'bg-gray-300' : 'bg-gray-200'
+                          }`}>
                             <div 
-                              className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                              className={`h-2 rounded-full transition-all duration-300 ${
+                                task.status === 'completed' ? 'bg-gray-400' : 'bg-blue-600'
+                              }`}
                               style={{ width: `${task.progress_percentage}%` }}
                             ></div>
                           </div>
                           {task.current_step && (
-                            <p className="text-sm text-gray-600 mt-1">Étape actuelle: {task.current_step}</p>
+                            <p className={`text-sm mt-1 ${
+                              task.status === 'completed' ? 'text-gray-400' : 'text-gray-600'
+                            }`}>
+                              Étape actuelle: {task.current_step}
+                            </p>
                           )}
                         </div>
 
@@ -516,7 +561,12 @@ const DashboardPage: React.FC = () => {
                             variant="outline"
                             size="sm"
                             onClick={() => navigate(`/edit-task/${task.id}`)}
-                            className="flex items-center space-x-2"
+                            className={`flex items-center space-x-2 ${
+                              task.status === 'completed' 
+                                ? 'opacity-50 cursor-not-allowed' 
+                                : ''
+                            }`}
+                            disabled={task.status === 'completed'}
                           >
                             <Edit className="w-4 h-4" />
                             <span>Modifier</span>
@@ -550,7 +600,11 @@ const DashboardPage: React.FC = () => {
                             variant="ghost"
                             size="sm"
                             onClick={() => navigate('/chat')}
-                            className="flex items-center space-x-2"
+                            className={`flex items-center space-x-2 ${
+                              task.status === 'completed' 
+                                ? 'opacity-50' 
+                                : ''
+                            }`}
                           >
                             <MessageSquare className="w-4 h-4" />
                             <span>Discuter</span>
