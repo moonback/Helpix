@@ -17,12 +17,12 @@ import FilterModal from '@/components/ui/FilterModal';
 import FilterButton from '@/components/ui/FilterButton';
 import FilterBadge from '@/components/ui/FilterBadge';
 import HelpOfferModal from '@/components/ui/HelpOfferModal';
+import CreditsDisplay from '@/components/ui/CreditsDisplay';
 import { calculateDistance, formatDistance } from '@/lib/utils';
 import { 
   Search, 
   Clock, 
-  DollarSign, 
-  Coins, 
+    DollarSign, 
   Target,
 
   Heart,
@@ -356,15 +356,7 @@ const HomePage: React.FC = () => {
               {/* Localisation, crédits et boutons à droite */}
               <div className="flex items-center gap-3 flex-shrink-0">
                 {/* Affichage des crédits */}
-                <button
-                  onClick={() => navigate('/wallet')}
-                  className="flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-white px-3 py-1.5 rounded-full shadow-sm transition-all duration-200 hover:shadow-md"
-                >
-                  <Coins className="w-4 h-4" />
-                  <span className="text-sm font-semibold">
-                    {wallet?.balance || 0} crédits
-                  </span>
-                </button>
+                <CreditsDisplay />
 
                 {/* Status de localisation */}
                 <div className="flex items-center">
