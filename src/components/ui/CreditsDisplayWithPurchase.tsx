@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useWalletStore } from '@/features/wallet/stores/walletStore';
-import CreditsDisplay from './CreditsDisplay';
 import CreditPurchaseModal from './CreditPurchaseModal';
 import { creditsToEuros, formatEuros } from '@/lib/creditPricing';
 import { Plus, ShoppingCart, AlertTriangle, Coins } from 'lucide-react';
