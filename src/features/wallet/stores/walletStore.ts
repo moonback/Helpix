@@ -120,10 +120,22 @@ export const useWalletStore = create<WalletStore>((set, get) => ({
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Utilisateur non connecté');
 
+      // Récupérer le wallet de l'utilisateur d'abord
+      const { data: wallet } = await supabase
+        .from('wallets')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+
+      if (!wallet) {
+        set({ transactions: [] });
+        return;
+      }
+
       const { data, error } = await supabase
         .from('transactions')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('wallet_id', wallet.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -230,7 +242,7 @@ export const useWalletStore = create<WalletStore>((set, get) => ({
       const { data: recentTransactions } = await supabase
         .from('transactions')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('wallet_id', walletData.id)
         .order('created_at', { ascending: false })
         .limit(10);
 
@@ -242,7 +254,7 @@ export const useWalletStore = create<WalletStore>((set, get) => ({
       const { data: monthlyEarnings } = await supabase
         .from('transactions')
         .select('amount')
-        .eq('user_id', user.id)
+        .eq('wallet_id', walletData.id)
         .eq('type', 'credit')
         .gte('created_at', startOfMonth.toISOString());
 
@@ -284,11 +296,20 @@ export const useWalletStore = create<WalletStore>((set, get) => ({
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Utilisateur non connecté');
 
+      // Récupérer le wallet de l'utilisateur
+      const { data: userWallet } = await supabase
+        .from('wallets')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+
+      if (!userWallet) throw new Error('Wallet non trouvé');
+
       const { data, error } = await supabase
         .from('transactions')
         .insert({
           ...transactionData,
-          user_id: user.id
+          wallet_id: userWallet.id
         })
         .select()
         .single();
