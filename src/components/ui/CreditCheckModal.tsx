@@ -6,7 +6,6 @@ import Button from './Button';
 import Card from './Card';
 import { 
   AlertTriangle, 
-  CreditCard, 
   CheckCircle, 
   X,
   Info
@@ -34,14 +33,14 @@ const CreditCheckModal: React.FC<CreditCheckModalProps> = ({
   const hasEnoughCredits = currentBalance >= requiredCredits;
   const missingCredits = Math.max(0, requiredCredits - currentBalance);
 
-  const handlePurchaseSuccess = () => {
-    onPurchaseSuccess?.();
-    // Vérifier si on a maintenant assez de crédits
-    const newBalance = useWalletStore.getState().wallet?.balance || 0;
-    if (newBalance >= requiredCredits) {
-      onCreditsSufficient();
-    }
-  };
+  // const handlePurchaseSuccess = () => {
+  //   onPurchaseSuccess?.();
+  //   // Vérifier si on a maintenant assez de crédits
+  //   const newBalance = useWalletStore.getState().wallet?.balance || 0;
+  //   if (newBalance >= requiredCredits) {
+  //     onCreditsSufficient();
+  //   }
+  // };
 
   if (!isOpen) return null;
 

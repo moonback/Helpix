@@ -11,7 +11,6 @@ import {
   Zap, 
   Crown,
   TrendingUp,
-  Check,
   Plus
 } from 'lucide-react';
 
@@ -31,7 +30,7 @@ interface CreditPackage {
 const CreditPackages: React.FC = () => {
   const { wallet } = useWalletStore();
   const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
-  const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
+  // const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
 
   const creditPackages: CreditPackage[] = CREDIT_PACKAGES.map(pkg => {
     const stats = calculatePackageStats(pkg);
@@ -55,12 +54,12 @@ const CreditPackages: React.FC = () => {
   };
 
   const getPricePerCredit = (packageData: CreditPackage) => {
-    const stats = calculatePackageStats(packageData);
+    const stats = calculatePackageStats(packageData as any);
     return formatEuros(stats.pricePerCredit, 3);
   };
 
   const handlePackageSelect = (packageId: string) => {
-    setSelectedPackage(packageId);
+    // setSelectedPackage(packageId);
     setIsPurchaseModalOpen(true);
   };
 

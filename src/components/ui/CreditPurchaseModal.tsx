@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useWalletStore } from '@/features/wallet/stores/walletStore';
 import Button from './Button';
 import Card from './Card';
-import { CREDIT_PACKAGES, calculatePackageStats, formatEuros, creditsToEuros } from '@/lib/creditPricing';
+import { CREDIT_PACKAGES, calculatePackageStats, formatEuros } from '@/lib/creditPricing';
 import { 
   X, 
   CreditCard, 
@@ -13,8 +13,7 @@ import {
   Zap,
   Crown,
   ShoppingCart,
-  DollarSign,
-  TrendingUp
+  DollarSign
 } from 'lucide-react';
 
 interface CreditPackage {
@@ -79,15 +78,9 @@ const CreditPurchaseModal: React.FC<CreditPurchaseModalProps> = ({
         reference_type: 'task_completion', // Utiliser une valeur valide
         reference_id: packageData.id,
         status: 'completed',
-        metadata: {
-          package_name: packageData.name,
-          package_id: packageData.id,
-          credits: packageData.credits,
-          bonus: packageData.bonus,
-          price: packageData.price,
-          payment_method: paymentMethod,
-          transaction_type: 'credit_purchase' // Stocker le vrai type dans metadata
-        }
+                      metadata: {
+                payment_method: paymentMethod
+              }
       });
 
       onSuccess?.();
@@ -109,7 +102,7 @@ const CreditPurchaseModal: React.FC<CreditPurchaseModalProps> = ({
   };
 
   const getPricePerCredit = (packageData: CreditPackage) => {
-    const stats = calculatePackageStats(packageData);
+    const stats = calculatePackageStats(packageData as any);
     return formatEuros(stats.pricePerCredit, 3);
   };
 
@@ -243,7 +236,7 @@ const CreditPurchaseModal: React.FC<CreditPurchaseModalProps> = ({
                              {getPricePerCredit(pkg)}/crédit
                            </div>
                            {(() => {
-                             const stats = calculatePackageStats(pkg);
+                             const stats = calculatePackageStats(pkg as any);
                              return stats.savings > 0 && (
                                <div className="text-xs text-green-600 font-medium">
                                  Économie: {formatEuros(stats.actualSavings)} ({stats.savings.toFixed(0)}%)
@@ -326,7 +319,7 @@ const CreditPurchaseModal: React.FC<CreditPurchaseModalProps> = ({
                        {(() => {
                          const pkg = creditPackages.find(pkg => pkg.id === selectedPackage);
                          if (pkg) {
-                           const stats = calculatePackageStats(pkg);
+                           const stats = calculatePackageStats(pkg as any);
                            return stats.savings > 0 && (
                              <div className="text-xs text-green-600 font-medium">
                                Économie: {formatEuros(stats.actualSavings)}

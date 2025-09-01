@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useWalletStore } from '@/features/wallet/stores/walletStore';
 import CreditPurchaseModal from './CreditPurchaseModal';
 import { creditsToEuros, formatEuros } from '@/lib/creditPricing';
-import { Plus, ShoppingCart, AlertTriangle, Coins } from 'lucide-react';
+import { Plus, AlertTriangle, Coins } from 'lucide-react';
 
 interface CreditsDisplayWithPurchaseProps {
   requiredCredits?: number;

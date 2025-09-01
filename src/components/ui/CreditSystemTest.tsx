@@ -51,10 +51,10 @@ const CreditSystemTest: React.FC = () => {
           type: 'credit',
           amount: 1,
           description: 'Test du système de crédits',
-          reference_type: 'test',
+          reference_type: 'task_completion',
           reference_id: 'test_' + Date.now(),
           status: 'completed',
-          metadata: { test: true }
+          metadata: { task_title: 'Test' }
         });
         addTestResult('Transaction de test réussie', true);
       }

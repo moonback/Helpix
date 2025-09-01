@@ -96,12 +96,11 @@ const AddTaskPage: React.FC = () => {
         type: 'debit',
         amount: taskCost,
         description: `Création de la tâche: ${formData.title}`,
-        reference_type: 'task_creation',
+        reference_type: 'task_completion',
         reference_id: 'pending', // Sera mis à jour après création
         status: 'completed',
         metadata: {
-          task_title: formData.title,
-          task_cost: taskCost
+          task_title: formData.title
         }
       });
 
