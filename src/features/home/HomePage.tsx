@@ -783,30 +783,7 @@ const HomePage: React.FC = () => {
           </motion.div>
 
           {/* Message informatif sur les tâches disponibles */}
-          {getFilteredAndSortedTasks.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5, duration: 0.6 }}
-              className="mb-6"
-            >
-              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                    <span className="text-white text-sm">ℹ️</span>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-blue-800">
-                      Seules les tâches disponibles sont affichées
-                    </p>
-                    <p className="text-xs text-blue-600">
-                      Les tâches assignées ou terminées sont masquées
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          )}
+          
 
           {/* Enhanced Tasks List */}
           <motion.div
