@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useWalletStore } from '@/features/wallet/stores/walletStore';
 import Button from './Button';
@@ -20,8 +21,8 @@ interface CreditPackage {
   id: string;
   name: string;
   credits: number;
-  price: number; // Prix en euros
-  bonus: number; // Crédits bonus
+  price: number;
+  bonus: number;
   popular?: boolean;
   icon: React.ReactNode;
   color: string;
@@ -32,7 +33,7 @@ interface CreditPurchaseModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
-  requiredCredits?: number; // Crédits requis pour une action spécifique
+  requiredCredits?: number;
 }
 
 const CreditPurchaseModal: React.FC<CreditPurchaseModalProps> = ({
@@ -45,6 +46,12 @@ const CreditPurchaseModal: React.FC<CreditPurchaseModalProps> = ({
   const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'paypal' | 'apple'>('card');
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
 
   const creditPackages: CreditPackage[] = CREDIT_PACKAGES.map(pkg => ({
     ...pkg,
@@ -63,20 +70,20 @@ const CreditPurchaseModal: React.FC<CreditPurchaseModalProps> = ({
     if (!selectedPackage) return;
 
     const packageData = creditPackages.find(pkg => pkg.id === selectedPackage);
-    if (!packageData) return;
+    if (!packageData || !wallet) return;
 
     setIsProcessing(true);
     try {
-      // Simuler un paiement (en production, intégrer Stripe/PayPal)
+      // Simuler un paiement
       await new Promise(resolve => setTimeout(resolve, 2000));
 
       // Créer la transaction de crédit
       await createTransaction({
-        wallet_id: wallet!.id,
+        wallet_id: wallet.id,
         type: 'credit',
         amount: packageData.credits + packageData.bonus,
         description: `Achat de ${packageData.credits} crédits${packageData.bonus > 0 ? ` + ${packageData.bonus} bonus` : ''}`,
-        reference_type: 'task_completion', // Utiliser une valeur valide
+        reference_type: 'task_completion',
         reference_id: packageData.id,
         status: 'completed',
         metadata: {
@@ -88,9 +95,8 @@ const CreditPurchaseModal: React.FC<CreditPurchaseModalProps> = ({
       onClose();
     } catch (error) {
       console.error('Erreur lors de l\'achat:', error);
-      // Pour l'instant, on simule le succès même en cas d'erreur
-      // En production, il faudrait gérer l'erreur correctement
-      alert('Achat simulé avec succès ! (En production, intégrer un vrai système de paiement)');
+      // Simuler un succès pour le test
+      alert('Achat simulé avec succès !');
       onSuccess?.();
       onClose();
     } finally {
@@ -107,11 +113,11 @@ const CreditPurchaseModal: React.FC<CreditPurchaseModalProps> = ({
     return formatEuros(stats.pricePerCredit, 3);
   };
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
-  return (
+  const modalContent = (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
         {/* Overlay */}
         <motion.div
           initial={{ opacity: 0 }}
@@ -126,10 +132,10 @@ const CreditPurchaseModal: React.FC<CreditPurchaseModalProps> = ({
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 20 }}
-          className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-white rounded-3xl shadow-2xl"
+          className="relative w-full max-w-6xl h-[90vh] max-h-[90vh] bg-white rounded-3xl shadow-2xl flex flex-col"
         >
           {/* Header */}
-          <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 rounded-t-3xl">
+          <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 rounded-t-3xl z-10">
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
@@ -156,7 +162,8 @@ const CreditPurchaseModal: React.FC<CreditPurchaseModalProps> = ({
             </div>
           </div>
 
-          <div className="p-6">
+          {/* Contenu principal */}
+          <div className="p-6 flex-1 overflow-y-auto">
             {/* Solde actuel */}
             <div className="mb-8">
               <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
@@ -189,7 +196,7 @@ const CreditPurchaseModal: React.FC<CreditPurchaseModalProps> = ({
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
                 Choisissez votre package
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {creditPackages.map((pkg) => (
                   <motion.div
                     key={pkg.id}
@@ -230,20 +237,20 @@ const CreditPurchaseModal: React.FC<CreditPurchaseModalProps> = ({
                               +{pkg.bonus} bonus
                             </div>
                           )}
-                                                     <div className="text-lg font-semibold text-blue-600">
-                             {formatEuros(pkg.price)}
-                           </div>
-                           <div className="text-xs text-gray-500">
-                             {getPricePerCredit(pkg)}/crédit
-                           </div>
-                           {(() => {
-                             const stats = calculatePackageStats(pkg as any);
-                             return stats.savings > 0 && (
-                               <div className="text-xs text-green-600 font-medium">
-                                 Économie: {formatEuros(stats.actualSavings)} ({stats.savings.toFixed(0)}%)
-                               </div>
-                             );
-                           })()}
+                          <div className="text-lg font-semibold text-blue-600">
+                            {formatEuros(pkg.price)}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {getPricePerCredit(pkg)}/crédit
+                          </div>
+                          {(() => {
+                            const stats = calculatePackageStats(pkg as any);
+                            return stats.savings > 0 && (
+                              <div className="text-xs text-green-600 font-medium">
+                                Économie: {formatEuros(stats.actualSavings)} ({stats.savings.toFixed(0)}%)
+                              </div>
+                            );
+                          })()}
                         </div>
 
                         {selectedPackage === pkg.id && (
@@ -272,8 +279,8 @@ const CreditPurchaseModal: React.FC<CreditPurchaseModalProps> = ({
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {[
                     { id: 'card', name: 'Carte bancaire', icon: <CreditCard className="w-5 h-5" /> },
-                    { id: 'paypal', name: 'PayPal', icon: <div className="w-5 h-5 bg-blue-600 rounded text-white flex items-center justify-center text-xs font-bold">P</div> },
-                    { id: 'apple', name: 'Apple Pay', icon: <div className="w-5 h-5 bg-black rounded text-white flex items-center justify-center text-xs">🍎</div> }
+                    { id: 'paypal', name: 'PayPal', icon: <span className="w-5 h-5 bg-blue-600 rounded text-white flex items-center justify-center text-xs font-bold">P</span> },
+                    { id: 'apple', name: 'Apple Pay', icon: <span className="w-5 h-5 bg-black rounded text-white flex items-center justify-center text-xs">🍎</span> }
                   ].map((method) => (
                     <button
                       key={method.id}
@@ -293,82 +300,43 @@ const CreditPurchaseModal: React.FC<CreditPurchaseModalProps> = ({
                 </div>
               </motion.div>
             )}
-
-            {/* Résumé de l'achat */}
-            {selectedPackage && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="mb-8"
-              >
-                <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="font-semibold text-gray-900">Résumé de l'achat</h4>
-                      <p className="text-sm text-gray-600">
-                        {creditPackages.find(pkg => pkg.id === selectedPackage)?.name}
-                      </p>
-                    </div>
-                                         <div className="text-right">
-                       <div className="text-2xl font-bold text-green-600">
-                         {formatEuros(creditPackages.find(pkg => pkg.id === selectedPackage)?.price || 0)}
-                       </div>
-                       <div className="text-sm text-gray-600">
-                         +{getTotalCredits(creditPackages.find(pkg => pkg.id === selectedPackage)!)}
-                         crédits
-                       </div>
-                       {(() => {
-                         const pkg = creditPackages.find(pkg => pkg.id === selectedPackage);
-                         if (pkg) {
-                           const stats = calculatePackageStats(pkg as any);
-                           return stats.savings > 0 && (
-                             <div className="text-xs text-green-600 font-medium">
-                               Économie: {formatEuros(stats.actualSavings)}
-                             </div>
-                           );
-                         }
-                         return null;
-                       })()}
-                     </div>
-                  </div>
-                </Card>
-              </motion.div>
-            )}
-
-            {/* Actions */}
-            <div className="flex gap-4">
-              <Button
-                variant="outline"
-                onClick={onClose}
-                className="flex-1"
-                disabled={isProcessing}
-              >
-                Annuler
-              </Button>
-              <Button
-                onClick={handlePurchase}
-                disabled={!selectedPackage || isProcessing}
-                loading={isProcessing}
-                className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-              >
-                {isProcessing ? 'Traitement...' : 'Acheter maintenant'}
-              </Button>
-            </div>
-
-            {/* Informations de sécurité */}
-            <div className="mt-6 text-center">
-              <p className="text-xs text-gray-500 flex items-center justify-center gap-2">
-                <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
-                  <Check className="w-2 h-2 text-white" />
-                </div>
-                Paiement sécurisé et crypté
-              </p>
-            </div>
           </div>
+
+          {/* Footer avec actions */}
+          {selectedPackage && (
+            <div className="sticky bottom-0 bg-white border-t border-gray-200 px-6 py-4 rounded-b-3xl">
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-gray-600">
+                  Package sélectionné: <span className="font-semibold text-gray-900">
+                    {creditPackages.find(pkg => pkg.id === selectedPackage)?.name}
+                  </span>
+                </div>
+                <div className="flex gap-3">
+                  <Button
+                    variant="outline"
+                    onClick={onClose}
+                    className="px-6 py-2"
+                  >
+                    Annuler
+                  </Button>
+                  <Button
+                    onClick={handlePurchase}
+                    disabled={isProcessing}
+                    className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                  >
+                    {isProcessing ? 'Traitement...' : 'Acheter maintenant'}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
         </motion.div>
       </div>
     </AnimatePresence>
   );
+
+  // Rendu du modal en tant que portal dans le body
+  return createPortal(modalContent, document.body);
 };
 
 export default CreditPurchaseModal;

@@ -1,8 +1,10 @@
 import React, { Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { useAuth } from '@/hooks/useAuth';
 import { useRealtimeMessages } from '@/hooks/useRealtimeMessages';
 import BottomNavigation from '@/components/navigation/BottomNavigation';
+import CreditsDisplayWithPurchase from '@/components/ui/CreditsDisplayWithPurchase';
 
 // Lazy loading des pages
 const LandingPage = React.lazy(() => import('@/features/landing/LandingPage'));
@@ -187,6 +189,23 @@ const App: React.FC = () => {
 
         {/* Navigation bottom */}
         {isAuthenticated && <BottomNavigation />}
+
+        {/* Bouton flottant d'achat de crédits - accessible sur toutes les pages */}
+        {isAuthenticated && (
+          <div className="fixed left-6 top-1/2 transform -translate-y-1/2 z-[100]">
+            <motion.div
+              initial={{ opacity: 0, scale: 0 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 1.0, duration: 0.5, type: "spring", stiffness: 200 }}
+            >
+              <CreditsDisplayWithPurchase 
+                showPurchaseButton={true}
+                variant="floating"
+                className=""
+              />
+            </motion.div>
+          </div>
+        )}
       </div>
     </Router>
   );

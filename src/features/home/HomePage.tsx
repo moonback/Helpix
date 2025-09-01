@@ -364,11 +364,8 @@ const HomePage: React.FC = () => {
                 
               </div>
 
-              {/* Localisation, crédits et boutons à droite */}
+              {/* Localisation et boutons à droite */}
               <div className="flex items-center gap-3 flex-shrink-0">
-                {/* Affichage des crédits avec achat */}
-                <CreditsDisplayWithPurchase />
-
                 {/* Status de localisation */}
                 <div className="flex items-center">
                   {locationLoading ? (
