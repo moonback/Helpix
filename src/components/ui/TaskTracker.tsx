@@ -307,6 +307,16 @@ const TaskTracker: React.FC<TaskTrackerProps> = ({
               Mettre en pause
             </Button>
           )}
+          
+          {task.status === 'on_hold' && canEdit && (
+            <Button
+              onClick={() => onUpdateStatus('in_progress', 'Reprise de la tâche')}
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
+            >
+              <Play className="w-4 h-4 mr-2" />
+              Reprendre
+            </Button>
+          )}
         </div>
       </Card>
 
