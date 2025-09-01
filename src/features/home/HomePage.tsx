@@ -357,7 +357,7 @@ const HomePage: React.FC = () => {
                 <img 
                   src="/images/logo.png" 
                   alt="Logo Entraide Universelle" 
-                  className="w-12 h-12 object-contain"
+                  className="w-25 h-12 object-contain"
                 />
               </div>
               
@@ -366,9 +366,7 @@ const HomePage: React.FC = () => {
                 <h1 className="text-xl lg:text-2xl font-bold text-slate-800">
                   Bonjour Maysson !
                 </h1>
-                <p className="text-base text-slate-600 font-medium">
-                  Entraide Universelle
-                </p>
+                
               </div>
 
               {/* Localisation et boutons à droite */}
