@@ -1,0 +1,10 @@
+// Export de tous les composants du Dashboard
+export { default as DashboardHeader } from './DashboardHeader';
+export { default as ViewTabs } from './ViewTabs';
+export { default as MetricsCards } from './MetricsCards';
+export { default as AdvancedFilters } from './AdvancedFilters';
+export { default as SearchAndControls } from './SearchAndControls';
+export { default as TaskList } from './TaskList';
+export { default as TaskCard } from './TaskCard';
+export { default as AnalyticsSection } from './AnalyticsSection';
+export { default as SkeletonLoader } from './SkeletonLoader';
