@@ -4,6 +4,7 @@ import { useWalletStore } from '@/features/wallet/stores/walletStore';
 import CreditsDisplayWithPurchase from './CreditsDisplayWithPurchase';
 import Button from './Button';
 import Card from './Card';
+import { formatEuros } from '@/lib/creditPricing';
 import { 
   CreditCard, 
   Gift, 
@@ -165,7 +166,7 @@ const CreditSystemInfo: React.FC<CreditSystemInfoProps> = ({ className = '' }) =
                           🎯 Créer des tâches
                         </h4>
                         <p className="text-xs text-gray-600 mb-1">
-                          Coût: 10+ crédits selon la complexité
+                          Coût: 10+ crédits (≈ {formatEuros(1.00)}+)
                         </p>
                         <div className="flex items-center gap-1 text-xs text-purple-600">
                           <Star className="w-3 h-3" />
@@ -218,6 +219,9 @@ const CreditSystemInfo: React.FC<CreditSystemInfoProps> = ({ className = '' }) =
                         <div className="flex items-center gap-1 text-xs text-blue-600">
                           <Gift className="w-3 h-3" />
                           <span>Jusqu'à 25% bonus</span>
+                        </div>
+                        <div className="flex items-center gap-1 text-xs text-gray-500 mt-1">
+                          <span>À partir de {formatEuros(4.99)}</span>
                         </div>
                       </div>
                     </motion.div>

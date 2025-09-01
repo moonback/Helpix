@@ -4,6 +4,7 @@ import { useWalletStore } from '../stores/walletStore';
 import CreditPurchaseModal from '@/components/ui/CreditPurchaseModal';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
+import { CREDIT_PACKAGES, calculatePackageStats, formatEuros } from '@/lib/creditPricing';
 import { 
   Star, 
   Gift, 
@@ -32,60 +33,30 @@ const CreditPackages: React.FC = () => {
   const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
 
-  const creditPackages: CreditPackage[] = [
-    {
-      id: 'starter',
-      name: 'Starter',
-      credits: 50,
-      price: 4.99,
-      bonus: 0,
-      icon: <Zap className="w-6 h-6" />,
-      color: 'from-blue-500 to-blue-600',
-      description: 'Parfait pour commencer',
-      savings: '0%'
-    },
-    {
-      id: 'popular',
-      name: 'Populaire',
-      credits: 150,
-      price: 12.99,
-      bonus: 25,
-      popular: true,
-      icon: <Star className="w-6 h-6" />,
-      color: 'from-purple-500 to-purple-600',
-      description: 'Le plus choisi',
-      savings: '13%'
-    },
-    {
-      id: 'pro',
-      name: 'Pro',
-      credits: 300,
-      price: 24.99,
-      bonus: 75,
-      icon: <Crown className="w-6 h-6" />,
-      color: 'from-amber-500 to-amber-600',
-      description: 'Pour les utilisateurs actifs',
-      savings: '17%'
-    },
-    {
-      id: 'enterprise',
-      name: 'Enterprise',
-      credits: 600,
-      price: 44.99,
-      bonus: 200,
-      icon: <Gift className="w-6 h-6" />,
-      color: 'from-emerald-500 to-emerald-600',
-      description: 'Maximum de valeur',
-      savings: '25%'
-    }
-  ];
+  const creditPackages: CreditPackage[] = CREDIT_PACKAGES.map(pkg => {
+    const stats = calculatePackageStats(pkg);
+    return {
+      ...pkg,
+      icon: pkg.id === 'starter' ? <Zap className="w-6 h-6" /> :
+            pkg.id === 'popular' ? <Star className="w-6 h-6" /> :
+            pkg.id === 'pro' ? <Crown className="w-6 h-6" /> :
+            <Gift className="w-6 h-6" />,
+      color: pkg.id === 'starter' ? 'from-blue-500 to-blue-600' :
+             pkg.id === 'popular' ? 'from-purple-500 to-purple-600' :
+             pkg.id === 'pro' ? 'from-amber-500 to-amber-600' :
+             'from-emerald-500 to-emerald-600',
+      popular: pkg.id === 'popular',
+      savings: `${stats.savings.toFixed(0)}%`
+    };
+  });
 
   const getTotalCredits = (packageData: CreditPackage) => {
     return packageData.credits + packageData.bonus;
   };
 
   const getPricePerCredit = (packageData: CreditPackage) => {
-    return (packageData.price / getTotalCredits(packageData)).toFixed(3);
+    const stats = calculatePackageStats(packageData);
+    return formatEuros(stats.pricePerCredit, 3);
   };
 
   const handlePackageSelect = (packageId: string) => {
@@ -172,12 +143,12 @@ const CreditPackages: React.FC = () => {
                         +{pkg.bonus} bonus
                       </div>
                     )}
-                    <div className="text-lg font-semibold text-blue-600">
-                      {pkg.price}€
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      {getPricePerCredit(pkg)}€/crédit
-                    </div>
+                                         <div className="text-lg font-semibold text-blue-600">
+                       {formatEuros(pkg.price)}
+                     </div>
+                     <div className="text-xs text-gray-500">
+                       {getPricePerCredit(pkg)}/crédit
+                     </div>
                     {pkg.savings && pkg.savings !== '0%' && (
                       <div className="text-xs text-green-600 font-medium">
                         Économie: {pkg.savings}

@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useWalletStore } from '@/features/wallet/stores/walletStore';
 import CreditsDisplay from './CreditsDisplay';
 import CreditPurchaseModal from './CreditPurchaseModal';
+import { creditsToEuros, formatEuros } from '@/lib/creditPricing';
 import { Plus, ShoppingCart, AlertTriangle, Coins } from 'lucide-react';
 
 interface CreditsDisplayWithPurchaseProps {
@@ -45,9 +46,14 @@ const CreditsDisplayWithPurchase: React.FC<CreditsDisplayWithPurchaseProps> = ({
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-yellow-500 text-white rounded-full px-3 py-1.5 text-sm shadow-sm">
             <Coins className="w-4 h-4" />
-            <span className="font-semibold">
-              {wallet?.balance || 0} crédits
-            </span>
+            <div className="flex flex-col">
+              <span className="font-semibold leading-tight">
+                {wallet?.balance || 0} crédits
+              </span>
+              <span className="text-xs opacity-90 leading-tight">
+                ≈ {formatEuros(creditsToEuros(wallet?.balance || 0))}
+              </span>
+            </div>
           </div>
           
           {/* Indicateur de crédits insuffisants */}

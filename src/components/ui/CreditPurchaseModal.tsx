@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useWalletStore } from '@/features/wallet/stores/walletStore';
 import Button from './Button';
 import Card from './Card';
+import { CREDIT_PACKAGES, calculatePackageStats, formatEuros, creditsToEuros } from '@/lib/creditPricing';
 import { 
   X, 
   CreditCard, 
@@ -46,49 +47,18 @@ const CreditPurchaseModal: React.FC<CreditPurchaseModalProps> = ({
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'paypal' | 'apple'>('card');
 
-  const creditPackages: CreditPackage[] = [
-    {
-      id: 'starter',
-      name: 'Starter',
-      credits: 50,
-      price: 4.99,
-      bonus: 0,
-      icon: <Zap className="w-6 h-6" />,
-      color: 'from-blue-500 to-blue-600',
-      description: 'Parfait pour commencer'
-    },
-    {
-      id: 'popular',
-      name: 'Populaire',
-      credits: 150,
-      price: 12.99,
-      bonus: 25,
-      popular: true,
-      icon: <Star className="w-6 h-6" />,
-      color: 'from-purple-500 to-purple-600',
-      description: 'Le plus choisi'
-    },
-    {
-      id: 'pro',
-      name: 'Pro',
-      credits: 300,
-      price: 24.99,
-      bonus: 75,
-      icon: <Crown className="w-6 h-6" />,
-      color: 'from-amber-500 to-amber-600',
-      description: 'Pour les utilisateurs actifs'
-    },
-    {
-      id: 'enterprise',
-      name: 'Enterprise',
-      credits: 600,
-      price: 44.99,
-      bonus: 200,
-      icon: <Gift className="w-6 h-6" />,
-      color: 'from-emerald-500 to-emerald-600',
-      description: 'Maximum de valeur'
-    }
-  ];
+  const creditPackages: CreditPackage[] = CREDIT_PACKAGES.map(pkg => ({
+    ...pkg,
+    icon: pkg.id === 'starter' ? <Zap className="w-6 h-6" /> :
+          pkg.id === 'popular' ? <Star className="w-6 h-6" /> :
+          pkg.id === 'pro' ? <Crown className="w-6 h-6" /> :
+          <Gift className="w-6 h-6" />,
+    color: pkg.id === 'starter' ? 'from-blue-500 to-blue-600' :
+           pkg.id === 'popular' ? 'from-purple-500 to-purple-600' :
+           pkg.id === 'pro' ? 'from-amber-500 to-amber-600' :
+           'from-emerald-500 to-emerald-600',
+    popular: pkg.id === 'popular'
+  }));
 
   const handlePurchase = async () => {
     if (!selectedPackage) return;
@@ -139,7 +109,8 @@ const CreditPurchaseModal: React.FC<CreditPurchaseModalProps> = ({
   };
 
   const getPricePerCredit = (packageData: CreditPackage) => {
-    return (packageData.price / getTotalCredits(packageData)).toFixed(3);
+    const stats = calculatePackageStats(packageData);
+    return formatEuros(stats.pricePerCredit, 3);
   };
 
   if (!isOpen) return null;
@@ -265,12 +236,20 @@ const CreditPurchaseModal: React.FC<CreditPurchaseModalProps> = ({
                               +{pkg.bonus} bonus
                             </div>
                           )}
-                          <div className="text-lg font-semibold text-blue-600">
-                            {pkg.price}€
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            {getPricePerCredit(pkg)}€/crédit
-                          </div>
+                                                     <div className="text-lg font-semibold text-blue-600">
+                             {formatEuros(pkg.price)}
+                           </div>
+                           <div className="text-xs text-gray-500">
+                             {getPricePerCredit(pkg)}/crédit
+                           </div>
+                           {(() => {
+                             const stats = calculatePackageStats(pkg);
+                             return stats.savings > 0 && (
+                               <div className="text-xs text-green-600 font-medium">
+                                 Économie: {formatEuros(stats.actualSavings)} ({stats.savings.toFixed(0)}%)
+                               </div>
+                             );
+                           })()}
                         </div>
 
                         {selectedPackage === pkg.id && (
@@ -336,15 +315,27 @@ const CreditPurchaseModal: React.FC<CreditPurchaseModalProps> = ({
                         {creditPackages.find(pkg => pkg.id === selectedPackage)?.name}
                       </p>
                     </div>
-                    <div className="text-right">
-                      <div className="text-2xl font-bold text-green-600">
-                        {creditPackages.find(pkg => pkg.id === selectedPackage)?.price}€
-                      </div>
-                      <div className="text-sm text-gray-600">
-                        +{getTotalCredits(creditPackages.find(pkg => pkg.id === selectedPackage)!)}
-                        crédits
-                      </div>
-                    </div>
+                                         <div className="text-right">
+                       <div className="text-2xl font-bold text-green-600">
+                         {formatEuros(creditPackages.find(pkg => pkg.id === selectedPackage)?.price || 0)}
+                       </div>
+                       <div className="text-sm text-gray-600">
+                         +{getTotalCredits(creditPackages.find(pkg => pkg.id === selectedPackage)!)}
+                         crédits
+                       </div>
+                       {(() => {
+                         const pkg = creditPackages.find(pkg => pkg.id === selectedPackage);
+                         if (pkg) {
+                           const stats = calculatePackageStats(pkg);
+                           return stats.savings > 0 && (
+                             <div className="text-xs text-green-600 font-medium">
+                               Économie: {formatEuros(stats.actualSavings)}
+                             </div>
+                           );
+                         }
+                         return null;
+                       })()}
+                     </div>
                   </div>
                 </Card>
               </motion.div>
