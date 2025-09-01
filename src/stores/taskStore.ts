@@ -379,16 +379,16 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
 
       await get().updateTask(id, updates);
 
-      // Ajouter un commentaire automatique pour le changement de statut
-      if (reason) {
-        await get().addTaskComment(id, {
-          task_id: id,
-          user_id: 'system',
-          content: `Statut changé vers "${status}": ${reason}`,
-          type: 'progress_update',
-          is_internal: false
-        });
-      }
+      // Commentaire automatique désactivé pour éviter les erreurs de colonne manquante
+      // if (reason) {
+      //   await get().addTaskComment(id, {
+      //     task_id: id,
+      //     user_id: 'system',
+      //     content: `Statut changé vers "${status}": ${reason}`,
+      //     type: 'progress_update',
+      //     is_internal: false
+      //   });
+      // }
     } catch (error) {
       console.error('Erreur lors du changement de statut:', error);
       throw error;
@@ -403,14 +403,14 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
 
       });
 
-      // Ajouter un commentaire automatique
-      await get().addTaskComment(id, {
-        task_id: id,
-        user_id: 'system',
-        content: `Tâche assignée à l'utilisateur ${userId}`,
-        type: 'progress_update',
-        is_internal: false
-      });
+      // Commentaire automatique désactivé pour éviter les erreurs de colonne manquante
+      // await get().addTaskComment(id, {
+      //   task_id: id,
+      //   user_id: 'system',
+      //   content: `Tâche assignée à l'utilisateur ${userId}`,
+      //   type: 'progress_update',
+      //   is_internal: false
+      // });
     } catch (error) {
       console.error('Erreur lors de l\'assignation:', error);
       throw error;
