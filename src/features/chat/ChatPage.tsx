@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useMessageStore } from '@/stores/messageStore';
 import { useAuthStore } from '@/stores/authStore';
 import { Conversation } from '@/types';
@@ -6,8 +6,7 @@ import ConversationList from '@/components/chat/ConversationList';
 import ChatWindow from '@/components/chat/ChatWindow';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
-import Card from '@/components/ui/Card';
-import { Search, UserPlus, MessageCircle } from 'lucide-react';
+import { Search, MessageCircle } from 'lucide-react';
 
 // Styles CSS personnalisés pour les animations
 const customStyles = `
@@ -31,12 +30,16 @@ const customStyles = `
 `;
 
 const ChatPage: React.FC = () => {
-  const { currentConversation, setCurrentConversation } = useMessageStore();
+  const { currentConversation, setCurrentConversation, conversations, deleteConversation } = useMessageStore();
   const { user } = useAuthStore();
   const [showNewChat, setShowNewChat] = useState(false);
   const [searchUser, setSearchUser] = useState('');
   const [selectedUserId, setSelectedUserId] = useState<string>('');
   const [isCreating, setIsCreating] = useState(false);
+  const [isMultiSelectMode, setIsMultiSelectMode] = useState(false);
+  const [selectedConversations, setSelectedConversations] = useState<Set<string>>(new Set());
+  const [isDeletingMultiple, setIsDeletingMultiple] = useState(false);
+  const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   const handleConversationSelect = (conversation: Conversation) => {
     setCurrentConversation(conversation);
@@ -75,6 +78,56 @@ const ChatPage: React.FC = () => {
     setShowNewChat(false);
     setSearchUser('');
     setSelectedUserId('');
+  };
+
+  const handleToggleMultiSelect = () => {
+    setIsMultiSelectMode(!isMultiSelectMode);
+    setSelectedConversations(new Set());
+  };
+
+  const handleSelectConversation = (conversationId: string) => {
+    const newSelected = new Set(selectedConversations);
+    if (newSelected.has(conversationId)) {
+      newSelected.delete(conversationId);
+    } else {
+      newSelected.add(conversationId);
+    }
+    setSelectedConversations(newSelected);
+  };
+
+  const handleSelectAll = () => {
+    if (selectedConversations.size === conversations.length) {
+      setSelectedConversations(new Set());
+    } else {
+      setSelectedConversations(new Set(conversations.map(c => c.id)));
+    }
+  };
+
+  const handleDeleteSelected = async () => {
+    if (selectedConversations.size === 0) return;
+
+    setIsDeletingMultiple(true);
+    try {
+      const deletePromises = Array.from(selectedConversations).map(id => deleteConversation(id));
+      await Promise.all(deletePromises);
+      const deletedCount = selectedConversations.size;
+      setSelectedConversations(new Set());
+      setIsMultiSelectMode(false);
+      setNotification({ 
+        message: `${deletedCount} conversation(s) supprimée(s) avec succès !`, 
+        type: 'success' 
+      });
+      setTimeout(() => setNotification(null), 3000);
+    } catch (error) {
+      console.error('Erreur lors de la suppression des conversations:', error);
+      setNotification({ 
+        message: 'Erreur lors de la suppression des conversations', 
+        type: 'error' 
+      });
+      setTimeout(() => setNotification(null), 3000);
+    } finally {
+      setIsDeletingMultiple(false);
+    }
   };
 
   // Composant pour créer un nouveau chat
@@ -170,9 +223,38 @@ const ChatPage: React.FC = () => {
     </div>
   );
 
+  // Composant de notification
+  const Notification = () => {
+    if (!notification) return null;
+
+    return (
+      <div className="fixed top-4 right-4 z-50 animate-fadeIn">
+        <div className={`px-6 py-3 rounded-lg shadow-lg flex items-center space-x-3 ${
+          notification.type === 'success' 
+            ? 'bg-green-500 text-white' 
+            : 'bg-red-500 text-white'
+        }`}>
+          <div className="w-5 h-5">
+            {notification.type === 'success' ? (
+              <svg fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+              </svg>
+            ) : (
+              <svg fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+            )}
+          </div>
+          <span className="font-medium">{notification.message}</span>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <>
       <style>{customStyles}</style>
+      <Notification />
       <div className="h-full flex bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-slate-800">
         {/* Sidebar - Liste des conversations */}
         <div className="w-full md:w-72 lg:w-80 border-r border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm shadow-lg transition-all duration-300 ease-in-out">
@@ -183,6 +265,13 @@ const ChatPage: React.FC = () => {
               <ConversationList
                 onConversationSelect={handleConversationSelect}
                 onCreateNewChat={handleCreateNewChat}
+                isMultiSelectMode={isMultiSelectMode}
+                selectedConversations={selectedConversations}
+                onSelectConversation={handleSelectConversation}
+                onToggleMultiSelect={handleToggleMultiSelect}
+                onSelectAll={handleSelectAll}
+                onDeleteSelected={handleDeleteSelected}
+                isDeletingMultiple={isDeletingMultiple}
               />
             )}
           </div>
