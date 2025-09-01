@@ -350,87 +350,45 @@ const HomePage: React.FC = () => {
             transition={{ delay: 0.1, duration: 0.6 }}
             className="w-full"
           >
-            {/* Main Header Row - More Compact */}
+            {/* Header simplifié avec logo à gauche, texte au centre, boutons à droite */}
             <div className="flex items-center justify-between gap-4">
-              {/* Welcome Message - Simplified */}
-              <div className="flex items-center gap-3 flex-1 min-w-0">
-                <div className="relative">
-                    <img 
-                      src="/logo.png" 
-                      alt="Logo Entraide Universelle" 
-                      className="w-8 h-8 object-contain"
-                    />
-                  
-                  
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h1 className="text-xl lg:text-2xl font-bold text-slate-800 truncate">
-                    Bonjour {user?.name || 'Emilie'} ! 
-                  </h1>
-                  <p className="text-slate-600 text-sm lg:text-base hidden sm:block">
-                    Découvrez les opportunités d'entraide
-                  </p>
-                </div>
+              {/* Logo à gauche */}
+              <div className="flex-shrink-0">
+                <img 
+                  src="/images/logo.png" 
+                  alt="Logo Entraide Universelle" 
+                  className="w-50 h-12 object-contain"
+                />
+              </div>
+              
+              {/* Message de bienvenue au centre */}
+              <div className="text-center flex-1">
+                <h1 className="text-xl lg:text-2xl font-bold text-slate-800">
+                  Bonjour Maysson !
+                </h1>
+                
               </div>
 
-              {/* Compact Status & Actions */}
-              <div className="flex items-center gap-2 lg:gap-3">
-                {/* Micro Location Status */}
-                <div className="flex items-center">
-                  {locationLoading ? (
-                    <div className="flex items-center space-x-1.5 text-slate-600 bg-slate-50 px-2.5 py-1.5 rounded-lg border text-xs">
-                      <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-600"></div>
-                      <span className="font-medium hidden sm:inline">Localisation...</span>
-                    </div>
-                  ) : latitude && longitude ? (
-                    <div className="flex items-center space-x-1.5 text-emerald-700 bg-emerald-50 px-2.5 py-1.5 rounded-lg border border-emerald-200 text-xs">
-                      <div className="relative">
-                        <div className="w-3 h-3 bg-emerald-500 rounded-full"></div>
-                        <div className="absolute inset-0 bg-emerald-500 rounded-full animate-ping opacity-40"></div>
-                      </div>
-                      <DetailedAddressDisplay
-                        address={address}
-                        isLoading={!address}
-                        error={null}
-                        showIcon={false}
-                        className="text-emerald-700 font-medium truncate max-w-[120px] lg:max-w-[180px]"
-                        onRetry={retry}
-                      />
-                    </div>
-                  ) : locationError ? (
-                    <div className="flex items-center space-x-1.5 text-red-600 bg-red-50 px-2.5 py-1.5 rounded-lg border border-red-200 text-xs">
-                      <AlertCircle className="w-3 h-3" />
-                      <span className="font-medium hidden sm:inline">Erreur</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center space-x-1.5 text-slate-500 bg-slate-50 px-2.5 py-1.5 rounded-lg border text-xs">
-                      <Navigation className="w-3 h-3" />
-                      <span className="font-medium hidden sm:inline">Non localisé</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Compact Action Buttons */}
-                <div className="flex items-center gap-1.5">
-                  <Button
-                    onClick={() => navigate('/create-task')}
-                    size="sm"
-                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-3 py-1.5 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 text-sm"
-                  >
-                    <Plus className="w-4 h-4 mr-1" />
-                    <span className="hidden lg:inline">Créer</span>
-                    <span className="lg:hidden">+</span>
-                  </Button>
-                  <Button
-                    onClick={() => navigate('/dashboard')}
-                    variant="outline"
-                    size="sm"
-                    className="border-slate-300 hover:border-blue-500 hover:text-blue-600 px-3 py-1.5 rounded-lg transition-all duration-200 text-sm"
-                  >
-                    <BarChart3 className="w-4 h-4 lg:mr-1" />
-                    <span className="hidden lg:inline">Stats</span>
-                  </Button>
-                </div>
+              {/* Boutons à droite */}
+              <div className="flex items-center gap-2 lg:gap-3 flex-shrink-0">
+                <Button
+                  onClick={() => navigate('/create-task')}
+                  size="sm"
+                  className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-3 py-1.5 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 text-sm"
+                >
+                  <Plus className="w-4 h-4 mr-1" />
+                  <span className="hidden lg:inline">Créer</span>
+                  <span className="lg:hidden">+</span>
+                </Button>
+                <Button
+                  onClick={() => navigate('/dashboard')}
+                  variant="outline"
+                  size="sm"
+                  className="border-slate-300 hover:border-blue-500 hover:text-blue-600 px-3 py-1.5 rounded-lg transition-all duration-200 text-sm"
+                >
+                  <BarChart3 className="w-4 h-4 lg:mr-1" />
+                  <span className="hidden lg:inline">Stats</span>
+                </Button>
               </div>
             </div>
           </motion.div>
