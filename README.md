@@ -39,131 +39,123 @@ L'application favorise la solidarité, renforce les liens sociaux et crée un é
 - Détection automatique de position avec fallbacks multiples
 - Géocodage inverse avec services multiples (Nominatim, BigDataCloud, LocationIQ)
 - Tri des tâches par proximité géographique
-- Calculs de distance en temps réel
+- Carte interactive avec Leaflet et OpenStreetMap
 
-### 🗺️ **Carte Interactive**
-- Visualisation des tâches sur carte Leaflet
-- Marqueurs interactifs avec popups détaillées
-- Bascule vue carte / vue liste
-- Clustering des marqueurs pour performances
+### 🎯 **Gestion des Tâches Avancée**
+- CRUD complet des tâches avec validation
+- Système de statuts étendus (open, in_progress, completed, cancelled, on_hold, review)
+- Suivi de progression avec pourcentages et étapes
+- Système de priorités et complexité
+- Filtres et recherche avancée
+- Gestion des dépendances et sous-tâches
 
-### 💬 **Système de Messagerie**
-- Chat en temps réel entre utilisateurs
+### 💬 **Messagerie Temps Réel**
+- Chat complet avec interface moderne
 - Support messages texte, images et fichiers
-- Interface conversationnelle moderne avec glassmorphism
-- Notifications et statuts de lecture
+- Design glassmorphism avec animations
+- Gestion des conversations et participants
+- Statuts de lecture et historique
 
-### 🎯 **Gestion Avancée des Tâches**
-- Création/modification/suppression de tâches
-- Catégorisation (local/remote) avec priorités
-- Système de filtres et recherche avancée
-- Tableau de bord analytique complet
-- Suivi de progression détaillé
+### 💰 **Système de Crédits Payant**
+- Portefeuille numérique avec transactions sécurisées
+- Achat de crédits avec packages prédéfinis
+- Débit automatique lors de la création de tâches
+- Gains de crédits pour l'aide apportée
+- Système de retraits et paiements
 
-### 💳 **Système de Crédits**
-- Économie virtuelle d'entraide
-- Gestion des transactions transparente
-- Historique complet des échanges
-- Portefeuille intégré
+### 📊 **Tableau de Bord Analytique**
+- Métriques de performance en temps réel
+- Vues multiples : Vue d'ensemble, Toutes les tâches, Analytics
+- Filtres avancés par statut, priorité, complexité
+- Tri intelligent par différents critères
+- Statistiques de completion et efficacité
 
 ## 🛠️ Stack Technique
 
 ### **Frontend**
-- **React 18** - Bibliothèque UI avec hooks et suspense
+- **React 18** - Framework UI avec concurrent features
 - **TypeScript 5.2** - Typage statique strict
-- **Vite 5.0** - Build tool ultra-rapide avec HMR
-- **React Router v6** - Navigation SPA avec futures flags
-
-### **UI & Design**
+- **Vite 5.0** - Build tool ultra-rapide
 - **Tailwind CSS 3.3** - Framework CSS utility-first
-- **Framer Motion 10.16** - Animations et micro-interactions
-- **Lucide React** - Icônes SVG cohérentes et modernes
-- **clsx + tailwind-merge** - Gestion intelligente des classes
+- **Framer Motion 10.16** - Animations fluides
+- **React Router 6.20** - Navigation SPA
+- **Zustand 4.4** - Gestion d'état légère
+- **React Leaflet 4.2** - Cartes interactives
+- **Recharts 3.1** - Graphiques et visualisations
 
-### **Backend & Database**
-- **Supabase 2.38** - Backend-as-a-Service complet
-- **PostgreSQL** - Base de données relationnelle robuste
-- **Row Level Security (RLS)** - Sécurité granulaire
-- **Real-time subscriptions** - Synchronisation temps réel
+### **Backend & Base de Données**
+- **Supabase 2.38** - Backend-as-a-Service
+- **PostgreSQL 15+** - Base de données relationnelle
+- **Row Level Security (RLS)** - Sécurité au niveau des lignes
+- **Real-time Subscriptions** - Synchronisation temps réel
+- **Supabase Auth** - Authentification sécurisée
+- **Supabase Storage** - Stockage de fichiers
 
-### **State Management**
-- **Zustand 4.4** - Store global léger et performant
-- **Hooks personnalisés** - Logique métier encapsulée
-- **React Query patterns** - Gestion cache et synchronisation
+### **Services Externes**
+- **Nominatim** - Géocodage inverse OpenStreetMap
+- **BigDataCloud** - API de géolocalisation
+- **LocationIQ** - Service de géocodage alternatif
+- **OpenStreetMap** - Tiles de cartes
 
-### **Maps & Geolocation**
-- **Leaflet 1.9** - Cartographie open-source
-- **React-Leaflet 4.2** - Intégration React
-- **Geolocation API** - Position GPS native
-- **Services géocodage** - Multiple providers avec fallbacks
+### **Outils de Développement**
+- **ESLint** - Linting JavaScript/TypeScript
+- **Prettier** - Formatage de code
+- **Jest** - Tests unitaires
+- **Testing Library** - Tests de composants React
+- **Husky** - Git hooks (planifié)
 
-### **Development & Testing**
-- **Jest 29.7** - Framework de tests
-- **React Testing Library** - Tests d'intégration
-- **ESLint** - Linting et qualité code
-- **TypeScript strict** - Type checking complet
+## 📋 Prérequis
 
-## 🚀 Installation
-
-### **Prérequis**
-- **Node.js** 18.0+ (recommandé: 20.x LTS)
-- **npm** 9.0+ ou **yarn** 1.22+
+### **Développement Local**
+- **Node.js** 18+ (recommandé : 20.x LTS)
+- **npm** 9+ ou **yarn** 1.22+
 - **Git** 2.30+
-- **Compte Supabase** actif
 
-### **1. Cloner le Repository**
+### **Services Externes**
+- **Compte Supabase** (gratuit)
+- **Clé API Nominatim** (gratuite, optionnelle)
+- **Clé API BigDataCloud** (gratuite, optionnelle)
+- **Clé API LocationIQ** (gratuite, optionnelle)
+
+## 🚀 Installation & Configuration
+
+### **1. Cloner le Projet**
+
 ```bash
 git clone https://github.com/votre-username/entraide-universelle.git
 cd entraide-universelle
 ```
 
 ### **2. Installer les Dépendances**
+
 ```bash
 npm install
 # ou
 yarn install
 ```
 
-### **3. Configuration Environnement**
+### **3. Configuration Supabase**
 
-Créer `.env.local` à la racine :
-```env
-# Configuration Supabase (OBLIGATOIRE)
-VITE_SUPABASE_URL=https://votre-projet.supabase.co
-VITE_SUPABASE_ANON_KEY=votre-clé-anonyme-supabase
-
-# Configuration App (OPTIONNEL)
-VITE_APP_NAME=Entraide Universelle
-VITE_APP_VERSION=1.0.0
-
-# Services externes (OPTIONNEL)
-VITE_NOMINATIM_URL=https://nominatim.openstreetmap.org
-VITE_BIGDATACLOUD_API_KEY=votre-clé-bigdatacloud
-VITE_LOCATIONIQ_API_KEY=votre-clé-locationiq
-```
-
-### **4. Configuration Supabase**
-
-#### **A. Créer le Projet**
+#### **A. Créer un Projet Supabase**
 1. Aller sur [supabase.com](https://supabase.com)
 2. Créer un nouveau projet
-3. Copier URL et clé anonyme dans `.env.local`
+3. Noter l'URL et la clé anonyme
 
 #### **B. Configurer la Base de Données**
-```sql
--- Exécuter dans l'éditeur SQL Supabase
--- Voir docs/DB_SCHEMA.md pour le schéma complet
+Exécuter les scripts SQL dans l'ordre :
 
--- Tables principales
-CREATE TABLE users (...);
-CREATE TABLE tasks (...);
-CREATE TABLE conversations (...);
-CREATE TABLE messages (...);
--- Etc.
+```bash
+# 1. Structure de base
+psql -h your-db-host -U postgres -d postgres -f docs/CREER_STRUCTURE_WALLET.sql
 
--- Activer RLS et créer les politiques
-ALTER TABLE users ENABLE ROW LEVEL SECURITY;
--- Voir API_DOCS.md pour toutes les politiques
+# 2. Système de crédits
+psql -h your-db-host -U postgres -d postgres -f docs/CREATE_CREDIT_TABLES.sql
+
+# 3. Messagerie
+psql -h your-db-host -U postgres -d postgres -f docs/CREER_STRUCTURE_MESSAGERIE.sql
+
+# 4. Politiques RLS
+psql -h your-db-host -U postgres -d postgres -f docs/CREER_POLITIQUES_RLS_OFFRES.sql
 ```
 
 #### **C. Configurer l'Authentification**
@@ -172,6 +164,27 @@ ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 3. Configurer les URLs de redirection :
    - Site URL: `http://localhost:5173` (dev)
    - Redirect URLs: `http://localhost:5173/**` (dev)
+
+### **4. Variables d'Environnement**
+
+Créer un fichier `.env.local` :
+
+```bash
+# Supabase Configuration
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key
+
+# Géolocalisation (optionnel)
+VITE_NOMINATIM_URL=https://nominatim.openstreetmap.org
+VITE_BIGDATACLOUD_API_KEY=your-bigdatacloud-key
+VITE_LOCATIONIQ_API_KEY=your-locationiq-key
+
+# Cartes
+VITE_MAP_TILE_URL=https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png
+
+# Analytics (optionnel)
+VITE_ANALYTICS_ID=your-analytics-id
+```
 
 ### **5. Lancement de l'Application**
 
@@ -211,12 +224,15 @@ entraide-universelle/
 │   │   ├── auth/           # Authentification & onboarding
 │   │   ├── landing/        # Page d'accueil publique
 │   │   ├── home/           # Page d'accueil connectée
-│   │   ├── tasks/          # Gestion des tâches
-│   │   ├── chat/           # Messagerie
+│   │   ├── dashboard/      # Tableau de bord analytique
+│   │   ├── add/            # Création de tâches
+│   │   ├── edit/           # Édition de tâches
+│   │   ├── task-detail/    # Détails d'une tâche
 │   │   ├── map/            # Carte interactive
+│   │   ├── chat/           # Messagerie
 │   │   ├── profile/        # Profil utilisateur
 │   │   ├── wallet/         # Portefeuille et crédits
-│   │   └── dashboard/      # Tableau de bord analytique
+│   │   └── help-offers/    # Offres d'aide
 │   ├── hooks/               # Hooks personnalisés
 │   │   ├── useAuth.ts      # Gestion authentification
 │   │   ├── useGeolocation.ts # Géolocalisation avec fallbacks
@@ -224,134 +240,149 @@ entraide-universelle/
 │   │   └── useRealtimeMessages.ts # Messages temps réel
 │   ├── stores/              # Stores Zustand
 │   │   ├── authStore.ts    # État authentification
-│   │   ├── taskStore.ts    # État tâches avec analytics
-│   │   └── messageStore.ts # État messagerie
+│   │   ├── taskStore.ts    # État des tâches
+│   │   ├── messageStore.ts # État des messages
+│   │   ├── helpOfferStore.ts # État des offres d'aide
+│   │   └── walletStore.ts  # État du portefeuille
+│   ├── lib/                 # Utilitaires et configurations
+│   │   ├── supabase.ts     # Client Supabase
+│   │   ├── router.ts       # Configuration routing
+│   │   ├── utils.ts        # Fonctions utilitaires
+│   │   ├── creditUtils.ts  # Utilitaires crédits
+│   │   └── creditPricing.ts # Tarification des crédits
 │   ├── types/               # Types TypeScript globaux
-│   │   └── index.ts        # Interfaces principales
-│   └── lib/                 # Utilitaires et configuration
-│       ├── supabase.ts     # Client Supabase configuré
-│       ├── utils.ts        # Fonctions utilitaires
-│       └── router.ts       # Configuration routage
-├── docs/                    # Documentation technique
-│   ├── ARCHITECTURE.md     # Architecture détaillée
+│   │   └── index.ts        # Définitions de types
+│   ├── App.tsx             # Composant racine
+│   ├── main.tsx            # Point d'entrée
+│   └── index.css           # Styles globaux
+├── docs/                    # Documentation
+│   ├── ARCHITECTURE.md     # Architecture technique
 │   ├── API_DOCS.md         # Documentation API
 │   ├── DB_SCHEMA.md        # Schéma base de données
 │   ├── ROADMAP.md          # Feuille de route
-│   └── CONTRIBUTING.md     # Guide contribution
+│   └── CONTRIBUTING.md     # Guide de contribution
 ├── public/                  # Assets statiques
-└── dist/                    # Build de production
+├── package.json            # Dépendances et scripts
+├── tailwind.config.js      # Configuration Tailwind
+├── tsconfig.json           # Configuration TypeScript
+├── vite.config.ts          # Configuration Vite
+└── README.md               # Ce fichier
 ```
 
-## 🧪 Tests et Qualité
+## 🔧 Scripts Disponibles
 
-### **Lancer les Tests**
 ```bash
-# Tests unitaires
-npm run test
+# Développement
+npm run dev          # Serveur de développement
+npm run build        # Build de production
+npm run preview      # Preview du build
+npm run lint         # Linting ESLint
 
-# Tests en mode watch
-npm run test:watch
-
-# Coverage
-npm run test:coverage
-
-# Tests CI
-npm run test:ci
+# Tests
+npm run test         # Tests unitaires
+npm run test:watch   # Tests en mode watch
+npm run test:coverage # Tests avec couverture
+npm run test:ci      # Tests pour CI/CD
 ```
 
-### **Linting et Formatting**
+## 🌍 Déploiement
+
+### **Vercel (Recommandé)**
 ```bash
-# Vérifier le code
-npm run lint
-
-# Build TypeScript
-npm run build
-```
-
-## 🌍 Variables d'Environnement
-
-### **Variables Obligatoires**
-| Variable | Description | Exemple |
-|----------|-------------|---------|
-| `VITE_SUPABASE_URL` | URL du projet Supabase | `https://abc.supabase.co` |
-| `VITE_SUPABASE_ANON_KEY` | Clé anonyme Supabase | `eyJ0eXAiOiJKV1Q...` |
-
-### **Variables Optionnelles**
-| Variable | Description | Défaut |
-|----------|-------------|--------|
-| `VITE_APP_NAME` | Nom de l'application | `Entraide Universelle` |
-| `VITE_APP_VERSION` | Version affichée | `1.0.0` |
-| `VITE_NOMINATIM_URL` | URL service Nominatim | `https://nominatim.openstreetmap.org` |
-
-## 🚀 Déploiement
-
-### **Plateformes Recommandées**
-
-#### **Vercel (Recommandé)**
-```bash
-# Installation Vercel CLI
+# Installer Vercel CLI
 npm i -g vercel
 
-# Déploiement
-vercel --prod
+# Déployer
+vercel
+
+# Variables d'environnement
+vercel env add VITE_SUPABASE_URL
+vercel env add VITE_SUPABASE_ANON_KEY
 ```
 
-#### **Netlify**
+### **Netlify**
 ```bash
 # Build
 npm run build
 
 # Déployer le dossier dist/
+# Configurer les variables d'environnement dans Netlify
 ```
 
-#### **Configuration Variables**
-Ajouter dans l'interface de votre plateforme :
-- `VITE_SUPABASE_URL`
-- `VITE_SUPABASE_ANON_KEY`
-- Et autres variables selon besoins
+### **Docker (Optionnel)**
+```dockerfile
+FROM node:18-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+COPY . .
+RUN npm run build
+EXPOSE 3000
+CMD ["npm", "run", "preview"]
+```
 
-## 📚 Documentation
+## 📊 Monitoring & Analytics
 
-- **[Architecture](docs/ARCHITECTURE.md)** - Design technique détaillé
-- **[API Documentation](docs/API_DOCS.md)** - Endpoints et exemples
-- **[Database Schema](docs/DB_SCHEMA.md)** - Structure base de données
-- **[Roadmap](docs/ROADMAP.md)** - Évolutions planifiées
-- **[Contributing](docs/CONTRIBUTING.md)** - Guide pour contribuer
+### **Métriques de Performance**
+- **Core Web Vitals** : LCP, FID, CLS
+- **Bundle Size** : Analyse avec Vite Bundle Analyzer
+- **Lighthouse** : Tests de performance réguliers
+
+### **Analytics (Optionnel)**
+- **Google Analytics** : Suivi d'usage
+- **Sentry** : Monitoring d'erreurs
+- **LogRocket** : Session replay
 
 ## 🤝 Contribution
 
-Voir [CONTRIBUTING.md](docs/CONTRIBUTING.md) pour :
-- Process de contribution
-- Standards de code
-- Guidelines de commit
-- Tests requis
+Voir [CONTRIBUTING.md](docs/CONTRIBUTING.md) pour les détails complets.
 
-## 🐛 Signaler un Bug
+### **Workflow de Contribution**
+1. Fork le projet
+2. Créer une branche feature (`git checkout -b feature/AmazingFeature`)
+3. Commit les changements (`git commit -m 'Add some AmazingFeature'`)
+4. Push vers la branche (`git push origin feature/AmazingFeature`)
+5. Ouvrir une Pull Request
 
-1. Vérifier les [issues existants](https://github.com/votre-username/entraide-universelle/issues)
-2. Créer un nouvel issue avec :
-   - Description claire du problème
-   - Étapes pour reproduire
-   - Capture d'écran si applicable
-   - Informations environnement (OS, navigateur)
+### **Standards de Code**
+- **TypeScript strict** : Types explicites obligatoires
+- **ESLint + Prettier** : Formatage automatique
+- **Tests** : Couverture minimum 80%
+- **Commits** : Conventionnal Commits
+- **Documentation** : JSDoc pour les fonctions publiques
 
 ## 📄 Licence
 
-Ce projet est sous licence **MIT** - voir [LICENSE](LICENSE) pour détails.
+Ce projet est sous licence MIT. Voir le fichier [LICENSE](LICENSE) pour plus de détails.
 
-## 🏆 Statut du Projet
+## 🆘 Support
 
-- ✅ **MVP Complété** - Fonctionnalités de base opérationnelles
-- 🚧 **V1.0 En Cours** - Améliorations UX et features avancées
-- 📋 **V2.0 Planifiée** - Applications mobiles et API publique
+### **Documentation**
+- [Architecture](docs/ARCHITECTURE.md) - Architecture technique détaillée
+- [API Documentation](docs/API_DOCS.md) - Endpoints et intégrations
+- [Database Schema](docs/DB_SCHEMA.md) - Structure de la base de données
+- [Roadmap](docs/ROADMAP.md) - Feuille de route et fonctionnalités
 
-## 🔗 Liens Utiles
+### **Communauté**
+- **Issues** : [GitHub Issues](https://github.com/votre-username/entraide-universelle/issues)
+- **Discussions** : [GitHub Discussions](https://github.com/votre-username/entraide-universelle/discussions)
+- **Email** : support@entraide-universelle.com
 
-- **Demo Live** : [https://entraide-universelle.vercel.app](https://entraide-universelle.vercel.app)
-- **Documentation** : [docs/](docs/)
-- **Supabase Dashboard** : [supabase.com/dashboard](https://supabase.com/dashboard)
-- **Issues & Support** : [GitHub Issues](https://github.com/votre-username/entraide-universelle/issues)
+### **FAQ**
+- **Problèmes de géolocalisation** : Vérifier les permissions du navigateur
+- **Erreurs Supabase** : Vérifier les variables d'environnement
+- **Performance** : Utiliser le mode production pour les tests
 
 ---
 
-**Fait avec ❤️ pour créer un monde plus solidaire**
+## 🎉 Remerciements
+
+- **Supabase** pour l'infrastructure backend
+- **OpenStreetMap** pour les données cartographiques
+- **React** et **TypeScript** pour l'écosystème frontend
+- **Tailwind CSS** pour le design system
+- **Framer Motion** pour les animations
+
+---
+
+**Fait avec ❤️ pour connecter les communautés et favoriser l'entraide locale.**
