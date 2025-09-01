@@ -1,8 +1,15 @@
 # 🗄️ Schéma de Base de Données - Entraide Universelle
 
-## Vue d'ensemble
+## 🎯 Vue d'ensemble
 
-La base de données Entraide Universelle utilise **PostgreSQL** hébergé sur Supabase avec une architecture relationnelle optimisée pour les applications d'entraide et de partage de compétences.
+La base de données Entraide Universelle utilise **PostgreSQL 15+** hébergé sur Supabase avec une architecture relationnelle moderne, optimisée pour les applications d'entraide collaborative et le partage de compétences à grande échelle.
+
+### **Caractéristiques Techniques**
+- **SGBD** : PostgreSQL 15+ avec extensions avancées
+- **Sécurité** : Row Level Security (RLS) sur toutes les tables
+- **Performance** : Index optimisés et requêtes géospatiales
+- **Scalabilité** : Design pour millions d'utilisateurs
+- **Real-time** : Synchronisation temps réel native
 
 ## 🏗️ Architecture de la Base
 

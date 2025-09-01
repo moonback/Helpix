@@ -1,8 +1,15 @@
 # 📚 Documentation API - Entraide Universelle
 
-## Vue d'ensemble
+## 🎯 Vue d'ensemble
 
-L'application Entraide Universelle utilise **Supabase** comme backend-as-a-service, fournissant une API REST complète avec authentification, base de données PostgreSQL, et fonctionnalités en temps réel.
+L'application Entraide Universelle utilise **Supabase** comme backend-as-a-service (BaaS), fournissant une API REST complète avec authentification robuste, base de données PostgreSQL relationnelle, et fonctionnalités temps réel avancées.
+
+### **Architecture API**
+- **Base URL** : `https://votre-projet.supabase.co/rest/v1/`
+- **Authentification** : JWT tokens avec auto-refresh
+- **Format** : JSON avec support TypeScript complet
+- **Real-time** : WebSocket subscriptions natives
+- **Sécurité** : Row Level Security (RLS) granulaire
 
 ## 🔐 Authentification
 

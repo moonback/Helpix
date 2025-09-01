@@ -1,428 +1,603 @@
-# 🤝 Guide de Contribution
+# 🤝 Guide de Contribution - Entraide Universelle
 
-Bienvenue dans le projet **Entraide Universelle** ! Ce guide vous aidera à contribuer efficacement au développement de cette plateforme d'entraide géolocalisée.
-
-## 📋 Table des matières
-
-- [🎯 Comment contribuer](#-comment-contribuer)
-- [🚀 Premiers pas](#-premiers-pas)
-- [📝 Standards de code](#-standards-de-code)
-- [🔧 Workflow de développement](#-workflow-de-développement)
-- [🧪 Tests](#-tests)
-- [📚 Documentation](#-documentation)
-- [🐛 Signaler des bugs](#-signaler-des-bugs)
-- [💡 Proposer des fonctionnalités](#-proposer-des-fonctionnalités)
-- [📞 Support](#-support)
-
-## 🎯 Comment contribuer
-
-### Types de contributions acceptées
-
-- 🐛 **Correction de bugs** : Identification et résolution de problèmes
-- ✨ **Nouvelles fonctionnalités** : Ajout de capacités utiles
-- 📚 **Documentation** : Amélioration de la documentation existante
-- 🎨 **UI/UX** : Améliorations de l'interface utilisateur
-- 🧪 **Tests** : Ajout ou amélioration des tests
-- 🔧 **Refactoring** : Amélioration du code existant
-- 🚀 **Performance** : Optimisations de performance
-
-### Niveaux de contribution
-
-- **Débutant** : Corrections mineures, documentation, tests simples
-- **Intermédiaire** : Nouvelles fonctionnalités, refactoring
-- **Avancé** : Architecture, optimisations majeures, intégrations complexes
-
-## 🚀 Premiers pas
-
-### 1. Fork et Clone
-
-```bash
-# Fork le projet sur GitHub
-# Puis clonez votre fork
-git clone https://github.com/votre-username/entraide-universelle.git
-cd entraide-universelle
-
-# Ajoutez le remote upstream
-git remote add upstream https://github.com/original-owner/entraide-universelle.git
-```
-
-### 2. Installation des dépendances
-
-```bash
-# Installation des dépendances
-npm install
-
-# Vérification de l'installation
-npm run dev
-```
-
-### 3. Configuration de l'environnement
-
-```bash
-# Copiez le fichier d'environnement
-cp .env.example .env.local
-
-# Configurez vos variables d'environnement
-# Voir README.md pour les détails
-```
-
-### 4. Branche de développement
-
-```bash
-# Créez une branche pour votre contribution
-git checkout -b feature/nom-de-votre-fonctionnalite
-# ou
-git checkout -b fix/nom-du-bug
-```
-
-## 📝 Standards de code
-
-### TypeScript
-
-- **Strict mode** : Utilisez toujours le mode strict TypeScript
-- **Types explicites** : Définissez des types clairs pour toutes les interfaces
-- **Interfaces** : Privilégiez les interfaces aux types pour les objets
-- **Imports** : Utilisez des imports/exports nommés
-
-```typescript
-// ✅ Bon
-interface User {
-  id: string;
-  email: string;
-  name: string;
-}
-
-export const createUser = (userData: Omit<User, 'id'>): User => {
-  // ...
-};
-
-// ❌ Éviter
-type User = {
-  id: string;
-  email: string;
-  name: string;
-};
-```
-
-### React
-
-- **Hooks** : Utilisez les hooks personnalisés pour la logique réutilisable
-- **Props** : Définissez des interfaces claires pour les props
-- **État** : Utilisez Zustand pour l'état global, useState pour l'état local
-- **Performance** : Utilisez React.memo, useMemo, useCallback quand nécessaire
-
-```typescript
-// ✅ Bon
-interface ButtonProps {
-  variant?: 'primary' | 'secondary';
-  size?: 'sm' | 'md' | 'lg';
-  onClick: () => void;
-  children: React.ReactNode;
-}
-
-export const Button = React.memo<ButtonProps>(({
-  variant = 'primary',
-  size = 'md',
-  onClick,
-  children
-}) => {
-  // ...
-});
-```
-
-### CSS/Tailwind
-
-- **Utility-first** : Privilégiez les classes Tailwind aux CSS personnalisés
-- **Responsive** : Utilisez les breakpoints Tailwind (sm:, md:, lg:, xl:)
-- **Dark mode** : Supportez le mode sombre avec dark: classes
-- **Accessibilité** : Utilisez les classes d'accessibilité Tailwind
-
-```tsx
-// ✅ Bon
-<div className="
-  flex flex-col space-y-4 
-  p-4 md:p-6 lg:p-8
-  bg-white dark:bg-gray-900
-  rounded-lg shadow-md
-  hover:shadow-lg transition-shadow
-">
-```
-
-### Nommage
-
-- **Fichiers** : PascalCase pour les composants, camelCase pour les utilitaires
-- **Variables** : camelCase
-- **Constantes** : UPPER_SNAKE_CASE
-- **Interfaces** : PascalCase avec préfixe I (optionnel)
-- **Types** : PascalCase
-
-```typescript
-// ✅ Bon
-// Fichiers
-Button.tsx
-useAuth.ts
-utils.ts
-
-// Variables et fonctions
-const userLocation = { lat: 0, lng: 0 };
-const MAX_RETRY_ATTEMPTS = 3;
-
-// Interfaces et types
-interface UserProfile {
-  // ...
-}
-
-type TaskStatus = 'pending' | 'in_progress' | 'completed';
-```
-
-## 🔧 Workflow de développement
-
-### 1. Planification
-
-- **Issue** : Créez ou assignez-vous une issue
-- **Discussion** : Commentez l'issue pour clarifier les besoins
-- **Estimation** : Estimez le temps de développement
-- **Labels** : Ajoutez les labels appropriés (bug, enhancement, documentation)
-
-### 2. Développement
-
-```bash
-# Mettez à jour votre branche
-git fetch upstream
-git rebase upstream/main
-
-# Développez votre fonctionnalité
-# Committez régulièrement avec des messages clairs
-git add .
-git commit -m "feat: ajouter la fonctionnalité de filtrage avancé
-
-- Implémentation du composant FilterModal
-- Ajout des options de tri par distance
-- Tests unitaires pour les nouvelles fonctionnalités"
-```
-
-### 3. Tests
-
-```bash
-# Lancez les tests
-npm test
-
-# Tests avec couverture
-npm run test:coverage
-
-# Tests en mode watch
-npm run test:watch
-```
-
-### 4. Linting et Formatting
-
-```bash
-# Vérification du code
-npm run lint
-
-# Correction automatique
-npm run lint:fix
-
-# Formatage
-npm run format
-```
-
-### 5. Pull Request
-
-```bash
-# Poussez votre branche
-git push origin feature/nom-de-votre-fonctionnalite
-
-# Créez une Pull Request sur GitHub
-# Utilisez le template fourni
-```
-
-## 🧪 Tests
-
-### Structure des tests
-
-```
-src/
-├── components/
-│   └── ui/
-│       ├── Button.tsx
-│       └── __tests__/
-│           └── Button.test.tsx
-├── hooks/
-│   ├── useAuth.ts
-│   └── __tests__/
-│       └── useAuth.test.ts
-└── features/
-    └── home/
-        ├── HomePage.tsx
-        └── __tests__/
-            └── HomePage.test.tsx
-```
-
-### Standards de test
-
-- **Coverage** : Minimum 80% de couverture
-- **Tests unitaires** : Pour tous les composants et hooks
-- **Tests d'intégration** : Pour les flux utilisateur critiques
-- **Mocks** : Utilisez des mocks pour les dépendances externes
-
-```typescript
-// ✅ Exemple de test
-import { render, screen, fireEvent } from '@testing-library/react';
-import { Button } from '../Button';
-
-describe('Button', () => {
-  it('should render with correct text', () => {
-    render(<Button>Cliquez ici</Button>);
-    expect(screen.getByText('Cliquez ici')).toBeInTheDocument();
-  });
-
-  it('should call onClick when clicked', () => {
-    const handleClick = jest.fn();
-    render(<Button onClick={handleClick}>Cliquez ici</Button>);
-    
-    fireEvent.click(screen.getByText('Cliquez ici'));
-    expect(handleClick).toHaveBeenCalledTimes(1);
-  });
-});
-```
-
-## 📚 Documentation
-
-### Standards de documentation
-
-- **JSDoc** : Documentez toutes les fonctions publiques
-- **README** : Mettez à jour le README si nécessaire
-- **Changelog** : Documentez les changements importants
-- **Architecture** : Mettez à jour ARCHITECTURE.md pour les changements majeurs
-
-```typescript
-/**
- * Calcule la distance entre deux points géographiques
- * @param lat1 - Latitude du premier point
- * @param lng1 - Longitude du premier point
- * @param lat2 - Latitude du second point
- * @param lng2 - Longitude du second point
- * @returns Distance en kilomètres
- * @example
- * const distance = calculateDistance(48.8566, 2.3522, 43.2965, 5.3698);
- * console.log(distance); // Distance Paris-Marseille
- */
-export const calculateDistance = (
-  lat1: number,
-  lng1: number,
-  lat2: number,
-  lng2: number
-): number => {
-  // Implémentation...
-};
-```
-
-## 🐛 Signaler des bugs
-
-### Template de bug report
-
-```markdown
-## 🐛 Description du bug
-
-Description claire et concise du problème.
-
-## 🔍 Étapes pour reproduire
-
-1. Aller sur '...'
-2. Cliquer sur '...'
-3. Faire défiler jusqu'à '...'
-4. Voir l'erreur
-
-## 📱 Comportement attendu
-
-Ce qui devrait se passer.
-
-## 📱 Comportement actuel
-
-Ce qui se passe actuellement.
-
-## 🖼️ Captures d'écran
-
-Si applicable, ajoutez des captures d'écran.
-
-## 💻 Environnement
-
-- OS: [ex: Windows 10, macOS 12.0]
-- Navigateur: [ex: Chrome 96, Safari 15]
-- Version: [ex: 1.0.0]
-
-## 📋 Informations supplémentaires
-
-Contexte supplémentaire, logs d'erreur, etc.
-```
-
-## 💡 Proposer des fonctionnalités
-
-### Template de feature request
-
-```markdown
-## 🚀 Résumé
-
-Description courte de la fonctionnalité souhaitée.
-
-## 🎯 Problème à résoudre
-
-Description du problème ou du besoin.
-
-## 💡 Solution proposée
-
-Description de la solution souhaitée.
-
-## 🔄 Alternatives considérées
-
-Autres solutions possibles.
-
-## 📱 Impact utilisateur
-
-Comment cette fonctionnalité améliorera l'expérience utilisateur.
-
-## 🎨 Mockups/Designs
-
-Si applicable, ajoutez des mockups ou designs.
-
-## 📋 Critères d'acceptation
-
-- [ ] Critère 1
-- [ ] Critère 2
-- [ ] Critère 3
-```
-
-## 📞 Support
-
-### Canaux de communication
-
-- **GitHub Issues** : Pour les bugs et feature requests
-- **Discussions GitHub** : Pour les questions générales
-- **Email** : [votre-email@domaine.com]
-
-### Ressources utiles
-
-- [README.md](./README.md) - Documentation principale
-- [ARCHITECTURE.md](./ARCHITECTURE.md) - Architecture technique
-- [API_DOCS.md](./API_DOCS.md) - Documentation API
-- [ROADMAP.md](./ROADMAP.md) - Feuille de route
-- [DB_SCHEMA.md](./DB_SCHEMA.md) - Schéma de base de données
-
-### Code de conduite
-
-Nous nous engageons à maintenir un environnement de développement ouvert et accueillant. Tous les contributeurs doivent :
-
-- Être respectueux et inclusifs
-- Collaborer de manière constructive
-- Respecter les standards de code établis
-- Tester leurs contributions
-- Documenter leurs changements
-
-## 🎉 Remerciements
-
-Merci de contribuer à **Entraide Universelle** ! Votre contribution aide à créer une plateforme d'entraide plus accessible et utile pour tous.
+Merci de votre intérêt pour contribuer à Entraide Universelle ! Ce guide vous aidera à contribuer efficacement au projet.
 
 ---
 
-**Besoin d'aide ?** N'hésitez pas à ouvrir une issue ou à nous contacter directement !
+## 🎯 Types de Contributions
+
+Nous accueillons plusieurs types de contributions :
+
+### **🐛 Corrections de Bugs**
+- Signalement de bugs avec reproduction
+- Corrections avec tests appropriés
+- Améliorations de la robustesse
+
+### **✨ Nouvelles Fonctionnalités**
+- Propositions d'améliorations UX/UI
+- Nouvelles features avec spécifications
+- Optimisations de performance
+
+### **📚 Documentation**
+- Amélioration de la documentation
+- Guides utilisateur et développeur
+- Traductions et localisation
+
+### **🧪 Tests**
+- Tests unitaires et d'intégration
+- Tests de performance
+- Tests d'accessibilité
+
+### **🎨 Design & UX**
+- Améliorations d'interface
+- Accessibilité et inclusion
+- Animations et micro-interactions
+
+---
+
+## 🚀 Démarrage Rapide
+
+### **1. Fork & Clone**
+```bash
+# Fork le repository sur GitHub
+# Puis cloner votre fork
+git clone https://github.com/VOTRE-USERNAME/entraide-universelle.git
+cd entraide-universelle
+
+# Ajouter le remote upstream
+git remote add upstream https://github.com/original-owner/entraide-universelle.git
+```
+
+### **2. Installation**
+```bash
+# Installer les dépendances
+npm install
+
+# Copier les variables d'environnement
+cp .env.example .env.local
+# Configurer vos clés Supabase dans .env.local
+
+# Démarrer le serveur de développement
+npm run dev
+```
+
+### **3. Vérifier l'Installation**
+```bash
+# Lancer les tests
+npm run test
+
+# Vérifier le linting
+npm run lint
+
+# Tester le build
+npm run build
+```
+
+---
+
+## 🔄 Workflow de Contribution
+
+### **1. Créer une Branche**
+```bash
+# Toujours partir de main mis à jour
+git checkout main
+git pull upstream main
+
+# Créer une branche feature/bugfix
+git checkout -b feature/nouvelle-fonctionnalite
+# ou
+git checkout -b fix/correction-bug
+```
+
+### **2. Convention de Nommage des Branches**
+- `feature/nom-fonctionnalite` - Nouvelles fonctionnalités
+- `fix/nom-bug` - Corrections de bugs
+- `docs/sujet` - Modifications documentation
+- `test/composant` - Ajout/modification tests
+- `refactor/composant` - Refactoring code
+- `style/composant` - Modifications CSS/UI
+
+### **3. Développer**
+```bash
+# Développer votre fonctionnalité
+# Commiter régulièrement avec des messages clairs
+
+# Synchroniser avec upstream régulièrement
+git fetch upstream
+git rebase upstream/main
+```
+
+### **4. Tests et Qualité**
+```bash
+# Avant de push, vérifier :
+npm run test           # Tests passent
+npm run lint          # Pas d'erreurs linting
+npm run build         # Build réussit
+npm run test:coverage # Coverage maintenu
+```
+
+### **5. Soumettre la PR**
+```bash
+# Pousser votre branche
+git push origin feature/nouvelle-fonctionnalite
+
+# Créer une Pull Request sur GitHub
+# Utiliser le template fourni
+```
+
+---
+
+## 📝 Standards de Code
+
+### **TypeScript**
+```typescript
+// ✅ Bon : Types explicites et interfaces claires
+interface TaskProps {
+  task: Task;
+  onEdit: (id: number) => void;
+  onDelete: (id: number) => Promise<void>;
+}
+
+const TaskCard: React.FC<TaskProps> = ({ task, onEdit, onDelete }) => {
+  // Implementation
+};
+
+// ❌ Éviter : Any types et props non typées
+const TaskCard = (props: any) => {
+  // Implementation
+};
+```
+
+### **React Components**
+```typescript
+// ✅ Bon : Functional components avec hooks
+const TaskList: React.FC<TaskListProps> = ({ tasks, filters }) => {
+  const [loading, setLoading] = useState(false);
+  
+  const filteredTasks = useMemo(() => {
+    return tasks.filter(task => 
+      filters.category ? task.category === filters.category : true
+    );
+  }, [tasks, filters]);
+
+  useEffect(() => {
+    // Side effects
+  }, []);
+
+  return (
+    <div className="task-list">
+      {/* JSX */}
+    </div>
+  );
+};
+
+// ❌ Éviter : Class components et inline functions
+class TaskList extends Component {
+  render() {
+    return (
+      <div>
+        {tasks.map(task => 
+          <Task 
+            key={task.id} 
+            onClick={() => this.handleClick(task.id)} 
+          />
+        )}
+      </div>
+    );
+  }
+}
+```
+
+### **Styles et CSS**
+```typescript
+// ✅ Bon : Tailwind utility classes
+<button className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+  Action
+</button>
+
+// ✅ Bon : Classes conditionnelles avec clsx
+const buttonClasses = clsx(
+  'font-medium py-2 px-4 rounded-lg transition-colors',
+  {
+    'bg-blue-500 hover:bg-blue-600 text-white': variant === 'primary',
+    'bg-gray-200 hover:bg-gray-300 text-gray-800': variant === 'secondary',
+  }
+);
+
+// ❌ Éviter : Styles inline
+<button style={{ backgroundColor: 'blue', color: 'white' }}>
+  Action
+</button>
+```
+
+### **Zustand Stores**
+```typescript
+// ✅ Bon : Store typé avec actions claires
+interface TaskStore {
+  tasks: Task[];
+  isLoading: boolean;
+  error: string | null;
+  
+  fetchTasks: () => Promise<void>;
+  createTask: (task: CreateTaskRequest) => Promise<void>;
+  updateTask: (id: number, updates: Partial<Task>) => Promise<void>;
+  deleteTask: (id: number) => Promise<void>;
+}
+
+const useTaskStore = create<TaskStore>((set, get) => ({
+  tasks: [],
+  isLoading: false,
+  error: null,
+
+  fetchTasks: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      const { data, error } = await supabase
+        .from('tasks')
+        .select('*')
+        .order('created_at', { ascending: false });
+        
+      if (error) throw error;
+      set({ tasks: data || [], isLoading: false });
+    } catch (error) {
+      set({ error: error.message, isLoading: false });
+    }
+  },
+  
+  // Autres actions...
+}));
+```
+
+---
+
+## 🧪 Standards de Tests
+
+### **Tests de Composants**
+```typescript
+// tests/components/Button.test.tsx
+import { render, screen, fireEvent } from '@testing-library/react';
+import { Button } from '@/components/ui/Button';
+
+describe('Button', () => {
+  it('renders correctly with text', () => {
+    render(<Button>Click me</Button>);
+    expect(screen.getByRole('button', { name: 'Click me' })).toBeInTheDocument();
+  });
+
+  it('calls onClick when clicked', () => {
+    const handleClick = jest.fn();
+    render(<Button onClick={handleClick}>Click me</Button>);
+    
+    fireEvent.click(screen.getByRole('button'));
+    expect(handleClick).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows loading state correctly', () => {
+    render(<Button loading>Loading</Button>);
+    expect(screen.getByRole('button')).toBeDisabled();
+    expect(screen.getByText('Loading')).toBeInTheDocument();
+  });
+});
+```
+
+### **Tests de Hooks**
+```typescript
+// tests/hooks/useAuth.test.ts
+import { renderHook, act } from '@testing-library/react';
+import { useAuth } from '@/hooks/useAuth';
+
+// Mock Supabase
+jest.mock('@/lib/supabase', () => ({
+  supabase: {
+    auth: {
+      signIn: jest.fn(),
+      signOut: jest.fn(),
+      getSession: jest.fn()
+    }
+  }
+}));
+
+describe('useAuth', () => {
+  it('should handle sign in correctly', async () => {
+    const { result } = renderHook(() => useAuth());
+    
+    await act(async () => {
+      await result.current.signIn('test@example.com', 'password');
+    });
+    
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.error).toBe(null);
+  });
+});
+```
+
+### **Coverage Requirements**
+- **Minimum 80%** de couverture globale
+- **100%** pour les utilitaires critiques
+- **90%** pour les stores Zustand
+- **70%** pour les composants UI
+- Tests d'intégration pour les flows critiques
+
+---
+
+## 📋 Conventions de Commit
+
+### **Format des Messages**
+```bash
+# Format : type(scope): description
+
+# Types :
+feat(auth): add social login with Google
+fix(chat): resolve message rendering issue
+docs(readme): update installation instructions
+test(tasks): add unit tests for task store
+refactor(ui): optimize Button component performance
+style(home): improve mobile responsiveness
+chore(deps): update dependencies to latest versions
+```
+
+### **Types de Commits**
+- `feat` - Nouvelle fonctionnalité
+- `fix` - Correction de bug
+- `docs` - Documentation
+- `test` - Tests
+- `refactor` - Refactoring sans changement fonctionnel
+- `style` - Formatage, style, CSS
+- `perf` - Améliorations de performance
+- `chore` - Maintenance, dépendances
+
+### **Scopes Recommandés**
+- `auth` - Authentification
+- `tasks` - Gestion des tâches
+- `chat` - Messagerie
+- `map` - Carte et géolocalisation
+- `ui` - Composants UI
+- `store` - Stores Zustand
+- `api` - Intégrations API
+- `build` - Configuration build
+
+### **Exemples de Bons Commits**
+```bash
+feat(tasks): add filtering by priority and category
+fix(chat): prevent duplicate messages in real-time updates
+docs(api): document new authentication endpoints
+test(store): add comprehensive tests for task store actions
+refactor(hooks): extract geolocation logic to custom hook
+style(mobile): improve navigation on small screens
+perf(map): optimize marker clustering for better performance
+chore(deps): upgrade React to version 18.2.0
+```
+
+---
+
+## 🔍 Processus de Review
+
+### **Checklist Avant Soumission**
+- [ ] Code respecte les standards de style
+- [ ] Tests ajoutés/mis à jour si nécessaire
+- [ ] Documentation mise à jour
+- [ ] Pas de console.log ou debug code
+- [ ] Performance considérée
+- [ ] Accessibilité vérifiée
+- [ ] Mobile testé
+- [ ] TypeScript strict respecté
+
+### **Description de PR**
+```markdown
+## Description
+Brève description de ce qui a été changé et pourquoi.
+
+## Type de changement
+- [ ] Bug fix (changement non-breaking qui corrige un problème)
+- [ ] Nouvelle fonctionnalité (changement non-breaking qui ajoute une fonctionnalité)
+- [ ] Breaking change (fix ou feature qui cassent la compatibilité)
+- [ ] Documentation (changements de documentation uniquement)
+
+## Comment tester
+1. Aller à...
+2. Cliquer sur...
+3. Faire défiler jusqu'à...
+4. Voir...
+
+## Captures d'écran (si applicable)
+Avant / Après ou captures des nouvelles fonctionnalités
+
+## Checklist
+- [ ] Mon code respecte les standards du projet
+- [ ] J'ai fait une auto-review de mon code
+- [ ] J'ai commenté mon code, particulièrement les parties complexes
+- [ ] J'ai fait les changements de documentation correspondants
+- [ ] Mes changements ne génèrent pas de nouveaux warnings
+- [ ] J'ai ajouté des tests qui prouvent que ma correction/fonctionnalité marche
+- [ ] Les nouveaux et anciens tests passent localement
+```
+
+### **Processus de Review**
+1. **Review automatique** - CI/CD checks
+2. **Review par les pairs** - Au moins 1 approval requis
+3. **Review du maintainer** - Si changement majeur
+4. **Tests manuels** - Sur device si UI/UX
+5. **Merge** - Squash and merge préféré
+
+---
+
+## 🎨 Guidelines UI/UX
+
+### **Design System**
+```typescript
+// Suivre le design system existant
+// Colors
+const colors = {
+  primary: {
+    50: '#eff6ff',
+    500: '#3b82f6',
+    900: '#1e3a8a'
+  },
+  gray: {
+    50: '#f9fafb',
+    500: '#6b7280',
+    900: '#111827'
+  }
+};
+
+// Spacing (Tailwind scale)
+const spacing = ['0', '1', '2', '3', '4', '6', '8', '12', '16', '24'];
+
+// Typography
+const typography = {
+  xs: '0.75rem',
+  sm: '0.875rem',
+  base: '1rem',
+  lg: '1.125rem',
+  xl: '1.25rem'
+};
+```
+
+### **Composants UI**
+- Utiliser les composants existants quand possible
+- Créer de nouveaux composants réutilisables
+- Respecter les props interfaces existantes
+- Ajouter des variants plutôt que dupliquer
+- Tester sur mobile ET desktop
+
+### **Accessibilité**
+```typescript
+// ✅ Bon : ARIA labels et semantic HTML
+<button 
+  aria-label="Supprimer la tâche"
+  aria-describedby="delete-description"
+  onClick={handleDelete}
+>
+  <TrashIcon />
+</button>
+<span id="delete-description" className="sr-only">
+  Cette action supprimera définitivement la tâche
+</span>
+
+// ✅ Bon : Navigation clavier
+<div 
+  role="button"
+  tabIndex={0}
+  onKeyDown={(e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      handleClick();
+    }
+  }}
+  onClick={handleClick}
+>
+  Action
+</div>
+```
+
+---
+
+## 🚨 Signalement de Bugs
+
+### **Template d'Issue Bug**
+```markdown
+**Describe the bug**
+A clear and concise description of what the bug is.
+
+**To Reproduce**
+Steps to reproduce the behavior:
+1. Go to '...'
+2. Click on '....'
+3. Scroll down to '....'
+4. See error
+
+**Expected behavior**
+A clear and concise description of what you expected to happen.
+
+**Screenshots**
+If applicable, add screenshots to help explain your problem.
+
+**Desktop (please complete the following information):**
+ - OS: [e.g. iOS]
+ - Browser [e.g. chrome, safari]
+ - Version [e.g. 22]
+
+**Smartphone (please complete the following information):**
+ - Device: [e.g. iPhone6]
+ - OS: [e.g. iOS8.1]
+ - Browser [e.g. stock browser, safari]
+ - Version [e.g. 22]
+
+**Additional context**
+Add any other context about the problem here.
+```
+
+### **Informations Importantes**
+- **Étapes de reproduction** claires
+- **Comportement attendu** vs **comportement actuel**
+- **Screenshots/videos** si applicable
+- **Environnement** (OS, navigateur, device)
+- **Console logs** si erreurs JavaScript
+
+---
+
+## 💡 Proposition de Fonctionnalités
+
+### **Template d'Issue Feature**
+```markdown
+**Is your feature request related to a problem? Please describe.**
+A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
+
+**Describe the solution you'd like**
+A clear and concise description of what you want to happen.
+
+**Describe alternatives you've considered**
+A clear and concise description of any alternative solutions or features you've considered.
+
+**Additional context**
+Add any other context or screenshots about the feature request here.
+
+**User Story**
+As a [type of user], I want [goal] so that [reason].
+```
+
+### **Critères d'Acceptation**
+- Feature alignée avec la vision du projet
+- User story claire avec bénéfice utilisateur
+- Faisabilité technique évaluée
+- Impact sur performance considéré
+- Design/maquettes fournies si UI
+
+---
+
+## 🤝 Code de Conduite
+
+### **Notre Engagement**
+Nous nous engageons à faire de la participation à notre projet une expérience sans harcèlement pour tous, indépendamment de l'âge, de la taille corporelle, du handicap visible ou invisible, de l'ethnicité, des caractéristiques sexuelles, de l'identité et de l'expression de genre, du niveau d'expérience, de l'éducation, du statut socio-économique, de la nationalité, de l'apparence personnelle, de la race, de la religion ou de l'identité et de l'orientation sexuelles.
+
+### **Standards Attendus**
+- Utiliser un langage accueillant et inclusif
+- Respecter les différents points de vue et expériences
+- Accepter gracieusement les critiques constructives
+- Se concentrer sur ce qui est le mieux pour la communauté
+- Faire preuve d'empathie envers les autres membres
+
+### **Comportements Inacceptables**
+- Commentaires insultants/désobligeants et attaques personnelles ou politiques
+- Harcèlement public ou privé
+- Publication d'informations privées sans permission explicite
+- Autre conduite qui pourrait raisonnablement être considérée comme inappropriée
+
+---
+
+## 📞 Support et Questions
+
+### **Où Obtenir de l'Aide**
+- **GitHub Discussions** - Questions générales et discussions
+- **GitHub Issues** - Bugs et demandes de fonctionnalités
+- **Discord/Slack** - Chat en temps réel (si disponible)
+- **Email** - contact@entraide-universelle.fr
+
+### **Documentation**
+- **[README.md](../README.md)** - Guide de démarrage
+- **[ARCHITECTURE.md](ARCHITECTURE.md)** - Architecture technique
+- **[API_DOCS.md](API_DOCS.md)** - Documentation API
+- **[DB_SCHEMA.md](DB_SCHEMA.md)** - Schéma base de données
+
+---
+
+**Merci de contribuer à Entraide Universelle ! Ensemble, construisons un monde plus solidaire. 🤝**
