@@ -34,45 +34,77 @@ export const useGeolocation = (): UseGeolocationReturn => {
 
     setState(prev => ({ ...prev, isLoading: true, error: null }));
 
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setState({
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-          accuracy: position.coords.accuracy,
-          error: null,
-          isLoading: false,
-        });
-      },
-      (error) => {
-        let errorMessage = 'Erreur de géolocalisation';
-        
-        switch (error.code) {
-          case error.PERMISSION_DENIED:
-            errorMessage = 'Permission de géolocalisation refusée. Veuillez l\'activer dans les paramètres de votre navigateur.';
-            break;
-          case error.POSITION_UNAVAILABLE:
-            errorMessage = 'Informations de localisation indisponibles.';
-            break;
-          case error.TIMEOUT:
-            errorMessage = 'Délai d\'attente dépassé pour la géolocalisation.';
-            break;
-          default:
-            errorMessage = 'Erreur inconnue lors de la géolocalisation.';
-        }
+    // Fonction pour essayer la géolocalisation avec différents niveaux de précision
+    const tryGeolocation = (attempt: number = 1, maxAttempts: number = 3) => {
+      const options = {
+        enableHighAccuracy: attempt === 1, // Haute précision seulement au premier essai
+        timeout: attempt === 1 ? 15000 : 10000, // Plus de temps pour la haute précision
+        maximumAge: attempt === 1 ? 0 : 300000, // Pas de cache pour la haute précision
+      };
 
-        setState(prev => ({
-          ...prev,
-          error: errorMessage,
-          isLoading: false,
-        }));
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 300000, // 5 minutes
-      }
-    );
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          // Vérifier la précision (en mètres)
+          const accuracy = position.coords.accuracy;
+          
+          // Si la précision est acceptable (< 100m) ou si c'est le dernier essai
+          if (accuracy < 100 || attempt === maxAttempts) {
+            setState({
+              latitude: position.coords.latitude,
+              longitude: position.coords.longitude,
+              accuracy: position.coords.accuracy,
+              error: null,
+              isLoading: false,
+            });
+          } else if (attempt < maxAttempts) {
+            // Essayer avec moins de précision
+            setTimeout(() => tryGeolocation(attempt + 1, maxAttempts), 1000);
+          } else {
+            // Accepter même si la précision n'est pas parfaite
+            setState({
+              latitude: position.coords.latitude,
+              longitude: position.coords.longitude,
+              accuracy: position.coords.accuracy,
+              error: null,
+              isLoading: false,
+            });
+          }
+        },
+        (error) => {
+          if (attempt < maxAttempts) {
+            // Réessayer avec moins de précision
+            setTimeout(() => tryGeolocation(attempt + 1, maxAttempts), 1000);
+          } else {
+            // Dernier essai échoué
+            let errorMessage = 'Erreur de géolocalisation';
+            
+            switch (error.code) {
+              case error.PERMISSION_DENIED:
+                errorMessage = 'Permission de géolocalisation refusée. Veuillez l\'activer dans les paramètres de votre navigateur.';
+                break;
+              case error.POSITION_UNAVAILABLE:
+                errorMessage = 'Informations de localisation indisponibles.';
+                break;
+              case error.TIMEOUT:
+                errorMessage = 'Délai d\'attente dépassé pour la géolocalisation.';
+                break;
+              default:
+                errorMessage = 'Erreur inconnue lors de la géolocalisation.';
+            }
+
+            setState(prev => ({
+              ...prev,
+              error: errorMessage,
+              isLoading: false,
+            }));
+          }
+        },
+        options
+      );
+    };
+
+    // Commencer les tentatives
+    tryGeolocation();
   }, []);
 
   const clearLocation = useCallback(() => {

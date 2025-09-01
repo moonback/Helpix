@@ -17,10 +17,18 @@ const GEOCODING_SERVICES = [
   {
     name: 'Nominatim',
     url: 'https://nominatim.openstreetmap.org/reverse',
-    timeout: 5000,
+    timeout: 8000,
     headers: {
       'Accept-Language': 'fr,en',
       'User-Agent': 'EntraideUniverselle/1.0'
+    }
+  },
+  {
+    name: 'BigDataCloud',
+    url: 'https://api.bigdatacloud.net/data/reverse-geocode-client',
+    timeout: 10000,
+    headers: {
+      'Accept-Language': 'fr,en'
     }
   },
   {
@@ -94,59 +102,166 @@ export const useReverseGeocoding = (): UseReverseGeocodingReturn => {
     let address = '';
     let streetAddress = '';
     let cityInfo = '';
+    let regionInfo = '';
     
     if (data.address) {
       const addr = data.address;
       
-      // Construire l'adresse de rue
+      // Construire l'adresse de rue (plus détaillée)
       if (addr.house_number && addr.road) {
         streetAddress = `${addr.house_number} ${addr.road}`;
       } else if (addr.road) {
         streetAddress = addr.road;
+      } else if (addr.pedestrian) {
+        streetAddress = addr.pedestrian;
+      } else if (addr.footway) {
+        streetAddress = addr.footway;
+      } else if (addr.path) {
+        streetAddress = addr.path;
       }
       
-      // Construire les informations de ville
-      if (addr.postcode && addr.city) {
-        cityInfo = `${addr.postcode} ${addr.city}`;
-      } else if (addr.city) {
-        cityInfo = addr.city;
+      // Construire les informations de ville (plus complètes)
+      let cityParts = [];
+      
+      // Ajouter le code postal
+      if (addr.postcode) {
+        cityParts.push(addr.postcode);
       }
       
-      // Assembler l'adresse complète
-      if (streetAddress && cityInfo) {
-        address = `${streetAddress}, ${cityInfo}`;
-      } else if (streetAddress) {
-        address = streetAddress;
-      } else if (cityInfo) {
-        address = cityInfo;
+      // Ajouter la ville (priorité aux différents types)
+      if (addr.city) {
+        cityParts.push(addr.city);
+      } else if (addr.town) {
+        cityParts.push(addr.town);
+      } else if (addr.village) {
+        cityParts.push(addr.village);
+      } else if (addr.hamlet) {
+        cityParts.push(addr.hamlet);
+      } else if (addr.municipality) {
+        cityParts.push(addr.municipality);
+      }
+      
+      cityInfo = cityParts.join(' ');
+      
+      // Construire les informations de région
+      let regionParts = [];
+      
+      // Ajouter le département/région
+      if (addr.county) {
+        regionParts.push(addr.county);
+      } else if (addr.state) {
+        regionParts.push(addr.state);
+      } else if (addr.region) {
+        regionParts.push(addr.region);
       }
       
       // Ajouter le pays si différent de la France
-      if (addr.country && addr.country !== 'France' && address) {
-        address += `, ${addr.country}`;
+      if (addr.country && addr.country !== 'France') {
+        regionParts.push(addr.country);
       }
+      
+      regionInfo = regionParts.join(', ');
+      
+      // Assembler l'adresse complète de manière hiérarchique
+      let addressParts = [];
+      
+      if (streetAddress) {
+        addressParts.push(streetAddress);
+      }
+      
+      if (cityInfo) {
+        addressParts.push(cityInfo);
+      }
+      
+      if (regionInfo) {
+        addressParts.push(regionInfo);
+      }
+      
+      address = addressParts.join(', ');
     }
 
-    // Si pas d'adresse détaillée, utiliser le nom d'affichage
+    // Si pas d'adresse détaillée, utiliser le nom d'affichage avec plus de contexte
     if (!address && data.display_name) {
       const parts = data.display_name.split(',');
-      // Prendre les 3 premières parties pour éviter une adresse trop longue
-      address = parts.slice(0, 3).join(',').trim();
+      // Prendre les 4 premières parties pour plus de contexte
+      address = parts.slice(0, 4).join(',').trim();
+    }
+
+    // Nettoyer l'adresse finale
+    if (address) {
+      // Supprimer les espaces multiples
+      address = address.replace(/\s+/g, ' ').trim();
+      // Supprimer les virgules multiples
+      address = address.replace(/,+/g, ',').trim();
+      // Supprimer les virgules en début/fin
+      address = address.replace(/^,|,$/g, '').trim();
     }
 
     return address || 'Adresse non disponible';
   };
 
-  const tryGeocodingService = async (service: typeof GEOCODING_SERVICES[0], lat: number, lon: number): Promise<string> => {
-    const params = new URLSearchParams({
-      format: 'json',
-      lat: lat.toString(),
-      lon: lon.toString(),
-      zoom: '18',
-      addressdetails: '1'
-    });
+  const parseBigDataCloudResponse = (data: any): string => {
+    let address = '';
+    let addressParts = [];
+    
+    if (data.localityInfo && data.localityInfo.administrative) {
+      const admin = data.localityInfo.administrative;
+      
+      // Construire l'adresse de rue
+      if (data.streetNumber && data.street) {
+        addressParts.push(`${data.streetNumber} ${data.street}`);
+      } else if (data.street) {
+        addressParts.push(data.street);
+      }
+      
+      // Ajouter la ville et le code postal
+      if (data.postcode && data.city) {
+        addressParts.push(`${data.postcode} ${data.city}`);
+      } else if (data.city) {
+        addressParts.push(data.city);
+      }
+      
+      // Ajouter la région/département
+      if (admin[1] && admin[1].name) {
+        addressParts.push(admin[1].name);
+      }
+      
+      // Ajouter le pays si différent de la France
+      if (data.countryName && data.countryName !== 'France') {
+        addressParts.push(data.countryName);
+      }
+      
+      address = addressParts.join(', ');
+    }
 
-    const url = `${service.url}?${params.toString()}`;
+    return address || data.locality || 'Adresse non disponible';
+  };
+
+  const tryGeocodingService = async (service: typeof GEOCODING_SERVICES[0], lat: number, lon: number): Promise<string> => {
+    let params: URLSearchParams;
+    let url: string;
+    
+    if (service.name === 'BigDataCloud') {
+      params = new URLSearchParams({
+        latitude: lat.toString(),
+        longitude: lon.toString(),
+        localityLanguage: 'fr'
+      });
+      url = `${service.url}?${params.toString()}`;
+    } else {
+      // Nominatim et autres services
+      params = new URLSearchParams({
+        format: 'json',
+        lat: lat.toString(),
+        lon: lon.toString(),
+        zoom: '18',
+        addressdetails: '1',
+        extratags: '1',
+        namedetails: '1',
+        'accept-language': 'fr,en'
+      });
+      url = `${service.url}?${params.toString()}`;
+    }
     
     const response = await fetchWithTimeout(url, {
       headers: service.headers
@@ -162,7 +277,12 @@ export const useReverseGeocoding = (): UseReverseGeocodingReturn => {
       throw new Error(data.error);
     }
 
-    return parseNominatimResponse(data);
+    // Parser selon le service
+    if (service.name === 'BigDataCloud') {
+      return parseBigDataCloudResponse(data);
+    } else {
+      return parseNominatimResponse(data);
+    }
   };
 
   const getAddressFromCoords = useCallback(async (latitude: number, longitude: number) => {
