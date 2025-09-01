@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import { useWalletStore } from '@/features/wallet/stores/walletStore';
 import CreditsDisplay from './CreditsDisplay';
 import CreditPurchaseModal from './CreditPurchaseModal';
-import Button from './Button';
 import { Plus, ShoppingCart, AlertTriangle, Coins } from 'lucide-react';
 
 interface CreditsDisplayWithPurchaseProps {
@@ -68,11 +67,9 @@ const CreditsDisplayWithPurchase: React.FC<CreditsDisplayWithPurchaseProps> = ({
 
         {/* Bouton d'achat */}
         {showPurchaseButton && (
-          <Button
-            variant="outline"
-            size="sm"
+          <button
             onClick={handlePurchaseClick}
-            className={`flex items-center gap-1.5 transition-all duration-200 ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg border transition-all duration-200 ${
               !hasEnoughCredits
                 ? 'border-red-300 text-red-600 hover:bg-red-50 hover:border-red-400'
                 : 'border-blue-300 text-blue-600 hover:bg-blue-50 hover:border-blue-400'
@@ -82,7 +79,7 @@ const CreditsDisplayWithPurchase: React.FC<CreditsDisplayWithPurchaseProps> = ({
             <span className="hidden sm:inline">
               {!hasEnoughCredits ? 'Recharger' : 'Acheter'}
             </span>
-          </Button>
+          </button>
         )}
       </div>
 
