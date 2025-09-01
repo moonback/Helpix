@@ -479,7 +479,7 @@ const HomePage: React.FC = () => {
               </motion.p>
               
               {/* Enhanced Stats Cards */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-6xl mx-auto mb-10">
+              {/* <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-6xl mx-auto mb-10">
                 {statsCards.map((stat, index) => (
                   <motion.div
                     key={stat.title}
@@ -501,7 +501,7 @@ const HomePage: React.FC = () => {
                     )}
                   </motion.div>
                 ))}
-              </div>
+              </div> */}
 
               {/* CTA Buttons */}
               <motion.div
