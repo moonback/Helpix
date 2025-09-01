@@ -18,6 +18,8 @@ import FilterButton from '@/components/ui/FilterButton';
 import FilterBadge from '@/components/ui/FilterBadge';
 import HelpOfferModal from '@/components/ui/HelpOfferModal';
 import CreditsDisplay from '@/components/ui/CreditsDisplay';
+import CreditsDisplayWithPurchase from '@/components/ui/CreditsDisplayWithPurchase';
+import CreditSystemInfo from '@/components/ui/CreditSystemInfo';
 import { calculateDistance, formatDistance } from '@/lib/utils';
 import { 
   Search, 
@@ -365,8 +367,8 @@ const HomePage: React.FC = () => {
 
               {/* Localisation, crédits et boutons à droite */}
               <div className="flex items-center gap-3 flex-shrink-0">
-                {/* Affichage des crédits */}
-                <CreditsDisplay />
+                {/* Affichage des crédits avec achat */}
+                <CreditsDisplayWithPurchase />
 
                 {/* Status de localisation */}
                 <div className="flex items-center">
@@ -541,6 +543,9 @@ const HomePage: React.FC = () => {
       <div className="relative z-10 px-6 py-8">
         <div className="max-w-7xl mx-auto">
 
+
+          {/* Information sur le système de crédits */}
+          <CreditSystemInfo className="mb-8" />
 
           {/* Quick Actions Section */}
           <AnimatePresence>

@@ -3,24 +3,31 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useTaskStore } from '@/stores/taskStore';
 import { useAuthStore } from '@/stores/authStore';
+import { useWalletStore } from '@/features/wallet/stores/walletStore';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
 import AddressSearch from '@/components/ui/AddressSearch';
 import LocationMap from '@/components/ui/LocationMap';
+import CreditCheckModal from '@/components/ui/CreditCheckModal';
+import CreditsDisplayWithPurchase from '@/components/ui/CreditsDisplayWithPurchase';
 import { 
   ArrowLeft, 
   Clock, 
   Target, 
   DollarSign, 
   Calendar,
-  Tag
+  Tag,
+  CreditCard,
+  AlertTriangle,
+  CheckCircle
 } from 'lucide-react';
 
 const AddTaskPage: React.FC = () => {
   const navigate = useNavigate();
   const { createTask } = useTaskStore();
   const { user } = useAuthStore();
+  const { wallet, createTransaction } = useWalletStore();
   
   const [formData, setFormData] = useState({
     title: '',
@@ -41,17 +48,34 @@ const AddTaskPage: React.FC = () => {
   } | null>(null);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCreditCheckOpen, setIsCreditCheckOpen] = useState(false);
+
+  // Calculer le coût de la tâche (minimum 10 crédits)
+  const taskCost = Math.max(10, parseInt(formData.budget_credits) || 0);
+  const hasEnoughCredits = (wallet?.balance || 0) >= taskCost;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
 
+    // Vérifier les crédits avant de créer la tâche
+    if (!hasEnoughCredits) {
+      setIsCreditCheckOpen(true);
+      return;
+    }
+
+    await createTaskWithCredits();
+  };
+
+  const createTaskWithCredits = async () => {
+    if (!user || !wallet) return;
+
     setIsSubmitting(true);
     try {
       const taskData = {
         ...formData,
-        user_id: user.id, // Ajouter l'ID utilisateur UUID
-        status: 'open' as 'open' | 'in_progress' | 'completed' | 'cancelled', // Statut par défaut
+        user_id: user.id,
+        status: 'open' as 'open' | 'in_progress' | 'completed' | 'cancelled',
         estimated_duration: parseInt(formData.estimated_duration),
         budget_credits: parseInt(formData.budget_credits),
         required_skills: formData.required_skills.split(',').map(s => s.trim()).filter(Boolean),
@@ -63,9 +87,24 @@ const AddTaskPage: React.FC = () => {
         updated_at: new Date().toISOString()
       };
 
-
-
+      // Créer la tâche
       await createTask(taskData);
+
+      // Débiter les crédits
+      await createTransaction({
+        wallet_id: wallet.id,
+        type: 'debit',
+        amount: taskCost,
+        description: `Création de la tâche: ${formData.title}`,
+        reference_type: 'task_creation',
+        reference_id: 'pending', // Sera mis à jour après création
+        status: 'completed',
+        metadata: {
+          task_title: formData.title,
+          task_cost: taskCost
+        }
+      });
+
       navigate('/');
     } catch (error) {
       console.error('Erreur lors de la création de la tâche:', error);
@@ -104,7 +143,10 @@ const AddTaskPage: React.FC = () => {
           <h1 className="text-lg font-semibold text-gray-900">
             Nouvelle Tâche
           </h1>
-          <div className="w-10" />
+          <CreditsDisplayWithPurchase 
+            requiredCredits={taskCost}
+            className="flex-shrink-0"
+          />
         </div>
         
 
@@ -250,22 +292,67 @@ const AddTaskPage: React.FC = () => {
             </div>
           </Card>
 
-          {/* Aperçu de la priorité */}
+          {/* Aperçu de la priorité et coût */}
           <Card>
-            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-              <div className={`p-2 rounded-full ${priorityColors[formData.priority]}`}>
-                <span className="text-lg">{priorityIcons[formData.priority]}</span>
+            <div className="space-y-4">
+              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                <div className={`p-2 rounded-full ${priorityColors[formData.priority]}`}>
+                  <span className="text-lg">{priorityIcons[formData.priority]}</span>
+                </div>
+                <div>
+                  <p className="font-medium text-gray-900">
+                    Priorité {formData.priority.charAt(0).toUpperCase() + formData.priority.slice(1)}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    {formData.priority === 'urgent' && 'Besoin immédiat'}
+                    {formData.priority === 'high' && 'Besoin important'}
+                    {formData.priority === 'medium' && 'Besoin modéré'}
+                    {formData.priority === 'low' && 'Pas urgent'}
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="font-medium text-gray-900">
-                  Priorité {formData.priority.charAt(0).toUpperCase() + formData.priority.slice(1)}
-                </p>
-                <p className="text-sm text-gray-600">
-                  {formData.priority === 'urgent' && 'Besoin immédiat'}
-                  {formData.priority === 'high' && 'Besoin important'}
-                  {formData.priority === 'medium' && 'Besoin modéré'}
-                  {formData.priority === 'low' && 'Pas urgent'}
-                </p>
+
+              {/* Coût de la tâche */}
+              <div className={`flex items-center gap-3 p-3 rounded-lg border-2 ${
+                hasEnoughCredits 
+                  ? 'bg-green-50 border-green-200' 
+                  : 'bg-red-50 border-red-200'
+              }`}>
+                <div className={`p-2 rounded-full ${
+                  hasEnoughCredits 
+                    ? 'bg-green-100 text-green-600' 
+                    : 'bg-red-100 text-red-600'
+                }`}>
+                  {hasEnoughCredits ? (
+                    <CheckCircle className="w-5 h-5" />
+                  ) : (
+                    <AlertTriangle className="w-5 h-5" />
+                  )}
+                </div>
+                <div className="flex-1">
+                  <p className="font-medium text-gray-900">
+                    Coût de création: {taskCost} crédits
+                  </p>
+                  <p className={`text-sm ${
+                    hasEnoughCredits ? 'text-green-600' : 'text-red-600'
+                  }`}>
+                    {hasEnoughCredits 
+                      ? `Solde suffisant (${wallet?.balance || 0} crédits)`
+                      : `Crédits insuffisants (${wallet?.balance || 0}/${taskCost})`
+                    }
+                  </p>
+                </div>
+                {!hasEnoughCredits && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsCreditCheckOpen(true)}
+                    className="border-red-300 text-red-600 hover:bg-red-50"
+                  >
+                    <CreditCard className="w-4 h-4 mr-1" />
+                    Recharger
+                  </Button>
+                )}
               </div>
             </div>
           </Card>
@@ -282,20 +369,40 @@ const AddTaskPage: React.FC = () => {
               !formData.description || 
               !formData.estimated_duration || 
               !formData.budget_credits ||
-              (formData.category === 'local' && !selectedLocation)
+              (formData.category === 'local' && !selectedLocation) ||
+              !hasEnoughCredits
             }
           >
             {isSubmitting ? 'Création...' : 'Créer la tâche'}
           </Button>
 
-          {/* Message d'aide pour la localisation */}
+          {/* Messages d'aide */}
           {formData.category === 'local' && !selectedLocation && (
             <div className="text-center text-sm text-amber-600 bg-amber-50 p-3 rounded-lg border border-amber-200">
               📍 Pour les tâches sur place, une localisation précise est requise
             </div>
           )}
+          
+          {!hasEnoughCredits && (
+            <div className="text-center text-sm text-red-600 bg-red-50 p-3 rounded-lg border border-red-200">
+              💳 Crédits insuffisants pour créer cette tâche. Rechargez votre compte.
+            </div>
+          )}
         </motion.form>
       </div>
+
+      {/* Modal de vérification des crédits */}
+      <CreditCheckModal
+        isOpen={isCreditCheckOpen}
+        onClose={() => setIsCreditCheckOpen(false)}
+        requiredCredits={taskCost}
+        taskTitle={formData.title || 'Nouvelle tâche'}
+        onCreditsSufficient={createTaskWithCredits}
+        onPurchaseSuccess={() => {
+          // Rafraîchir le wallet après l'achat
+          useWalletStore.getState().fetchWallet();
+        }}
+      />
     </div>
   );
 };
