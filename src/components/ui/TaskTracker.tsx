@@ -357,7 +357,7 @@ const TaskTracker: React.FC<TaskTrackerProps> = ({
             <div className="flex items-center justify-between">
               <span className="text-sm text-gray-600">Dernière activité</span>
               <span className="text-sm text-gray-900">
-                {task.last_activity ? new Date(task.last_activity).toLocaleDateString() : 'Aucune'}
+                {task.updated_at ? new Date(task.updated_at).toLocaleDateString() : 'Aucune'}
               </span>
             </div>
             

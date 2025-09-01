@@ -10,6 +10,7 @@ import WalletStats from './components/WalletStats';
 import TransactionList from './components/TransactionList';
 import CreditEarnings from './components/CreditEarnings';
 import WithdrawalForm from './components/WithdrawalForm';
+import CreditPackages from './components/CreditPackages';
 import SkeletonLoader from './components/SkeletonLoader';
 
 const WalletPage: React.FC = () => {
@@ -31,7 +32,7 @@ const WalletPage: React.FC = () => {
     requestWithdrawal
   } = useWalletStore();
 
-  const [activeTab, setActiveTab] = useState<'overview' | 'transactions' | 'earnings' | 'withdrawals'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'transactions' | 'earnings' | 'withdrawals' | 'purchase'>('overview');
 
   useEffect(() => {
     const loadWalletData = async () => {
@@ -105,7 +106,8 @@ const WalletPage: React.FC = () => {
                 { id: 'overview', label: 'Vue d\'ensemble', icon: '📊' },
                 { id: 'transactions', label: 'Transactions', icon: '💳' },
                 { id: 'earnings', label: 'Gains', icon: '💰' },
-                { id: 'withdrawals', label: 'Retraits', icon: '🏦' }
+                { id: 'withdrawals', label: 'Retraits', icon: '🏦' },
+                { id: 'purchase', label: 'Acheter', icon: '🛒' }
               ].map((tab) => (
                 <motion.button
                   key={tab.id}
@@ -217,6 +219,15 @@ const WalletPage: React.FC = () => {
                   </div>
                 </div>
               )}
+            </motion.div>
+          )}
+
+          {activeTab === 'purchase' && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <CreditPackages />
             </motion.div>
           )}
         </div>

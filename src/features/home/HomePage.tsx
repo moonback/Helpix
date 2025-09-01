@@ -4,7 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTaskStore } from '@/stores/taskStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useMessageStore } from '@/stores/messageStore';
-import { useHelpOfferStore } from '@/stores/helpOfferStore';
+import { useWalletStore } from '@/features/wallet/stores/walletStore';
+
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { useReverseGeocoding } from '@/hooks/useReverseGeocoding';
 import Button from '@/components/ui/Button';
@@ -16,20 +17,22 @@ import FilterModal from '@/components/ui/FilterModal';
 import FilterButton from '@/components/ui/FilterButton';
 import FilterBadge from '@/components/ui/FilterBadge';
 import HelpOfferModal from '@/components/ui/HelpOfferModal';
+import CreditsDisplayWithPurchase from '@/components/ui/CreditsDisplayWithPurchase';
+import CreditSystemInfo from '@/components/ui/CreditSystemInfo';
 import { calculateDistance, formatDistance } from '@/lib/utils';
 import { 
   Search, 
   Clock, 
-  DollarSign, 
+    DollarSign, 
   Target,
-  AlertTriangle,
+
   Heart,
   MessageCircle,
   Navigation,
   AlertCircle,
   Users,
   MapPin,
-  TrendingUp,
+
 
   BarChart3,
   Eye,
@@ -40,13 +43,13 @@ import {
   SortDesc,
   Calendar,
   Award,
-  Activity,
+
   UserCheck,
   Globe,
-  Sparkles,
+
   Lightbulb,
   Hand,
-  MapPinned,
+
   Compass
 } from 'lucide-react';
 
@@ -58,22 +61,17 @@ interface QuickAction {
   action: () => void;
 }
 
-interface StatCard {
-  title: string;
-  value: string | number;
-  icon: React.ReactNode;
-  color: string;
-  trend?: string;
-}
+
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const { tasks, fetchTasks, isLoading, setUserLocation, getTasksByProximity } = useTaskStore();
   const { user, updateUserLocation } = useAuthStore();
   const { createConversation } = useMessageStore();
+  const { fetchWallet } = useWalletStore();
   const { latitude, longitude, error: locationError, isLoading: locationLoading, requestLocation } = useGeolocation();
   const { address, getAddressFromCoords, retry } = useReverseGeocoding();
-  const { createHelpOffer } = useHelpOfferStore();
+
   
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'local' | 'remote'>('all');
@@ -89,6 +87,13 @@ const HomePage: React.FC = () => {
   useEffect(() => {
     fetchTasks();
   }, []);
+
+  // Charger les données du wallet
+  useEffect(() => {
+    if (user) {
+      fetchWallet();
+    }
+  }, [user, fetchWallet]);
 
   useEffect(() => {
     if (latitude && longitude) {
@@ -118,6 +123,11 @@ const HomePage: React.FC = () => {
     let filteredTasks = tasks.filter(task => {
       if (!validateTask(task)) return false;
       
+      // Exclure les tâches assignées ou terminées
+      if (task.assigned_to || task.status === 'completed') {
+        return false;
+      }
+      
       const matchesSearch = task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            task.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            task.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -134,6 +144,11 @@ const HomePage: React.FC = () => {
     if (sortByProximity && latitude && longitude) {
       filteredTasks = getTasksByProximity().filter(task => {
         if (!validateTask(task)) return false;
+        
+        // Exclure les tâches assignées ou terminées
+        if (task.assigned_to || task.status === 'completed') {
+          return false;
+        }
         
         const matchesSearch = task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                              task.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -158,38 +173,7 @@ const HomePage: React.FC = () => {
     return filteredTasks;
   }, [tasks, searchTerm, selectedCategory, selectedPriority, sortByProximity, sortOrder, latitude, longitude]);
 
-  const statsCards: StatCard[] = useMemo(() => [
-    {
-      title: 'Demandes actives',
-      value: tasks.length,
-      icon: <Activity className="w-6 h-6" />,
-      color: 'from-blue-500 to-blue-600',
-      trend: '+12%'
-    },
-    {
-      title: 'Près de vous',
-      value: latitude && longitude ? getTasksByProximity().slice(0, 10).length : 0,
-      icon: <MapPinned className="w-6 h-6" />,
-      color: 'from-emerald-500 to-emerald-600',
-      trend: '+5%'
-    },
-    {
-      title: 'Urgentes',
-      value: tasks.filter(task => task.priority === 'urgent').length,
-      icon: <AlertTriangle className="w-6 h-6" />,
-      color: 'from-red-500 to-red-600'
-    },
-    {
-      title: 'Nouvelles aujourd\'hui',
-      value: tasks.filter(task => {
-        const today = new Date();
-        const taskDate = new Date(task.created_at);
-        return taskDate.toDateString() === today.toDateString();
-      }).length,
-      icon: <Sparkles className="w-6 h-6" />,
-      color: 'from-purple-500 to-purple-600'
-    }
-  ], [tasks, latitude, longitude]);
+
 
   const quickActions: QuickAction[] = [
     {
@@ -376,12 +360,15 @@ const HomePage: React.FC = () => {
               <div className="text-center flex-1">
                 <h1 className="text-xl lg:text-2xl font-bold text-slate-800">
                   Bonjour Maysson !
-                </h1>
+                  </h1>
                 
               </div>
 
-              {/* Localisation et boutons à droite */}
+              {/* Localisation, crédits et boutons à droite */}
               <div className="flex items-center gap-3 flex-shrink-0">
+                {/* Affichage des crédits avec achat */}
+                <CreditsDisplayWithPurchase />
+
                 {/* Status de localisation */}
                 <div className="flex items-center">
                   {locationLoading ? (
@@ -476,7 +463,7 @@ const HomePage: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4, duration: 0.8 }}
               >
-                Entraide Universelle
+                  Entraide Universelle
               </motion.h1>
               
               <motion.p 
@@ -555,6 +542,9 @@ const HomePage: React.FC = () => {
       <div className="relative z-10 px-6 py-8">
         <div className="max-w-7xl mx-auto">
 
+
+          {/* Information sur le système de crédits */}
+          <CreditSystemInfo className="mb-8" />
 
           {/* Quick Actions Section */}
           <AnimatePresence>
@@ -795,6 +785,9 @@ const HomePage: React.FC = () => {
               </motion.div>
             )}
           </motion.div>
+
+          {/* Message informatif sur les tâches disponibles */}
+          
 
           {/* Enhanced Tasks List */}
           <motion.div

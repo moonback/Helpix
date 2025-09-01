@@ -5,10 +5,7 @@ import {
   MessageSquare, 
   Clock, 
   DollarSign, 
-  User, 
   MapPin,
-  CheckCircle,
-  XCircle,
   AlertCircle,
   Bell
 } from 'lucide-react';

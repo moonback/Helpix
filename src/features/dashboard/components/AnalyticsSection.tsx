@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import Card from '@/components/ui/Card';
-import { Calendar, TrendingUp, Target, Clock } from 'lucide-react';
+import { Calendar, Target, Clock } from 'lucide-react';
 
 interface DashboardData {
   total_tasks: number;

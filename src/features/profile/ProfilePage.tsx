@@ -10,7 +10,7 @@ import { useGeolocation } from '@/hooks/useGeolocation';
 
 const ProfilePage: React.FC = () => {
   const { user, updateProfile, signOut, updateUserLocation } = useAuthStore();
-  const { address, getAddressFromCoords, retry } = useReverseGeocoding();
+  const { address, getAddressFromCoords } = useReverseGeocoding();
   const { latitude, longitude, requestLocation } = useGeolocation();
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState({

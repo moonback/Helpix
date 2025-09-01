@@ -4,11 +4,7 @@ import {
   FileText, 
   CheckCircle, 
   Clock, 
-  AlertTriangle,
-  TrendingUp,
-  Users,
-  Target,
-  Calendar
+  AlertTriangle
 } from 'lucide-react';
 import Card from '@/components/ui/Card';
 

@@ -4,7 +4,7 @@ import {
   DollarSign, 
   Clock, 
   CheckCircle, 
-  XCircle,
+
   User,
   Calendar
 } from 'lucide-react';

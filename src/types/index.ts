@@ -6,6 +6,8 @@ export interface User {
   avatar_url?: string;
   bio?: string;
   location?: string;
+  latitude?: number;
+  longitude?: number;
   credits: number;
   created_at: string;
 }

@@ -234,9 +234,14 @@ export const useWalletStore = create<WalletStore>((set, get) => ({
       // Récupérer les statistiques du wallet
       const { data: walletData } = await supabase
         .from('wallets')
-        .select('balance, total_earned, total_spent')
+        .select('id, balance, total_earned, total_spent')
         .eq('user_id', user.id)
         .single();
+
+      if (!walletData) {
+        set({ stats: null });
+        return;
+      }
 
       // Récupérer les transactions récentes
       const { data: recentTransactions } = await supabase
@@ -378,7 +383,19 @@ export const useWalletStore = create<WalletStore>((set, get) => ({
       if (error) throw error;
 
       // Créer une transaction de crédit
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Utilisateur non connecté');
+
+      const { data: userWallet } = await supabase
+        .from('wallets')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+
+      if (!userWallet) throw new Error('Wallet non trouvé');
+
       await get().createTransaction({
+        wallet_id: userWallet.id,
         type: 'credit',
         amount: data.amount,
         description: `Gain pour l'aide apportée à la tâche: ${data.task_title}`,

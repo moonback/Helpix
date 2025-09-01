@@ -1,9 +1,8 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Filter } from 'lucide-react';
-import { FILTER_OPTIONS, STATUS_LABELS, PRIORITY_LABELS, COMPLEXITY_LABELS } from '../constants';
+import { FILTER_OPTIONS } from '../constants';
 import { getStatusColor, getPriorityColor, getComplexityColor } from '../utils';
-import { TaskFilter } from '@/types';
 
 interface TaskFilters {
   status?: string[];

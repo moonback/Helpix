@@ -13,7 +13,6 @@ export interface Wallet {
 export interface Transaction {
   id: string;
   wallet_id: string;
-  user_id: string;
   type: 'credit' | 'debit' | 'withdrawal' | 'refund';
   amount: number;
   description: string;
