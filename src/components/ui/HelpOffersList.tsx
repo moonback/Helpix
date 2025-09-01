@@ -126,7 +126,7 @@ const HelpOffersList: React.FC<HelpOffersListProps> = ({
               </div>
               <div>
                                  <h3 className="font-semibold text-slate-800">
-                   {offer.helper?.name || 'Utilisateur anonyme'}
+                   {offer.helper?.email || 'Utilisateur anonyme'}
                  </h3>
                 <p className="text-sm text-slate-500">
                   Offre reçue le {new Date(offer.created_at).toLocaleDateString('fr-FR')}

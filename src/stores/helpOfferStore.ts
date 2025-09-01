@@ -54,7 +54,7 @@ export const useHelpOfferStore = create<HelpOfferState>((set, get) => ({
         })
         .select(`
           *,
-          helper:helper_id(id, name, email, avatar_url),
+          helper:helper_id(id, email),
           task:task_id(id, title, user_id)
         `)
         .single();
@@ -177,7 +177,7 @@ export const useHelpOfferStore = create<HelpOfferState>((set, get) => ({
          .from('help_offers')
          .select(`
            *,
-           helper:helper_id(id, name, email, avatar_url),
+           helper:helper_id(id, email),
            task:task_id(id, title, user_id)
          `)
          .eq('task_id', taskId)
@@ -208,7 +208,7 @@ export const useHelpOfferStore = create<HelpOfferState>((set, get) => ({
          .from('help_offers')
          .select(`
            *,
-           helper:helper_id(id, name, email, avatar_url),
+           helper:helper_id(id, email),
            task:task_id(id, title, user_id, status)
          `)
          .eq('helper_id', userId)
