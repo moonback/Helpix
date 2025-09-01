@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTaskStore } from '@/stores/taskStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useMessageStore } from '@/stores/messageStore';
+import { useWalletStore } from '@/features/wallet/stores/walletStore';
 
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { useReverseGeocoding } from '@/hooks/useReverseGeocoding';
@@ -21,6 +22,7 @@ import {
   Search, 
   Clock, 
   DollarSign, 
+  Coins, 
   Target,
 
   Heart,
@@ -65,6 +67,7 @@ const HomePage: React.FC = () => {
   const { tasks, fetchTasks, isLoading, setUserLocation, getTasksByProximity } = useTaskStore();
   const { user, updateUserLocation } = useAuthStore();
   const { createConversation } = useMessageStore();
+  const { wallet, fetchWallet } = useWalletStore();
   const { latitude, longitude, error: locationError, isLoading: locationLoading, requestLocation } = useGeolocation();
   const { address, getAddressFromCoords, retry } = useReverseGeocoding();
 
@@ -83,6 +86,13 @@ const HomePage: React.FC = () => {
   useEffect(() => {
     fetchTasks();
   }, []);
+
+  // Charger les données du wallet
+  useEffect(() => {
+    if (user) {
+      fetchWallet();
+    }
+  }, [user, fetchWallet]);
 
   useEffect(() => {
     if (latitude && longitude) {
@@ -339,12 +349,23 @@ const HomePage: React.FC = () => {
               <div className="text-center flex-1">
                 <h1 className="text-xl lg:text-2xl font-bold text-slate-800">
                   Bonjour Maysson !
-                </h1>
+                  </h1>
                 
               </div>
 
-              {/* Localisation et boutons à droite */}
+              {/* Localisation, crédits et boutons à droite */}
               <div className="flex items-center gap-3 flex-shrink-0">
+                {/* Affichage des crédits */}
+                <button
+                  onClick={() => navigate('/wallet')}
+                  className="flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-white px-3 py-1.5 rounded-full shadow-sm transition-all duration-200 hover:shadow-md"
+                >
+                  <Coins className="w-4 h-4" />
+                  <span className="text-sm font-semibold">
+                    {wallet?.balance || 0} crédits
+                  </span>
+                </button>
+
                 {/* Status de localisation */}
                 <div className="flex items-center">
                   {locationLoading ? (
@@ -439,7 +460,7 @@ const HomePage: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4, duration: 0.8 }}
               >
-                Entraide Universelle
+                  Entraide Universelle
               </motion.h1>
               
               <motion.p 
