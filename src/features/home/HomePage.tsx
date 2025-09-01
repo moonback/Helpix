@@ -67,7 +67,7 @@ const HomePage: React.FC = () => {
   const { tasks, fetchTasks, isLoading, setUserLocation, getTasksByProximity } = useTaskStore();
   const { user, updateUserLocation } = useAuthStore();
   const { createConversation } = useMessageStore();
-  const { wallet, fetchWallet } = useWalletStore();
+  const { fetchWallet } = useWalletStore();
   const { latitude, longitude, error: locationError, isLoading: locationLoading, requestLocation } = useGeolocation();
   const { address, getAddressFromCoords, retry } = useReverseGeocoding();
 
