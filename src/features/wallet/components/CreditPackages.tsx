@@ -33,7 +33,7 @@ const CreditPackages: React.FC = () => {
   // const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
 
   const creditPackages: CreditPackage[] = CREDIT_PACKAGES.map(pkg => {
-    const stats = calculatePackageStats(pkg);
+    const stats = calculatePackageStats(pkg as any);
     return {
       ...pkg,
       icon: pkg.id === 'starter' ? <Zap className="w-6 h-6" /> :
@@ -58,7 +58,7 @@ const CreditPackages: React.FC = () => {
     return formatEuros(stats.pricePerCredit, 3);
   };
 
-  const handlePackageSelect = (packageId: string) => {
+  const handlePackageSelect = (_packageId: string) => {
     // setSelectedPackage(packageId);
     setIsPurchaseModalOpen(true);
   };
@@ -208,7 +208,7 @@ const CreditPackages: React.FC = () => {
         isOpen={isPurchaseModalOpen}
         onClose={() => {
           setIsPurchaseModalOpen(false);
-          setSelectedPackage(null);
+          // setSelectedPackage(null);
         }}
         onSuccess={handlePurchaseSuccess}
       />

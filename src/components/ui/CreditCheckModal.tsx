@@ -17,7 +17,7 @@ interface CreditCheckModalProps {
   requiredCredits: number;
   taskTitle: string;
   onCreditsSufficient: () => void;
-  onPurchaseSuccess?: () => void;
+  // onPurchaseSuccess?: () => void;
 }
 
 const CreditCheckModal: React.FC<CreditCheckModalProps> = ({
@@ -25,8 +25,8 @@ const CreditCheckModal: React.FC<CreditCheckModalProps> = ({
   onClose,
   requiredCredits,
   taskTitle,
-  onCreditsSufficient,
-  onPurchaseSuccess
+  onCreditsSufficient
+  // onPurchaseSuccess
 }) => {
   const { wallet } = useWalletStore();
   const currentBalance = wallet?.balance || 0;

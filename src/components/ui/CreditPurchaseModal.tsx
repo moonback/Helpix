@@ -72,15 +72,16 @@ const CreditPurchaseModal: React.FC<CreditPurchaseModalProps> = ({
 
       // Créer la transaction de crédit
       await createTransaction({
+        wallet_id: wallet!.id,
         type: 'credit',
         amount: packageData.credits + packageData.bonus,
         description: `Achat de ${packageData.credits} crédits${packageData.bonus > 0 ? ` + ${packageData.bonus} bonus` : ''}`,
         reference_type: 'task_completion', // Utiliser une valeur valide
         reference_id: packageData.id,
         status: 'completed',
-                      metadata: {
-                payment_method: paymentMethod
-              }
+        metadata: {
+          payment_method: paymentMethod
+        }
       });
 
       onSuccess?.();
