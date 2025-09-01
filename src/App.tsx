@@ -5,6 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useRealtimeMessages } from '@/hooks/useRealtimeMessages';
 import BottomNavigation from '@/components/navigation/BottomNavigation';
 import CreditsDisplayWithPurchase from '@/components/ui/CreditsDisplayWithPurchase';
+import PaymentNotificationContainer from '@/components/ui/PaymentNotificationContainer';
 
 // Lazy loading des pages
 const LandingPage = React.lazy(() => import('@/features/landing/LandingPage'));
@@ -206,6 +207,9 @@ const App: React.FC = () => {
             </motion.div>
           </div>
         )}
+
+        {/* Notifications de paiement */}
+        {isAuthenticated && <PaymentNotificationContainer />}
       </div>
     </Router>
   );

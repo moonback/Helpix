@@ -447,39 +447,42 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
 
       await get().updateTask(id, updates);
 
-      // Créditer automatiquement l'utilisateur qui a répondu à la tâche
+      // Traiter le paiement automatique quand la tâche est terminée
       if (status === 'completed') {
         const task = get().tasks.find(t => t.id === id);
         if (task && task.assigned_to && task.budget_credits > 0) {
           try {
-            // Vérifier si l'utilisateur a déjà été crédité pour cette tâche
-            const { hasUserBeenCreditedForTask, creditUserForTaskCompletion } = await import('@/lib/creditUtils');
+            // Vérifier si le paiement a déjà été traité pour cette tâche
+            const { hasTaskPaymentBeenProcessed, processTaskPayment } = await import('@/lib/creditUtils');
             
-            const alreadyCredited = await hasUserBeenCreditedForTask(id);
-            if (!alreadyCredited) {
-              const success = await creditUserForTaskCompletion(
-                task.assigned_to,
-                id,
-                task.budget_credits,
-                task.title,
-                task.user_id
+            const paymentAlreadyProcessed = await hasTaskPaymentBeenProcessed(id);
+            if (!paymentAlreadyProcessed) {
+              const success = await processTaskPayment(
+                task.user_id,        // Propriétaire de la tâche (qui paie)
+                task.assigned_to,    // Utilisateur qui a aidé (qui reçoit)
+                id,                  // ID de la tâche
+                task.budget_credits, // Montant à transférer
+                task.title           // Titre de la tâche
               );
               
               if (success) {
-                // Rafraîchir le store wallet si l'utilisateur actuel est celui qui a été crédité
+                // Rafraîchir les stores wallet des utilisateurs concernés
                 const { useAuthStore } = await import('@/stores/authStore');
                 const { user } = useAuthStore.getState();
-                if (user && user.id === task.assigned_to) {
+                if (user) {
                   const { useWalletStore } = await import('@/features/wallet/stores/walletStore');
                   const walletStore = useWalletStore.getState();
                   await walletStore.fetchWallet();
                 }
+
+                // Afficher une notification de succès
+                console.log(`✅ Paiement traité avec succès: ${task.budget_credits} crédits transférés pour "${task.title}"`);
               }
             } else {
-              console.log(`ℹ️ L'utilisateur a déjà été crédité pour la tâche ${id}`);
+              console.log(`ℹ️ Le paiement a déjà été traité pour la tâche ${id}`);
             }
           } catch (walletError) {
-            console.error('Erreur lors du crédit automatique:', walletError);
+            console.error('Erreur lors du traitement du paiement automatique:', walletError);
             // Ne pas faire échouer le changement de statut si le crédit échoue
           }
         }

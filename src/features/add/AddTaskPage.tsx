@@ -397,10 +397,6 @@ const AddTaskPage: React.FC = () => {
         requiredCredits={taskCost}
         taskTitle={formData.title || 'Nouvelle tâche'}
         onCreditsSufficient={createTaskWithCredits}
-        onPurchaseSuccess={() => {
-          // Rafraîchir le wallet après l'achat
-          useWalletStore.getState().fetchWallet();
-        }}
       />
     </div>
   );

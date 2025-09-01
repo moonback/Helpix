@@ -16,8 +16,8 @@ import DetailedAddressDisplay from '@/components/ui/DetailedAddressDisplay';
 import FilterModal from '@/components/ui/FilterModal';
 import FilterButton from '@/components/ui/FilterButton';
 import FilterBadge from '@/components/ui/FilterBadge';
-import HelpOfferModal from '@/components/ui/HelpOfferModal';
-import CreditsDisplayWithPurchase from '@/components/ui/CreditsDisplayWithPurchase';
+
+
 import CreditSystemInfo from '@/components/ui/CreditSystemInfo';
 import { calculateDistance, formatDistance } from '@/lib/utils';
 import { 
@@ -78,11 +78,10 @@ const HomePage: React.FC = () => {
   const [selectedPriority, setSelectedPriority] = useState<'all' | 'low' | 'medium' | 'high' | 'urgent'>('all');
   const [sortByProximity, setSortByProximity] = useState(true);
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [showQuickActions, setShowQuickActions] = useState(true);
-  const [selectedTaskForOffer, setSelectedTaskForOffer] = useState<any>(null);
-  const [isHelpOfferModalOpen, setIsHelpOfferModalOpen] = useState(false);
+
 
   useEffect(() => {
     fetchTasks();
@@ -246,12 +245,11 @@ const HomePage: React.FC = () => {
         return;
       }
 
-      // Ouvrir le modal d'offre d'aide
-      setSelectedTaskForOffer(task);
-      setIsHelpOfferModalOpen(true);
+      // Naviguer vers la page d'offres d'aide
+      navigate(`/task/${taskId}/offers`);
       
     } catch (error) {
-      console.error('Erreur lors de l\'ouverture du modal d\'offre:', error);
+      console.error('Erreur lors de la navigation vers les offres:', error);
     }
   };
 
@@ -293,10 +291,7 @@ const HomePage: React.FC = () => {
     setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
   };
 
-  const handleHelpOfferSuccess = () => {
-    // Optionnel: afficher une notification de succès
-    console.log('Offre d\'aide envoyée avec succès');
-  };
+
 
   if (isLoading) {
     return (
@@ -537,7 +532,7 @@ const HomePage: React.FC = () => {
 
       {/* Main Content */}
       <div className="relative z-10 px-6 py-8">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-12xl mx-auto">
 
 
           {/* Information sur le système de crédits */}
@@ -837,9 +832,9 @@ const HomePage: React.FC = () => {
                 </motion.div>
               </Card>
             ) : (
-              <div className={`grid gap-6 ${
+              <div className={`grid gap-4 ${
                 viewMode === 'grid' 
-                  ? 'md:grid-cols-2 xl:grid-cols-3' 
+                  ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
                   : 'grid-cols-1'
               }`}>
                 {getFilteredAndSortedTasks.map((task, index) => (
@@ -850,8 +845,8 @@ const HomePage: React.FC = () => {
                     transition={{ delay: index * 0.05, duration: 0.4 }}
                     layout
                   >
-                    <Card className={`group relative overflow-hidden bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl border border-white/50 hover:shadow-2xl hover:border-blue-200 transition-all duration-500 transform hover:scale-[1.02] ${
-                      viewMode === 'grid' ? 'p-6' : 'p-8'
+                    <Card className={`group relative overflow-hidden bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-white/50 hover:shadow-xl hover:border-blue-200 transition-all duration-300 transform hover:scale-[1.01] ${
+                      viewMode === 'grid' ? 'p-4' : 'p-6'
                     }`}>
                       {/* Priority Indicator */}
                       <div className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r ${
@@ -862,13 +857,13 @@ const HomePage: React.FC = () => {
                       }`}></div>
 
                       {/* Header */}
-                      <div className="flex items-start justify-between mb-6">
+                      <div className="flex items-start justify-between mb-4">
                         <div className="flex items-start space-x-4 flex-1 min-w-0">
                           <div className="relative">
-                            <div className="w-14 h-14 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-2xl flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow">
-                              <span className="text-2xl">{categoryIcons[task.category]}</span>
+                            <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-xl flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow">
+                              <span className="text-xl">{categoryIcons[task.category]}</span>
                             </div>
-                            <div className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center text-xs shadow-sm ${
+                            <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-xs shadow-sm ${
                               task.priority === 'urgent' ? 'bg-red-500' :
                               task.priority === 'high' ? 'bg-orange-500' :
                               task.priority === 'medium' ? 'bg-yellow-500' :
@@ -879,7 +874,7 @@ const HomePage: React.FC = () => {
                           </div>
                           <div className="flex-1 min-w-0">
                             <h3 
-                              className="text-xl font-bold text-slate-800 mb-2 line-clamp-2 cursor-pointer hover:text-blue-600 transition-colors"
+                              className="text-lg font-bold text-slate-800 mb-2 line-clamp-2 cursor-pointer hover:text-blue-600 transition-colors"
                               onClick={() => handleViewTask(task.id)}
                             >
                               {task.title}
@@ -974,23 +969,23 @@ const HomePage: React.FC = () => {
                       </div>
 
                       {/* Skills */}
-                      <div className="mb-6">
-                        <h4 className="text-sm font-semibold text-slate-700 mb-3 flex items-center">
-                          <Target className="w-4 h-4 mr-2 text-purple-600" />
-                          Compétences requises
+                      <div className="mb-4">
+                        <h4 className="text-xs font-semibold text-slate-700 mb-2 flex items-center">
+                          <Target className="w-3 h-3 mr-1 text-purple-600" />
+                          Compétences
                         </h4>
-                        <div className="flex flex-wrap gap-2">
-                          {task.required_skills.slice(0, viewMode === 'grid' ? 3 : 5).map((skill, skillIndex) => (
+                        <div className="flex flex-wrap gap-1">
+                          {task.required_skills.slice(0, viewMode === 'grid' ? 2 : 3).map((skill, skillIndex) => (
                             <span
                               key={skillIndex}
-                              className="inline-flex items-center px-3 py-1 bg-gradient-to-r from-purple-50 to-indigo-50 text-purple-700 text-sm font-medium rounded-full border border-purple-200 hover:from-purple-100 hover:to-indigo-100 transition-colors"
+                              className="inline-flex items-center px-2 py-0.5 bg-gradient-to-r from-purple-50 to-indigo-50 text-purple-700 text-xs font-medium rounded-full border border-purple-200"
                             >
                               {skill}
                             </span>
                           ))}
-                          {task.required_skills.length > (viewMode === 'grid' ? 3 : 5) && (
-                            <span className="inline-flex items-center px-3 py-1 bg-slate-100 text-slate-600 text-sm rounded-full">
-                              +{task.required_skills.length - (viewMode === 'grid' ? 3 : 5)} autres
+                          {task.required_skills.length > (viewMode === 'grid' ? 2 : 3) && (
+                            <span className="inline-flex items-center px-2 py-0.5 bg-slate-100 text-slate-600 text-xs rounded-full">
+                              +{task.required_skills.length - (viewMode === 'grid' ? 2 : 3)}
                             </span>
                           )}
                         </div>
@@ -998,19 +993,19 @@ const HomePage: React.FC = () => {
 
                       {/* Tags */}
                       {task.tags.length > 0 && (
-                        <div className="mb-6">
-                          <div className="flex flex-wrap gap-2">
-                            {task.tags.slice(0, viewMode === 'grid' ? 3 : 6).map((tag, tagIndex) => (
+                        <div className="mb-4">
+                          <div className="flex flex-wrap gap-1">
+                            {task.tags.slice(0, viewMode === 'grid' ? 2 : 4).map((tag, tagIndex) => (
                               <span
                                 key={tagIndex}
-                                className="inline-flex items-center px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs rounded-full cursor-pointer transition-colors"
+                                className="inline-flex items-center px-1.5 py-0.5 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs rounded-full cursor-pointer transition-colors"
                               >
                                 #{tag}
                               </span>
                             ))}
-                            {task.tags.length > (viewMode === 'grid' ? 3 : 6) && (
-                              <span className="inline-flex items-center px-2 py-1 bg-slate-100 text-slate-500 text-xs rounded-full">
-                                +{task.tags.length - (viewMode === 'grid' ? 3 : 6)}
+                            {task.tags.length > (viewMode === 'grid' ? 2 : 4) && (
+                              <span className="inline-flex items-center px-1.5 py-0.5 bg-slate-100 text-slate-500 text-xs rounded-full">
+                                +{task.tags.length - (viewMode === 'grid' ? 2 : 4)}
                               </span>
                             )}
                           </div>
@@ -1018,7 +1013,7 @@ const HomePage: React.FC = () => {
                       )}
 
                       {/* Actions */}
-                      <div className="flex items-center justify-between pt-6 border-t border-slate-200">
+                      <div className="flex items-center justify-between pt-4 border-t border-slate-200">
                         <div className="flex items-center space-x-3">
                           {user && task.user_id !== user.id ? (
                             <>
@@ -1141,18 +1136,7 @@ const HomePage: React.FC = () => {
         <div className="absolute top-3/4 left-1/3 w-64 h-64 bg-emerald-400/5 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1.5s'}}></div>
       </div>
 
-      {/* Modal d'offre d'aide */}
-      {selectedTaskForOffer && (
-        <HelpOfferModal
-          isOpen={isHelpOfferModalOpen}
-          onClose={() => {
-            setIsHelpOfferModalOpen(false);
-            setSelectedTaskForOffer(null);
-          }}
-          task={selectedTaskForOffer}
-          onSuccess={handleHelpOfferSuccess}
-        />
-      )}
+
     </div>
   );
 };
