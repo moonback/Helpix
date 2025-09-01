@@ -355,16 +355,13 @@ const HomePage: React.FC = () => {
               {/* Welcome Message - Simplified */}
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 <div className="relative">
-                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-md overflow-hidden">
                     <img 
                       src="/logo.png" 
                       alt="Logo Entraide Universelle" 
                       className="w-8 h-8 object-contain"
                     />
-                  </div>
-                  <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-green-500 rounded-full border-2 border-white">
-                    <div className="w-1 h-1 bg-white rounded-full animate-pulse mx-auto mt-1"></div>
-                  </div>
+                  
+                  
                 </div>
                 <div className="flex-1 min-w-0">
                   <h1 className="text-xl lg:text-2xl font-bold text-slate-800 truncate">
