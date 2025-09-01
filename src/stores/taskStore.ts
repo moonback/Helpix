@@ -476,13 +476,7 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
                 }
 
                 // Afficher une notification de succès
-                try {
-                  const { usePaymentNotifications } = await import('@/hooks/usePaymentNotifications');
-                  // Note: Les notifications seront gérées par le composant qui utilise le hook
-                  console.log(`✅ Paiement traité avec succès: ${task.budget_credits} crédits transférés pour "${task.title}"`);
-                } catch (notificationError) {
-                  console.warn('Impossible d\'afficher la notification:', notificationError);
-                }
+                console.log(`✅ Paiement traité avec succès: ${task.budget_credits} crédits transférés pour "${task.title}"`);
               }
             } else {
               console.log(`ℹ️ Le paiement a déjà été traité pour la tâche ${id}`);

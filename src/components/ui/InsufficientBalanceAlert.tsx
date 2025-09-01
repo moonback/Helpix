@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { AlertTriangle, CreditCard, Plus } from 'lucide-react';
+import { AlertTriangle, CreditCard } from 'lucide-react';
 import Button from './Button';
 
 interface InsufficientBalanceAlertProps {
