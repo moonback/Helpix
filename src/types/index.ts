@@ -178,6 +178,7 @@ export interface Message {
   timestamp: string;
   isRead: boolean;
   attachments?: Attachment[];
+  edited?: boolean;
 }
 
 export interface Conversation {
@@ -187,6 +188,10 @@ export interface Conversation {
   unreadCount: number;
   createdAt: string;
   updatedAt: string;
+  isFavorite?: boolean;
+  isArchived?: boolean;
+  isPinned?: boolean;
+  isMuted?: boolean;
 }
 
 export interface Attachment {
@@ -234,8 +239,13 @@ export interface MessageStore {
   fetchMessages: (conversationId: string) => Promise<void>;
   sendMessage: (content: string, receiverId: string, type?: 'text' | 'image' | 'file', attachments?: File[]) => Promise<void>;
   markAsRead: (messageId: string) => Promise<void>;
+  deleteMessage: (messageId: string) => Promise<void>;
+  editMessage: (messageId: string, content: string) => Promise<void>;
   createConversation: (participantIds: string[]) => Promise<void>;
   deleteConversation: (conversationId: string) => Promise<void>;
+  markConversationAsRead: (conversationId: string) => Promise<void>;
+  toggleConversationFavorite: (conversationId: string) => Promise<void>;
+  archiveConversation: (conversationId: string) => Promise<void>;
   setCurrentConversation: (conversation: Conversation | null) => void;
   updateUnreadCount: () => void;
 }

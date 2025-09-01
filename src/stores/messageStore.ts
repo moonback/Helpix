@@ -299,6 +299,56 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
     }
   },
 
+  deleteMessage: async (messageId: string) => {
+    try {
+      const { error } = await supabase
+        .from('messages')
+        .delete()
+        .eq('id', messageId);
+
+      if (error) throw error;
+
+      // Mettre à jour l'état local
+      set(state => ({
+        messages: state.messages.filter(msg => msg.id !== messageId)
+      }));
+
+      console.log('Message supprimé avec succès');
+    } catch (error: any) {
+      set({ error: error.message });
+      console.error('Erreur lors de la suppression du message:', error);
+    }
+  },
+
+  editMessage: async (messageId: string, content: string) => {
+    try {
+      const { error } = await supabase
+        .from('messages')
+        .update({ 
+          content: content,
+          edited: true,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', messageId);
+
+      if (error) throw error;
+
+      // Mettre à jour l'état local
+      set(state => ({
+        messages: state.messages.map(msg => 
+          msg.id === messageId 
+            ? { ...msg, content, edited: true }
+            : msg
+        )
+      }));
+
+      console.log('Message modifié avec succès');
+    } catch (error: any) {
+      set({ error: error.message });
+      console.error('Erreur lors de la modification du message:', error);
+    }
+  },
+
   deleteConversation: async (conversationId: string) => {
     try {
       const { error } = await supabase
@@ -345,6 +395,86 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
       }
     } catch (error) {
       // Ignorer les erreurs pour cette fonction
+    }
+  },
+
+  markConversationAsRead: async (conversationId: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { error } = await supabase
+        .from('messages')
+        .update({ isRead: true })
+        .eq('conversation_id', conversationId)
+        .eq('receiver_id', user.id)
+        .eq('isRead', false);
+
+      if (error) throw error;
+
+      // Mettre à jour l'état local
+      set(state => ({
+        conversations: state.conversations.map(conv => 
+          conv.id === conversationId 
+            ? { ...conv, unreadCount: 0 }
+            : conv
+        )
+      }));
+
+      console.log('Conversation marquée comme lue');
+    } catch (error: any) {
+      set({ error: error.message });
+      console.error('Erreur lors du marquage de la conversation:', error);
+    }
+  },
+
+  toggleConversationFavorite: async (conversationId: string) => {
+    try {
+      const { error } = await supabase
+        .from('conversations')
+        .update({ isFavorite: true })
+        .eq('id', conversationId);
+
+      if (error) throw error;
+
+      // Mettre à jour l'état local
+      set(state => ({
+        conversations: state.conversations.map(conv => 
+          conv.id === conversationId 
+            ? { ...conv, isFavorite: !conv.isFavorite }
+            : conv
+        )
+      }));
+
+      console.log('Statut favori modifié');
+    } catch (error: any) {
+      set({ error: error.message });
+      console.error('Erreur lors de la modification du favori:', error);
+    }
+  },
+
+  archiveConversation: async (conversationId: string) => {
+    try {
+      const { error } = await supabase
+        .from('conversations')
+        .update({ isArchived: true })
+        .eq('id', conversationId);
+
+      if (error) throw error;
+
+      // Mettre à jour l'état local
+      set(state => ({
+        conversations: state.conversations.map(conv => 
+          conv.id === conversationId 
+            ? { ...conv, isArchived: !conv.isArchived }
+            : conv
+        )
+      }));
+
+      console.log('Conversation archivée/désarchivée');
+    } catch (error: any) {
+      set({ error: error.message });
+      console.error('Erreur lors de l\'archivage:', error);
     }
   }
 }));
