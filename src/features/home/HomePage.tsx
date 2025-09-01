@@ -16,8 +16,8 @@ import DetailedAddressDisplay from '@/components/ui/DetailedAddressDisplay';
 import FilterModal from '@/components/ui/FilterModal';
 import FilterButton from '@/components/ui/FilterButton';
 import FilterBadge from '@/components/ui/FilterBadge';
-import HelpOfferModal from '@/components/ui/HelpOfferModal';
-import CreditsDisplayWithPurchase from '@/components/ui/CreditsDisplayWithPurchase';
+
+
 import CreditSystemInfo from '@/components/ui/CreditSystemInfo';
 import { calculateDistance, formatDistance } from '@/lib/utils';
 import { 
@@ -81,8 +81,7 @@ const HomePage: React.FC = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [showQuickActions, setShowQuickActions] = useState(true);
-  const [selectedTaskForOffer, setSelectedTaskForOffer] = useState<any>(null);
-  const [isHelpOfferModalOpen, setIsHelpOfferModalOpen] = useState(false);
+
 
   useEffect(() => {
     fetchTasks();
@@ -246,12 +245,11 @@ const HomePage: React.FC = () => {
         return;
       }
 
-      // Ouvrir le modal d'offre d'aide
-      setSelectedTaskForOffer(task);
-      setIsHelpOfferModalOpen(true);
+      // Naviguer vers la page d'offres d'aide
+      navigate(`/task/${taskId}/offers`);
       
     } catch (error) {
-      console.error('Erreur lors de l\'ouverture du modal d\'offre:', error);
+      console.error('Erreur lors de la navigation vers les offres:', error);
     }
   };
 
@@ -293,10 +291,7 @@ const HomePage: React.FC = () => {
     setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
   };
 
-  const handleHelpOfferSuccess = () => {
-    // Optionnel: afficher une notification de succès
-    console.log('Offre d\'aide envoyée avec succès');
-  };
+
 
   if (isLoading) {
     return (
@@ -537,7 +532,7 @@ const HomePage: React.FC = () => {
 
       {/* Main Content */}
       <div className="relative z-10 px-6 py-8">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-12xl mx-auto">
 
 
           {/* Information sur le système de crédits */}
@@ -1141,18 +1136,7 @@ const HomePage: React.FC = () => {
         <div className="absolute top-3/4 left-1/3 w-64 h-64 bg-emerald-400/5 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1.5s'}}></div>
       </div>
 
-      {/* Modal d'offre d'aide */}
-      {selectedTaskForOffer && (
-        <HelpOfferModal
-          isOpen={isHelpOfferModalOpen}
-          onClose={() => {
-            setIsHelpOfferModalOpen(false);
-            setSelectedTaskForOffer(null);
-          }}
-          task={selectedTaskForOffer}
-          onSuccess={handleHelpOfferSuccess}
-        />
-      )}
+
     </div>
   );
 };

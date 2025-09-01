@@ -276,7 +276,7 @@ const LandingPage = () => {
           <div className="absolute top-3/4 left-1/3 w-64 h-64 bg-emerald-400/10 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
         </div>
 
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center pt-16 pb-12 sm:pt-32 sm:pb-24">
+        <div className="relative z-10 max-w-12xl mx-auto px-4 sm:px-6 lg:px-8 text-center pt-16 pb-12 sm:pt-32 sm:pb-24">
           <motion.div
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}

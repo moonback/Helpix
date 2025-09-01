@@ -2,10 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, Users, Filter } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { useNavigate } from 'react-router-dom';
 import 'leaflet/dist/leaflet.css';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import { useTaskStore } from '@/stores/taskStore';
+import { useAuthStore } from '@/stores/authStore';
 import { Task } from '@/types';
 
 // Fix pour les icônes Leaflet
@@ -43,7 +45,9 @@ const LocationMarker: React.FC = () => {
 };
 
 const MapPage: React.FC = () => {
+  const navigate = useNavigate();
   const { tasks, fetchTasks, isLoading } = useTaskStore();
+  const { user } = useAuthStore();
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [mapView, setMapView] = useState<'map' | 'list'>('map');
 
@@ -85,6 +89,14 @@ const MapPage: React.FC = () => {
 
   const handleMapViewToggle = () => {
     setMapView(mapView === 'map' ? 'list' : 'map');
+  };
+
+  const handleOfferHelp = (taskId: number) => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    navigate(`/task/${taskId}/offers`);
   };
 
   return (
@@ -255,6 +267,7 @@ const MapPage: React.FC = () => {
                               variant="outline"
                               size="sm"
                               className="text-xs"
+                              onClick={() => handleOfferHelp(task.id)}
                             >
                               Aider
                             </Button>
@@ -334,7 +347,7 @@ const MapPage: React.FC = () => {
                       size="sm"
                       onClick={(e) => {
                         e.stopPropagation();
-                        // Logique pour aider
+                        handleOfferHelp(task.id);
                       }}
                     >
                       Aider
@@ -498,7 +511,7 @@ const MapPage: React.FC = () => {
                  variant="primary"
                  className="flex-1"
                  onClick={() => {
-                   // Logique pour aider
+                   handleOfferHelp(selectedTask.id);
                    setSelectedTask(null);
                  }}
                >

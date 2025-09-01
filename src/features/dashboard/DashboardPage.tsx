@@ -77,7 +77,7 @@ const DashboardPage: React.FC = () => {
       <DashboardHeader onCreateTask={handleCreateTask} />
 
       <div className="p-6">
-        <div className="max-w-7xl mx-auto space-y-6">
+        <div className="max-w-12xl mx-auto space-y-6">
           {/* Navigation et contrôles */}
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <ViewTabs 
