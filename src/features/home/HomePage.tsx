@@ -78,7 +78,7 @@ const HomePage: React.FC = () => {
   const [selectedPriority, setSelectedPriority] = useState<'all' | 'low' | 'medium' | 'high' | 'urgent'>('all');
   const [sortByProximity, setSortByProximity] = useState(true);
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [showQuickActions, setShowQuickActions] = useState(true);
 
