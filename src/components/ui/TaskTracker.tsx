@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Task, TaskComment, TaskAttachment } from '@/types';
+import { Task, TaskComment } from '@/types';
 import Button from './Button';
 import Input from './Input';
 import Card from './Card';

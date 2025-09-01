@@ -8,7 +8,6 @@ export const useRealtimeMessages = () => {
   const { 
     fetchConversations, 
     updateUnreadCount,
-    setCurrentConversation,
     currentConversation 
   } = useMessageStore();
   const subscriptionRef = useRef<any>(null);

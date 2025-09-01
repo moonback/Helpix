@@ -1,8 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 
 // Remplacez par vos vraies clés Supabase
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://your-project.supabase.co';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'your-anon-key';
+const supabaseUrl = (import.meta as any).env?.VITE_SUPABASE_URL || 'https://your-project.supabase.co';
+const supabaseAnonKey = (import.meta as any).env?.VITE_SUPABASE_ANON_KEY || 'your-anon-key';
 
 // Configuration améliorée pour la persistance de session
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
@@ -19,29 +19,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     // Détection automatique de l'URL de redirection
     detectSessionInUrl: true,
     
-    // Configuration des cookies
-    cookieOptions: {
-      // Nom du cookie de session
-      name: 'entraide-universelle-session',
-      
-      // Durée de vie du cookie (7 jours par défaut)
-      lifetime: 60 * 60 * 24 * 7,
-      
-      // Domaine du cookie (laisser undefined pour le domaine actuel)
-      domain: undefined,
-      
-      // Chemin du cookie
-      path: '/',
-      
-      // Cookie sécurisé en production
-      secure: import.meta.env.PROD,
-      
-      // Protection contre les attaques XSS
-      httpOnly: false, // Doit être false pour le côté client
-      
-      // Protection CSRF
-      sameSite: 'lax' as const,
-    }
+
   },
   
   // Configuration globale

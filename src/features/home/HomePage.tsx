@@ -28,7 +28,7 @@ import {
   Users,
   MapPin,
   TrendingUp,
-  Shield,
+
   BarChart3,
   Eye,
   Edit,

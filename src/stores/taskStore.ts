@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { supabase } from '@/lib/supabase';
-import { Task, TaskComment, TaskHistoryEntry, TaskMetrics, TaskDashboard, TaskFilter, TaskSort } from '@/types';
+import { Task, TaskComment, TaskDashboard, TaskFilter, TaskSort } from '@/types';
 import { sortTasksByProximity } from '@/lib/utils';
 
 interface TaskStore {
@@ -498,12 +498,12 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
     const sortedTasks = [...tasks];
     
     sortedTasks.sort((a, b) => {
-      let aValue: any = a[sort.field];
-      let bValue: any = b[sort.field];
+      let aValue: any = (a as any)[sort.field];
+      let bValue: any = (b as any)[sort.field];
 
       if (sort.field === 'progress') {
-        aValue = a.progress_percentage;
-        bValue = b.progress_percentage;
+        aValue = (a as any).progress_percentage || 0;
+        bValue = (b as any).progress_percentage || 0;
       }
 
       if (typeof aValue === 'string') {
