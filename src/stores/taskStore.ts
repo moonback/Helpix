@@ -11,6 +11,7 @@ interface TaskStore {
   
   // Actions de base
   fetchTasks: () => Promise<void>;
+  fetchMyAssignedTasks: () => Promise<void>;
   createTask: (taskData: Partial<Task>) => Promise<void>;
   updateTask: (id: number, updates: Partial<Task>) => Promise<void>;
   deleteTask: (id: number) => Promise<void>;
@@ -59,20 +60,60 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
   taskFilters: {},
   taskSort: { field: 'created_at', direction: 'desc' },
 
+  fetchMyAssignedTasks: async () => {
+    try {
+      set({ isLoading: true, error: null });
+      
+      // Récupérer l'utilisateur connecté
+      const { data: { user } } = await supabase.auth.getUser();
+      const currentUserId = user?.id;
+
+      if (!currentUserId) {
+        throw new Error('Utilisateur non connecté');
+      }
+
+      // Récupérer uniquement les tâches assignées à l'utilisateur connecté
+      const { data, error } = await supabase
+        .from('tasks')
+        .select('*')
+        .eq('assigned_to', currentUserId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      set({ tasks: data || [] });
+    } catch (error) {
+      console.error('Erreur lors de la récupération des tâches assignées:', error);
+      set({ error: 'Erreur lors de la récupération des tâches assignées' });
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
   fetchTasks: async () => {
     try {
       set({ isLoading: true, error: null });
       
+      // Récupérer l'utilisateur connecté
+      const { data: { user } } = await supabase.auth.getUser();
+      const currentUserId = user?.id;
+
+      if (!currentUserId) {
+        throw new Error('Utilisateur non connecté');
+      }
+
+      // Récupérer les tâches non assignées OU assignées à l'utilisateur connecté
       const { data, error } = await supabase
         .from('tasks')
         .select('*')
+        .or(`assigned_to.is.null,assigned_to.eq.${currentUserId}`)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
 
       // Si pas de données, utiliser des tâches mockées pour la démo
       if (!data || data.length === 0) {
-        const mockTasks: Task[] = [
+        const allMockTasks: Task[] = [
           {
             id: 1,
             user_id: 'user-1',
@@ -210,6 +251,11 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
             assigned_to: 'user-1'
           }
         ];
+        
+        // Filtrer les tâches mockées selon l'utilisateur connecté
+        const mockTasks = allMockTasks.filter(task => 
+          !task.assigned_to || task.assigned_to === currentUserId
+        );
         
         set({ tasks: mockTasks });
       } else {
