@@ -158,38 +158,7 @@ const HomePage: React.FC = () => {
     return filteredTasks;
   }, [tasks, searchTerm, selectedCategory, selectedPriority, sortByProximity, sortOrder, latitude, longitude]);
 
-  const statsCards: StatCard[] = useMemo(() => [
-    {
-      title: 'Demandes actives',
-      value: tasks.length,
-      icon: <Activity className="w-6 h-6" />,
-      color: 'from-blue-500 to-blue-600',
-      trend: '+12%'
-    },
-    {
-      title: 'Près de vous',
-      value: latitude && longitude ? getTasksByProximity().slice(0, 10).length : 0,
-      icon: <MapPinned className="w-6 h-6" />,
-      color: 'from-emerald-500 to-emerald-600',
-      trend: '+5%'
-    },
-    {
-      title: 'Urgentes',
-      value: tasks.filter(task => task.priority === 'urgent').length,
-      icon: <AlertTriangle className="w-6 h-6" />,
-      color: 'from-red-500 to-red-600'
-    },
-    {
-      title: 'Nouvelles aujourd\'hui',
-      value: tasks.filter(task => {
-        const today = new Date();
-        const taskDate = new Date(task.created_at);
-        return taskDate.toDateString() === today.toDateString();
-      }).length,
-      icon: <Sparkles className="w-6 h-6" />,
-      color: 'from-purple-500 to-purple-600'
-    }
-  ], [tasks, latitude, longitude]);
+
 
   const quickActions: QuickAction[] = [
     {

@@ -411,7 +411,7 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
     }
   },
 
-  updateTaskStatus: async (id, status, reason) => {
+  updateTaskStatus: async (id, status) => {
     try {
       const updates: Partial<Task> = {
         status,
