@@ -187,6 +187,79 @@ export type Database = {
           created_at?: string;
         };
       };
+      help_offers: {
+        Row: {
+          id: string;
+          task_id: number;
+          helper_id: string;
+          status: 'pending' | 'accepted' | 'rejected' | 'cancelled';
+          message: string | null;
+          proposed_duration: number | null;
+          proposed_credits: number | null;
+          created_at: string;
+          updated_at: string;
+          responded_at: string | null;
+          response_message: string | null;
+        };
+        Insert: {
+          id?: string;
+          task_id: number;
+          helper_id: string;
+          status?: 'pending' | 'accepted' | 'rejected' | 'cancelled';
+          message?: string | null;
+          proposed_duration?: number | null;
+          proposed_credits?: number | null;
+          created_at?: string;
+          updated_at?: string;
+          responded_at?: string | null;
+          response_message?: string | null;
+        };
+        Update: {
+          id?: string;
+          task_id?: number;
+          helper_id?: string;
+          status?: 'pending' | 'accepted' | 'rejected' | 'cancelled';
+          message?: string | null;
+          proposed_duration?: number | null;
+          proposed_credits?: number | null;
+          created_at?: string;
+          updated_at?: string;
+          responded_at?: string | null;
+          response_message?: string | null;
+        };
+      };
+      help_offer_notifications: {
+        Row: {
+          id: string;
+          help_offer_id: string;
+          user_id: string;
+          type: 'new_offer' | 'offer_accepted' | 'offer_rejected' | 'offer_cancelled';
+          title: string;
+          message: string;
+          is_read: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          help_offer_id: string;
+          user_id: string;
+          type: 'new_offer' | 'offer_accepted' | 'offer_rejected' | 'offer_cancelled';
+          title: string;
+          message: string;
+          is_read?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          help_offer_id?: string;
+          user_id?: string;
+          type?: 'new_offer' | 'offer_accepted' | 'offer_rejected' | 'offer_cancelled';
+          title?: string;
+          message?: string;
+          is_read?: boolean;
+          created_at?: string;
+        };
+      };
     };
   };
 };

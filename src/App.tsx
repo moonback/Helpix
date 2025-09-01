@@ -15,6 +15,7 @@ const ProfilePage = React.lazy(() => import('@/features/profile/ProfilePage'));
 const DashboardPage = React.lazy(() => import('@/features/dashboard/DashboardPage'));
 const TaskDetailPage = React.lazy(() => import('@/features/task-detail/TaskDetailPage'));
 const EditTaskPage = React.lazy(() => import('@/features/edit/EditTaskPage'));
+const HelpOffersPage = React.lazy(() => import('@/features/help-offers/HelpOffersPage'));
 const Auth = React.lazy(() => import('@/features/auth/Auth'));
 const Onboarding = React.lazy(() => import('@/features/auth/Onboarding'));
 
@@ -168,6 +169,13 @@ const App: React.FC = () => {
               <ProtectedRoute>
                 <div className="pb-16">
                   <EditTaskPage />
+                </div>
+              </ProtectedRoute>
+            } />
+            <Route path="/task/:taskId/offers" element={
+              <ProtectedRoute>
+                <div className="pb-16">
+                  <HelpOffersPage />
                 </div>
               </ProtectedRoute>
             } />

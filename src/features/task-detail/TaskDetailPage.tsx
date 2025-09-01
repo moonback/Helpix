@@ -112,6 +112,10 @@ const TaskDetailPage: React.FC = () => {
     }
   };
 
+  const handleViewOffers = () => {
+    navigate(`/task/${taskId}/offers`);
+  };
+
   const isOwner = user?.id === task?.user_id;
   const canEdit = isOwner || user?.id === task?.assigned_to;
 
@@ -212,6 +216,7 @@ const TaskDetailPage: React.FC = () => {
               onRemoveAttachment={handleRemoveAttachment}
               onEdit={handleEdit}
               onDelete={handleDelete}
+              onViewOffers={handleViewOffers}
               isOwner={isOwner}
               canEdit={canEdit}
             />
