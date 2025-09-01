@@ -17,7 +17,6 @@ import FilterModal from '@/components/ui/FilterModal';
 import FilterButton from '@/components/ui/FilterButton';
 import FilterBadge from '@/components/ui/FilterBadge';
 import HelpOfferModal from '@/components/ui/HelpOfferModal';
-import CreditsDisplay from '@/components/ui/CreditsDisplay';
 import CreditsDisplayWithPurchase from '@/components/ui/CreditsDisplayWithPurchase';
 import CreditSystemInfo from '@/components/ui/CreditSystemInfo';
 import { calculateDistance, formatDistance } from '@/lib/utils';
