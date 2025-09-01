@@ -57,7 +57,7 @@ export interface Task {
   total_steps?: number;
   completed_steps?: number;
   time_spent?: number; // en minutes
-  last_activity?: string;
+
   is_overdue: boolean;
   complexity: 'simple' | 'moderate' | 'complex';
   dependencies?: number[]; // IDs des tâches dépendantes
