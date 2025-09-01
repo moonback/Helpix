@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTaskStore } from '@/stores/taskStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useMessageStore } from '@/stores/messageStore';
-import { useHelpOfferStore } from '@/stores/helpOfferStore';
+
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { useReverseGeocoding } from '@/hooks/useReverseGeocoding';
 import Button from '@/components/ui/Button';
@@ -22,7 +22,7 @@ import {
   Clock, 
   DollarSign, 
   Target,
-  AlertTriangle,
+
   Heart,
   MessageCircle,
   Navigation,
@@ -40,13 +40,13 @@ import {
   SortDesc,
   Calendar,
   Award,
-  Activity,
+
   UserCheck,
   Globe,
-  Sparkles,
+
   Lightbulb,
   Hand,
-  MapPinned,
+
   Compass
 } from 'lucide-react';
 
@@ -58,13 +58,7 @@ interface QuickAction {
   action: () => void;
 }
 
-interface StatCard {
-  title: string;
-  value: string | number;
-  icon: React.ReactNode;
-  color: string;
-  trend?: string;
-}
+
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();

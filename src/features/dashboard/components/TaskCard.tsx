@@ -23,7 +23,7 @@ import {
   formatDate,
   truncateText,
   isTaskCompleted,
-  getTaskStatusIcon
+
 } from '../utils';
 import { STATUS_LABELS, PRIORITY_LABELS, COMPLEXITY_LABELS } from '../constants';
 
