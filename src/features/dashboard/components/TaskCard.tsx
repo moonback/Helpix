@@ -100,31 +100,31 @@ const TaskCard: React.FC<TaskCardProps> = ({
               {truncateText(task.description, 120)}
             </p>
             
-            {/* Métadonnées */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-              <div className={`flex items-center space-x-2 text-sm ${
+            {/* Métadonnées compactes */}
+            <div className="grid grid-cols-2 gap-2 mb-4">
+              <div className={`flex items-center space-x-1 text-xs ${
                 isCompleted ? 'text-gray-400' : 'text-gray-600'
               }`}>
-                <Clock className="w-4 h-4" />
+                <Clock className="w-3 h-3" />
                 <span>{task.estimated_duration}h</span>
               </div>
-              <div className={`flex items-center space-x-2 text-sm ${
+              <div className={`flex items-center space-x-1 text-xs ${
                 isCompleted ? 'text-gray-400' : 'text-gray-600'
               }`}>
-                <Target className="w-4 h-4" />
+                <Target className="w-3 h-3" />
                 <span>{task.progress_percentage}%</span>
               </div>
-              <div className={`flex items-center space-x-2 text-sm ${
+              <div className={`flex items-center space-x-1 text-xs ${
                 isCompleted ? 'text-gray-400' : 'text-gray-600'
               }`}>
-                <Calendar className="w-4 h-4" />
-                <span>{task.deadline ? formatDate(task.deadline) : 'Aucune'}</span>
+                <Calendar className="w-3 h-3" />
+                <span className="truncate">{task.deadline ? formatDate(task.deadline) : 'Aucune'}</span>
               </div>
-              <div className={`flex items-center space-x-2 text-sm ${
+              <div className={`flex items-center space-x-1 text-xs ${
                 isCompleted ? 'text-gray-400' : 'text-gray-600'
               }`}>
-                <Users className="w-4 h-4" />
-                <span>{task.assigned_to ? 'Assignée' : 'Non assignée'}</span>
+                <Users className="w-3 h-3" />
+                <span className="truncate">{task.assigned_to ? 'Assignée' : 'Libre'}</span>
               </div>
             </div>
 
