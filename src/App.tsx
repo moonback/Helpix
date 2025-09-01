@@ -1,40 +1,31 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/hooks/useAuth';
-
-// Pages
-import Onboarding from '@/features/auth/Onboarding';
-import Auth from '@/features/auth/Auth';
-import HomePage from '@/features/home/HomePage';
-import MapPage from '@/features/map/MapPage';
-import AddTaskPage from '@/features/add/AddTaskPage';
-import EditTaskPage from '@/features/edit/EditTaskPage';
-import WalletPage from '@/features/wallet/WalletPage';
-import ProfilePage from '@/features/profile/ProfilePage';
-import ChatPage from '@/features/chat/ChatPage';
-
-// Components
+import { useRealtimeMessages } from '@/hooks/useRealtimeMessages';
 import BottomNavigation from '@/components/navigation/BottomNavigation';
 
-// Loading component
+// Lazy loading des pages
+const HomePage = React.lazy(() => import('@/features/home/HomePage'));
+const MapPage = React.lazy(() => import('@/features/map/MapPage'));
+const AddTaskPage = React.lazy(() => import('@/features/add/AddTaskPage'));
+const ChatPage = React.lazy(() => import('@/features/chat/ChatPage'));
+const WalletPage = React.lazy(() => import('@/features/wallet/WalletPage'));
+const ProfilePage = React.lazy(() => import('@/features/profile/ProfilePage'));
+const DashboardPage = React.lazy(() => import('@/features/dashboard/DashboardPage'));
+const TaskDetailPage = React.lazy(() => import('@/features/task-detail/TaskDetailPage'));
+const EditTaskPage = React.lazy(() => import('@/features/edit/EditTaskPage'));
+const Auth = React.lazy(() => import('@/features/auth/Auth'));
+const Onboarding = React.lazy(() => import('@/features/auth/Onboarding'));
+
 const LoadingScreen: React.FC = () => (
-  <div className="min-h-screen bg-gradient-to-br from-primary-50 to-primary-100 flex items-center justify-center">
-    <motion.div
-      initial={{ opacity: 0, scale: 0.8 }}
-      animate={{ opacity: 1, scale: 1 }}
-      className="text-center"
-    >
-      <div className="text-6xl mb-4">🤝</div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-2">
-        Entraide Universelle
-      </h1>
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto"></div>
-    </motion.div>
+  <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+    <div className="text-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+      <p className="text-gray-600 dark:text-gray-400">Chargement...</p>
+    </div>
   </div>
 );
 
-// Protected route component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
 
@@ -43,13 +34,12 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/onboarding" replace />;
+    return <Navigate to="/auth" replace />;
   }
 
   return <>{children}</>;
 };
 
-// Public route component (redirects if already authenticated)
 const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
 
@@ -65,110 +55,107 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 };
 
 const App: React.FC = () => {
-  // Utiliser le hook useAuth pour la gestion automatique de l'authentification
-  useAuth();
+  const { isAuthenticated } = useAuth();
+  
+  // Initialiser la messagerie en temps réel (le hook gère lui-même l'état d'authentification)
+  useRealtimeMessages();
 
   return (
-    <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-      <div className="App">
-        <AnimatePresence mode="wait">
+    <Router>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <Suspense fallback={<LoadingScreen />}>
           <Routes>
-            {/* Public routes */}
-            <Route
-              path="/onboarding"
-              element={
-                <PublicRoute>
-                  <Onboarding />
-                </PublicRoute>
-              }
-            />
-            
-            <Route
-              path="/auth"
-              element={
-                <PublicRoute>
-                  <Auth />
-                </PublicRoute>
-              }
-            />
+            {/* Routes publiques */}
+            <Route path="/auth" element={
+              <PublicRoute>
+                <Auth />
+              </PublicRoute>
+            } />
+            <Route path="/onboarding" element={
+              <PublicRoute>
+                <Onboarding />
+              </PublicRoute>
+            } />
 
-            {/* Protected routes */}
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
+            {/* Routes protégées */}
+            <Route path="/" element={
+              <ProtectedRoute>
+                <div className="pb-16">
                   <HomePage />
-                  <BottomNavigation />
-                </ProtectedRoute>
-              }
-            />
-            
-            <Route
-              path="/map"
-              element={
-                <ProtectedRoute>
+                </div>
+              </ProtectedRoute>
+            } />
+            <Route path="/map" element={
+              <ProtectedRoute>
+                <div className="pb-16">
                   <MapPage />
-                  <BottomNavigation />
-                </ProtectedRoute>
-              }
-            />
-            
-            <Route
-              path="/add"
-              element={
-                <ProtectedRoute>
+                </div>
+              </ProtectedRoute>
+            } />
+            <Route path="/add" element={
+              <ProtectedRoute>
+                <div className="pb-16">
                   <AddTaskPage />
-                  <BottomNavigation />
-                </ProtectedRoute>
-              }
-            />
-            
-            <Route
-              path="/edit-task/:taskId"
-              element={
-                <ProtectedRoute>
-                  <EditTaskPage />
-                  <BottomNavigation />
-                </ProtectedRoute>
-              }
-            />
-            
-            <Route
-              path="/wallet"
-              element={
-                <ProtectedRoute>
-                  <WalletPage />
-                  <BottomNavigation />
-                </ProtectedRoute>
-              }
-            />
-            
-            <Route
-              path="/profile"
-              element={
-                <ProtectedRoute>
-                  <ProfilePage />
-                  <BottomNavigation />
-                </ProtectedRoute>
-              }
-            />
-
-            {/* Chat route */}
-            <Route
-              path="/chat/:userId"
-              element={
-                <ProtectedRoute>
+                </div>
+              </ProtectedRoute>
+            } />
+            <Route path="/create-task" element={
+              <ProtectedRoute>
+                <div className="pb-16">
+                  <AddTaskPage />
+                </div>
+              </ProtectedRoute>
+            } />
+            <Route path="/chat" element={
+              <ProtectedRoute>
+                <div className="pb-16">
                   <ChatPage />
-                </ProtectedRoute>
-              }
-            />
+                </div>
+              </ProtectedRoute>
+            } />
+            <Route path="/wallet" element={
+              <ProtectedRoute>
+                <div className="pb-16">
+                  <WalletPage />
+                </div>
+              </ProtectedRoute>
+            } />
+            <Route path="/profile" element={
+              <ProtectedRoute>
+                <div className="pb-16">
+                  <ProfilePage />
+                </div>
+              </ProtectedRoute>
+            } />
+            <Route path="/dashboard" element={
+              <ProtectedRoute>
+                <div className="pb-16">
+                  <DashboardPage />
+                </div>
+              </ProtectedRoute>
+            } />
+            <Route path="/task/:taskId" element={
+              <ProtectedRoute>
+                <div className="pb-16">
+                  <TaskDetailPage />
+                </div>
+              </ProtectedRoute>
+            } />
+            <Route path="/edit-task/:taskId" element={
+              <ProtectedRoute>
+                <div className="pb-16">
+                  <EditTaskPage />
+                </div>
+              </ProtectedRoute>
+            } />
 
-            {/* Catch all route */}
+            {/* Route par défaut */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
-        </AnimatePresence>
+        </Suspense>
 
-
+        {/* Navigation bottom */}
+        {isAuthenticated && <BottomNavigation />}
       </div>
     </Router>
   );
