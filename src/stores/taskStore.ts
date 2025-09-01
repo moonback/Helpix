@@ -11,6 +11,7 @@ interface TaskStore {
   
   // Actions de base
   fetchTasks: () => Promise<void>;
+  fetchAllTasks: () => Promise<void>;
   fetchMyAssignedTasks: () => Promise<void>;
   createTask: (taskData: Partial<Task>) => Promise<void>;
   updateTask: (id: number, updates: Partial<Task>) => Promise<void>;
@@ -59,6 +60,27 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
   selectedTask: null,
   taskFilters: {},
   taskSort: { field: 'created_at', direction: 'desc' },
+
+  fetchAllTasks: async () => {
+    try {
+      set({ isLoading: true, error: null });
+      
+      // Récupérer TOUTES les tâches (pour le tableau de bord)
+      const { data, error } = await supabase
+        .from('tasks')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      set({ tasks: data || [] });
+    } catch (error) {
+      console.error('Erreur lors de la récupération de toutes les tâches:', error);
+      set({ error: 'Erreur lors de la récupération des tâches' });
+    } finally {
+      set({ isLoading: false });
+    }
+  },
 
   fetchMyAssignedTasks: async () => {
     try {
@@ -424,6 +446,44 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
       }
 
       await get().updateTask(id, updates);
+
+      // Créditer automatiquement l'utilisateur qui a répondu à la tâche
+      if (status === 'completed') {
+        const task = get().tasks.find(t => t.id === id);
+        if (task && task.assigned_to && task.budget_credits > 0) {
+          try {
+            // Vérifier si l'utilisateur a déjà été crédité pour cette tâche
+            const { hasUserBeenCreditedForTask, creditUserForTaskCompletion } = await import('@/lib/creditUtils');
+            
+            const alreadyCredited = await hasUserBeenCreditedForTask(id);
+            if (!alreadyCredited) {
+              const success = await creditUserForTaskCompletion(
+                task.assigned_to,
+                id,
+                task.budget_credits,
+                task.title,
+                task.user_id
+              );
+              
+              if (success) {
+                // Rafraîchir le store wallet si l'utilisateur actuel est celui qui a été crédité
+                const { useAuthStore } = await import('@/stores/authStore');
+                const { user } = useAuthStore.getState();
+                if (user && user.id === task.assigned_to) {
+                  const { useWalletStore } = await import('@/features/wallet/stores/walletStore');
+                  const walletStore = useWalletStore.getState();
+                  await walletStore.fetchWallet();
+                }
+              }
+            } else {
+              console.log(`ℹ️ L'utilisateur a déjà été crédité pour la tâche ${id}`);
+            }
+          } catch (walletError) {
+            console.error('Erreur lors du crédit automatique:', walletError);
+            // Ne pas faire échouer le changement de statut si le crédit échoue
+          }
+        }
+      }
 
       // Commentaire automatique désactivé pour éviter les erreurs de colonne manquante
       // if (reason) {

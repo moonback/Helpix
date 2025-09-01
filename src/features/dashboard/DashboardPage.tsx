@@ -16,7 +16,7 @@ import SkeletonLoader from './components/SkeletonLoader';
 const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
   const { 
-    fetchTasks, 
+    fetchAllTasks, 
     isLoading, 
     getDashboardData, 
     filterTasks, 
@@ -34,7 +34,7 @@ const DashboardPage: React.FC = () => {
   const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
-    fetchTasks();
+    fetchAllTasks();
   }, []);
 
   const dashboard = getDashboardData();
@@ -45,6 +45,8 @@ const DashboardPage: React.FC = () => {
   const handleStatusChange = async (taskId: number, newStatus: 'open' | 'in_progress' | 'completed' | 'cancelled' | 'on_hold' | 'review') => {
     try {
       await updateTaskStatus(taskId, newStatus);
+      // Rafraîchir les tâches après la mise à jour
+      await fetchAllTasks();
     } catch (error) {
       console.error('Erreur lors du changement de statut:', error);
     }

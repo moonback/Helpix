@@ -97,6 +97,17 @@ export const useHelpOfferStore = create<HelpOfferState>((set, get) => ({
         isLoading: false
       }));
 
+      // Rafraîchir les tâches dans le taskStore après l'acceptation
+      try {
+        const { useTaskStore } = await import('@/stores/taskStore');
+        const taskStore = useTaskStore.getState();
+        if (taskStore.fetchAllTasks) {
+          await taskStore.fetchAllTasks();
+        }
+      } catch (taskError) {
+        console.warn('Impossible de rafraîchir les tâches après acceptation de l\'offre:', taskError);
+      }
+
     } catch (error) {
       console.error('Erreur lors de l\'acceptation de l\'offre:', error);
       set({ 
