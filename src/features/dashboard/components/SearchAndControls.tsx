@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Search, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import Input from '@/components/ui/Input';
-import Button from '@/components/ui/Button';
+
 import { SORT_OPTIONS } from '../constants';
 import { TaskSort } from '@/types';
 
@@ -47,7 +47,7 @@ const SearchAndControls: React.FC<SearchAndControlsProps> = ({
             </span>
             <select
               value={taskSort.field}
-              onChange={(e) => onSortChange({ ...taskSort, field: e.target.value })}
+              onChange={(e) => onSortChange({ ...taskSort, field: e.target.value as TaskSort['field'] })}
               className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
             >
               {SORT_OPTIONS.map((option) => (

@@ -2,8 +2,8 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { 
   TrendingUp, 
+  TrendingDown,
   Clock, 
-  DollarSign, 
   Activity,
   Target,
   Calendar

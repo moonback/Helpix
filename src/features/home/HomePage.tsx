@@ -29,7 +29,7 @@ import {
   AlertCircle,
   Users,
   MapPin,
-  TrendingUp,
+
 
   BarChart3,
   Eye,
@@ -73,7 +73,7 @@ const HomePage: React.FC = () => {
   const { createConversation } = useMessageStore();
   const { latitude, longitude, error: locationError, isLoading: locationLoading, requestLocation } = useGeolocation();
   const { address, getAddressFromCoords, retry } = useReverseGeocoding();
-  const { createHelpOffer } = useHelpOfferStore();
+
   
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'local' | 'remote'>('all');

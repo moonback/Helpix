@@ -9,7 +9,7 @@ import {
   MessageSquare, 
   Play, 
   CheckCircle,
-  MoreVertical,
+
   Eye
 } from 'lucide-react';
 import Card from '@/components/ui/Card';
@@ -44,7 +44,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
 }) => {
   const isCompleted = isTaskCompleted(task.status);
   const progressColor = getProgressColor(task.progress_percentage);
-  const StatusIcon = getTaskStatusIcon(task.status);
+
 
   return (
     <motion.div

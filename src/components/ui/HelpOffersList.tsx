@@ -7,9 +7,7 @@ import {
   DollarSign, 
   MessageSquare, 
   User, 
-  MapPin, 
-  Star,
-  Calendar,
+
   AlertCircle
 } from 'lucide-react';
 import Button from './Button';
@@ -24,7 +22,6 @@ interface HelpOffersListProps {
 
 const HelpOffersList: React.FC<HelpOffersListProps> = ({
   offers,
-  taskId,
   onOfferUpdate
 }) => {
   const { acceptHelpOffer, rejectHelpOffer, isLoading } = useHelpOfferStore();

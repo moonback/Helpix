@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Send, Clock, DollarSign, MessageSquare, User, MapPin } from 'lucide-react';
+import { X, Send, Clock, DollarSign, MessageSquare, MapPin } from 'lucide-react';
 import Button from './Button';
 import Input from './Input';
 import { Task } from '@/types';
