@@ -37,6 +37,7 @@ interface TaskTrackerProps {
   onRemoveAttachment: (attachmentId: string) => Promise<void>;
   onEdit: () => void;
   onDelete: () => void;
+  onViewOffers?: () => void;
   isOwner?: boolean;
   canEdit?: boolean;
 }
@@ -50,6 +51,7 @@ const TaskTracker: React.FC<TaskTrackerProps> = ({
   onRemoveAttachment,
   onEdit,
   onDelete,
+  onViewOffers,
   isOwner = false,
   canEdit = false
 }) => {
@@ -203,6 +205,17 @@ const TaskTracker: React.FC<TaskTrackerProps> = ({
           </div>
           
           <div className="flex items-center space-x-2">
+            {isOwner && onViewOffers && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onViewOffers}
+                className="flex items-center space-x-2 text-emerald-600 border-emerald-200 hover:bg-emerald-50"
+              >
+                <MessageSquare className="w-4 h-4" />
+                <span>Voir les offres</span>
+              </Button>
+            )}
             {canEdit && (
               <Button
                 variant="outline"
@@ -292,6 +305,16 @@ const TaskTracker: React.FC<TaskTrackerProps> = ({
             >
               <Pause className="w-4 h-4 mr-2" />
               Mettre en pause
+            </Button>
+          )}
+          
+          {task.status === 'on_hold' && canEdit && (
+            <Button
+              onClick={() => onUpdateStatus('in_progress', 'Reprise de la tâche')}
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
+            >
+              <Play className="w-4 h-4 mr-2" />
+              Reprendre
             </Button>
           )}
         </div>

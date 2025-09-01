@@ -11,6 +11,7 @@ interface TaskStore {
   
   // Actions de base
   fetchTasks: () => Promise<void>;
+  fetchMyAssignedTasks: () => Promise<void>;
   createTask: (taskData: Partial<Task>) => Promise<void>;
   updateTask: (id: number, updates: Partial<Task>) => Promise<void>;
   deleteTask: (id: number) => Promise<void>;
@@ -59,20 +60,60 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
   taskFilters: {},
   taskSort: { field: 'created_at', direction: 'desc' },
 
+  fetchMyAssignedTasks: async () => {
+    try {
+      set({ isLoading: true, error: null });
+      
+      // Récupérer l'utilisateur connecté
+      const { data: { user } } = await supabase.auth.getUser();
+      const currentUserId = user?.id;
+
+      if (!currentUserId) {
+        throw new Error('Utilisateur non connecté');
+      }
+
+      // Récupérer uniquement les tâches assignées à l'utilisateur connecté
+      const { data, error } = await supabase
+        .from('tasks')
+        .select('*')
+        .eq('assigned_to', currentUserId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      set({ tasks: data || [] });
+    } catch (error) {
+      console.error('Erreur lors de la récupération des tâches assignées:', error);
+      set({ error: 'Erreur lors de la récupération des tâches assignées' });
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
   fetchTasks: async () => {
     try {
       set({ isLoading: true, error: null });
       
+      // Récupérer l'utilisateur connecté
+      const { data: { user } } = await supabase.auth.getUser();
+      const currentUserId = user?.id;
+
+      if (!currentUserId) {
+        throw new Error('Utilisateur non connecté');
+      }
+
+      // Récupérer les tâches non assignées OU assignées à l'utilisateur connecté
       const { data, error } = await supabase
         .from('tasks')
         .select('*')
+        .or(`assigned_to.is.null,assigned_to.eq.${currentUserId}`)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
 
       // Si pas de données, utiliser des tâches mockées pour la démo
       if (!data || data.length === 0) {
-        const mockTasks: Task[] = [
+        const allMockTasks: Task[] = [
           {
             id: 1,
             user_id: 'user-1',
@@ -97,7 +138,7 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
             total_steps: 5,
             completed_steps: 3,
             time_spent: 150,
-            last_activity: '2024-01-12T14:30:00',
+
             is_overdue: false,
             complexity: 'moderate',
             assigned_to: 'user-2'
@@ -121,7 +162,7 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
             total_steps: 3,
             completed_steps: 0,
             time_spent: 0,
-            last_activity: '2024-01-09T14:30:00',
+
             is_overdue: false,
             complexity: 'simple'
           },
@@ -150,7 +191,7 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
             total_steps: 3,
             completed_steps: 3,
             time_spent: 90,
-            last_activity: '2024-01-10T12:00:00',
+
             is_overdue: false,
             complexity: 'simple',
             assigned_to: 'user-4'
@@ -176,7 +217,7 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
             total_steps: 4,
             completed_steps: 1,
             time_spent: 120,
-            last_activity: '2024-01-11T10:00:00',
+
             is_overdue: true,
             complexity: 'complex',
             assigned_to: 'user-5'
@@ -204,12 +245,17 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
             total_steps: 4,
             completed_steps: 4,
             time_spent: 132,
-            last_activity: '2024-01-12T16:00:00',
+
             is_overdue: false,
             complexity: 'moderate',
             assigned_to: 'user-1'
           }
         ];
+        
+        // Filtrer les tâches mockées selon l'utilisateur connecté
+        const mockTasks = allMockTasks.filter(task => 
+          !task.assigned_to || task.assigned_to === currentUserId
+        );
         
         set({ tasks: mockTasks });
       } else {
@@ -306,7 +352,7 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
       const updates: Partial<Task> = {
         progress_percentage: Math.max(0, Math.min(100, progress)),
         updated_at: new Date().toISOString(),
-        last_activity: new Date().toISOString()
+
       };
 
       if (step) {
@@ -331,7 +377,7 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
         time_spent: newTimeSpent,
         actual_duration: newTimeSpent / 60, // Convertir en heures
         updated_at: new Date().toISOString(),
-        last_activity: new Date().toISOString()
+
       });
     } catch (error) {
       console.error('Erreur lors de l\'enregistrement du temps:', error);
@@ -356,7 +402,7 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
         const updatedComments = [...(task.comments || []), newComment];
         await get().updateTask(taskId, {
           comments: updatedComments,
-          last_activity: new Date().toISOString()
+  
         });
       }
     } catch (error) {
@@ -369,8 +415,7 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
     try {
       const updates: Partial<Task> = {
         status,
-        updated_at: new Date().toISOString(),
-        last_activity: new Date().toISOString()
+        updated_at: new Date().toISOString()
       };
 
       if (status === 'completed') {
@@ -380,16 +425,16 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
 
       await get().updateTask(id, updates);
 
-      // Ajouter un commentaire automatique pour le changement de statut
-      if (reason) {
-        await get().addTaskComment(id, {
-          task_id: id,
-          user_id: 'system',
-          content: `Statut changé vers "${status}": ${reason}`,
-          type: 'progress_update',
-          is_internal: false
-        });
-      }
+      // Commentaire automatique désactivé pour éviter les erreurs de colonne manquante
+      // if (reason) {
+      //   await get().addTaskComment(id, {
+      //     task_id: id,
+      //     user_id: 'system',
+      //     content: `Statut changé vers "${status}": ${reason}`,
+      //     type: 'progress_update',
+      //     is_internal: false
+      //   });
+      // }
     } catch (error) {
       console.error('Erreur lors du changement de statut:', error);
       throw error;
@@ -401,17 +446,17 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
       await get().updateTask(id, {
         assigned_to: userId,
         updated_at: new Date().toISOString(),
-        last_activity: new Date().toISOString()
+
       });
 
-      // Ajouter un commentaire automatique
-      await get().addTaskComment(id, {
-        task_id: id,
-        user_id: 'system',
-        content: `Tâche assignée à l'utilisateur ${userId}`,
-        type: 'progress_update',
-        is_internal: false
-      });
+      // Commentaire automatique désactivé pour éviter les erreurs de colonne manquante
+      // await get().addTaskComment(id, {
+      //   task_id: id,
+      //   user_id: 'system',
+      //   content: `Tâche assignée à l'utilisateur ${userId}`,
+      //   type: 'progress_update',
+      //   is_internal: false
+      // });
     } catch (error) {
       console.error('Erreur lors de l\'assignation:', error);
       throw error;
@@ -438,7 +483,7 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
         const updatedAttachments = [...(task.attachments || []), attachment];
         await get().updateTask(taskId, {
           attachments: updatedAttachments,
-          last_activity: new Date().toISOString()
+  
         });
       }
     } catch (error) {
@@ -454,7 +499,7 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
         const updatedAttachments = task.attachments?.filter(a => a.id !== attachmentId) || [];
         await get().updateTask(taskId, {
           attachments: updatedAttachments,
-          last_activity: new Date().toISOString()
+  
         });
       }
     } catch (error) {

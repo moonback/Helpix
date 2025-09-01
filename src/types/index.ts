@@ -57,7 +57,7 @@ export interface Task {
   total_steps?: number;
   completed_steps?: number;
   time_spent?: number; // en minutes
-  last_activity?: string;
+
   is_overdue: boolean;
   complexity: 'simple' | 'moderate' | 'complex';
   dependencies?: number[]; // IDs des tâches dépendantes
@@ -266,4 +266,37 @@ export interface OnboardingSlide {
   title: string;
   description: string;
   icon: string;
+}
+
+// Types pour le système d'offres d'aide
+export interface HelpOffer {
+  id: string;
+  task_id: number;
+  helper_id: string;
+  status: 'pending' | 'accepted' | 'rejected' | 'cancelled';
+  message?: string;
+  proposed_duration?: number;
+  proposed_credits?: number;
+  created_at: string;
+  updated_at: string;
+  responded_at?: string;
+  response_message?: string;
+  
+  // Relations
+  helper?: User;
+  task?: Task;
+}
+
+export interface HelpOfferNotification {
+  id: string;
+  help_offer_id: string;
+  user_id: string;
+  type: 'new_offer' | 'offer_accepted' | 'offer_rejected' | 'offer_cancelled';
+  title: string;
+  message: string;
+  is_read: boolean;
+  created_at: string;
+  
+  // Relations
+  help_offer?: HelpOffer;
 }

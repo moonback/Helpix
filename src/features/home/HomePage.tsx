@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTaskStore } from '@/stores/taskStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useMessageStore } from '@/stores/messageStore';
+import { useHelpOfferStore } from '@/stores/helpOfferStore';
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { useReverseGeocoding } from '@/hooks/useReverseGeocoding';
 import Button from '@/components/ui/Button';
@@ -14,6 +15,7 @@ import DetailedAddressDisplay from '@/components/ui/DetailedAddressDisplay';
 import FilterModal from '@/components/ui/FilterModal';
 import FilterButton from '@/components/ui/FilterButton';
 import FilterBadge from '@/components/ui/FilterBadge';
+import HelpOfferModal from '@/components/ui/HelpOfferModal';
 import { calculateDistance, formatDistance } from '@/lib/utils';
 import { 
   Search, 
@@ -71,6 +73,7 @@ const HomePage: React.FC = () => {
   const { createConversation } = useMessageStore();
   const { latitude, longitude, error: locationError, isLoading: locationLoading, requestLocation } = useGeolocation();
   const { address, getAddressFromCoords, retry } = useReverseGeocoding();
+  const { createHelpOffer } = useHelpOfferStore();
   
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'local' | 'remote'>('all');
@@ -80,6 +83,8 @@ const HomePage: React.FC = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [showQuickActions, setShowQuickActions] = useState(true);
+  const [selectedTaskForOffer, setSelectedTaskForOffer] = useState<any>(null);
+  const [isHelpOfferModalOpen, setIsHelpOfferModalOpen] = useState(false);
 
   useEffect(() => {
     fetchTasks();
@@ -257,11 +262,12 @@ const HomePage: React.FC = () => {
         return;
       }
 
-      await createConversation([user.id, task.user_id]);
-      navigate('/chat');
+      // Ouvrir le modal d'offre d'aide
+      setSelectedTaskForOffer(task);
+      setIsHelpOfferModalOpen(true);
       
     } catch (error) {
-      console.error('Erreur lors de la création de la conversation:', error);
+      console.error('Erreur lors de l\'ouverture du modal d\'offre:', error);
     }
   };
 
@@ -301,6 +307,11 @@ const HomePage: React.FC = () => {
 
   const toggleSortOrder = () => {
     setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+  };
+
+  const handleHelpOfferSuccess = () => {
+    // Optionnel: afficher une notification de succès
+    console.log('Offre d\'aide envoyée avec succès');
   };
 
   if (isLoading) {
@@ -1139,6 +1150,19 @@ const HomePage: React.FC = () => {
         <div className="absolute bottom-1/4 -right-64 w-96 h-96 bg-purple-400/5 rounded-full blur-3xl animate-pulse" style={{animationDelay: '3s'}}></div>
         <div className="absolute top-3/4 left-1/3 w-64 h-64 bg-emerald-400/5 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1.5s'}}></div>
       </div>
+
+      {/* Modal d'offre d'aide */}
+      {selectedTaskForOffer && (
+        <HelpOfferModal
+          isOpen={isHelpOfferModalOpen}
+          onClose={() => {
+            setIsHelpOfferModalOpen(false);
+            setSelectedTaskForOffer(null);
+          }}
+          task={selectedTaskForOffer}
+          onSuccess={handleHelpOfferSuccess}
+        />
+      )}
     </div>
   );
 };
