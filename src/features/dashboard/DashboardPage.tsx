@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useTaskStore } from '@/stores/taskStore';
-import { useAuthStore } from '@/stores/authStore';
+
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
@@ -18,16 +18,10 @@ import {
   Plus,
   Eye,
   Edit,
-  Trash2,
   MessageSquare,
   FileText,
   Users,
   Target,
-  Zap,
-  Award,
-  Activity,
-  PieChart,
-  LineChart,
   ArrowUpRight,
   ArrowDownRight,
   Minus,
@@ -39,7 +33,6 @@ import {
 const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
   const { 
-    tasks, 
     fetchTasks, 
     isLoading, 
     getDashboardData, 
@@ -51,9 +44,9 @@ const DashboardPage: React.FC = () => {
     taskSort,
     setTaskSort,
     updateTaskStatus,
-    updateTaskProgress
+
   } = useTaskStore();
-  const { user } = useAuthStore();
+
   
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedView, setSelectedView] = useState<'overview' | 'tasks' | 'analytics'>('overview');
@@ -98,13 +91,7 @@ const DashboardPage: React.FC = () => {
     }
   };
 
-  const handleProgressUpdate = async (taskId: number, progress: number) => {
-    try {
-      await updateTaskProgress(taskId, progress);
-    } catch (error) {
-      console.error('Erreur lors de la mise à jour du progrès:', error);
-    }
-  };
+
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -233,10 +220,10 @@ const DashboardPage: React.FC = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-2">Statut</label>
                   <select
                     multiple
-                    value={taskFilters.status || []}
+                    value={taskFilters.status || [] as string[]}
                     onChange={(e) => {
                       const selected = Array.from(e.target.selectedOptions, option => option.value);
-                      setTaskFilters({ ...taskFilters, status: selected });
+                      setTaskFilters({ ...taskFilters, status: selected as any });
                     }}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
@@ -253,10 +240,10 @@ const DashboardPage: React.FC = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-2">Priorité</label>
                   <select
                     multiple
-                    value={taskFilters.priority || []}
+                    value={taskFilters.priority || [] as string[]}
                     onChange={(e) => {
                       const selected = Array.from(e.target.selectedOptions, option => option.value);
-                      setTaskFilters({ ...taskFilters, priority: selected });
+                      setTaskFilters({ ...taskFilters, priority: selected as any });
                     }}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
@@ -271,10 +258,10 @@ const DashboardPage: React.FC = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-2">Complexité</label>
                   <select
                     multiple
-                    value={taskFilters.complexity || []}
+                    value={taskFilters.complexity || [] as string[]}
                     onChange={(e) => {
                       const selected = Array.from(e.target.selectedOptions, option => option.value);
-                      setTaskFilters({ ...taskFilters, complexity: selected });
+                      setTaskFilters({ ...taskFilters, complexity: selected as any });
                     }}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >

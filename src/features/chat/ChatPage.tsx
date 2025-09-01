@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { useMessageStore } from '@/stores/messageStore';
-import { useAuthStore } from '@/stores/authStore';
+
 import { Conversation } from '@/types';
 import ConversationList from '@/components/chat/ConversationList';
 import ChatWindow from '@/components/chat/ChatWindow';
@@ -107,7 +107,7 @@ interface NotificationState {
 
 const ChatPage: React.FC = () => {
   const { currentConversation, setCurrentConversation, conversations, deleteConversation } = useMessageStore();
-  const { user } = useAuthStore();
+
   const [isMultiSelectMode, setIsMultiSelectMode] = useState(false);
   const [selectedConversations, setSelectedConversations] = useState<Set<string>>(new Set());
   const [isDeletingMultiple, setIsDeletingMultiple] = useState(false);

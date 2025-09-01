@@ -264,7 +264,7 @@ export const useReverseGeocoding = (): UseReverseGeocodingReturn => {
     }
     
     const response = await fetchWithTimeout(url, {
-      headers: service.headers
+      headers: service.headers as HeadersInit
     }, service.timeout);
 
     if (!response.ok) {
@@ -332,7 +332,7 @@ export const useReverseGeocoding = (): UseReverseGeocodingReturn => {
           
           return;
         } catch (error) {
-          lastError = error;
+          lastError = error as Error;
           console.warn(`Service ${service.name} a échoué:`, error);
           continue;
         }

@@ -70,7 +70,7 @@ const ConversationList: React.FC<ConversationListProps> = ({
   const [showFilters, setShowFilters] = useState(false);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
-  const [hoveredConversation, setHoveredConversation] = useState<string | null>(null);
+
 
   // Gestion de l'état de connexion
   useEffect(() => {
@@ -586,32 +586,32 @@ const ConversationList: React.FC<ConversationListProps> = ({
                     </div>
               
               <div className="flex items-center space-x-2">
-                <Button
+        <Button 
                   onClick={onDeleteSelected}
                   disabled={selectedConversations.size === 0 || isDeletingMultiple}
                   size="sm"
                   className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-xl"
                 >
                   {isDeletingMultiple ? (
-                    <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2">
                       <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
                       <span>Suppression...</span>
-                    </div>
-                  ) : (
+            </div>
+          ) : (
                     <div className="flex items-center space-x-2">
                       <Trash2 className="w-4 h-4" />
                       <span>Supprimer ({selectedConversations.size})</span>
                     </div>
-                  )}
-                </Button>
-                <Button
+          )}
+        </Button>
+          <Button 
                   onClick={onToggleMultiSelect}
                   variant="outline"
                   size="sm"
                   className="border-blue-300 dark:border-blue-600 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-800 px-3 py-2 rounded-xl"
                 >
                   Annuler
-                </Button>
+          </Button>
               </div>
             </div>
                 </div>
@@ -621,7 +621,7 @@ const ConversationList: React.FC<ConversationListProps> = ({
         <div className="flex-1 overflow-hidden h-full">
           {filteredAndSortedConversations.length > 0 ? (
             <div className="p-4 space-y-2">
-              {filteredAndSortedConversations.slice(0, 8).map((conversation, index) => (
+                              {filteredAndSortedConversations.slice(0, 8).map((conversation) => (
                 <div
                   key={conversation.id}
                   className={`conversation-item group p-4 rounded-2xl cursor-pointer transition-all ${
@@ -642,8 +642,7 @@ const ConversationList: React.FC<ConversationListProps> = ({
                       onConversationSelect(conversation);
                     }
                   }}
-                  onMouseEnter={() => setHoveredConversation(conversation.id)}
-                  onMouseLeave={() => setHoveredConversation(null)}
+
                 >
                   <div className="flex items-center space-x-4">
                     {/* Case à cocher en mode multi-sélection */}
@@ -677,8 +676,8 @@ const ConversationList: React.FC<ConversationListProps> = ({
                             {conversation.unreadCount > 9 ? '9+' : conversation.unreadCount}
                           </span>
                         </div>
-                      )}
-                    </div>
+        )}
+      </div>
 
                     {/* Contenu de la conversation */}
                     <div className="flex-1 min-w-0">
@@ -696,10 +695,10 @@ const ConversationList: React.FC<ConversationListProps> = ({
                           <span className="text-xs text-gray-500 dark:text-gray-400">
                             {formatLastSeen(conversation.updatedAt)}
                           </span>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center justify-between">
+        </div>
+      </div>
+
+          <div className="flex items-center justify-between">
                         <p className="text-sm text-gray-600 dark:text-gray-300 truncate pr-2">
                           {conversation.lastMessage ? (
                             <span className="flex items-center space-x-1">
@@ -803,7 +802,7 @@ const ConversationList: React.FC<ConversationListProps> = ({
                                         <Trash2 className="w-4 h-4" />
                                         <span>Supprimer</span>
                                       </button>
-                                    </div>
+          </div>
                                     <div className="border-t border-gray-200 dark:border-slate-600">
                                       <button
                                         onClick={(e) => {
@@ -814,20 +813,20 @@ const ConversationList: React.FC<ConversationListProps> = ({
                                       >
                                         Annuler
                                       </button>
-                                    </div>
-                                  </div>
-                                </div>
+                    </div>
+                    </div>
+                  </div>
                               )}
-                            </div>
-                          )}
-                        </div>
-                      </div>
+                    </div>
+                  )}
+                </div>
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
-          ) : (
+              </div>
+          ))}
+        </div>
+      ) : (
             /* État vide */
             <div className="h-full flex items-center justify-center p-8">
               <div className="text-center space-y-6 max-w-md">

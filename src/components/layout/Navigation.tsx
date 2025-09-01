@@ -40,7 +40,7 @@ const Navigation: React.FC = () => {
     { name: 'Profil', href: '/profile', icon: User, active: location.pathname === '/profile' },
   ];
 
-  const isActive = (path: string) => location.pathname === path;
+
 
   return (
     <>

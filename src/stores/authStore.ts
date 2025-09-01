@@ -194,7 +194,7 @@ export const useAuthStore = create<AuthState>()(
           if (!user) throw new Error('Utilisateur non connecté');
 
           // Vérifier si le profil existe déjà
-          const { data: existingUser, error: checkError } = await supabase
+          const { error: checkError } = await supabase
             .from('users')
             .select('id')
             .eq('id', user.id)
@@ -243,7 +243,7 @@ export const useAuthStore = create<AuthState>()(
           if (!user) throw new Error('Utilisateur non connecté');
 
           // Vérifier si le profil existe déjà
-          const { data: existingUser, error: checkError } = await supabase
+          const { error: checkError } = await supabase
             .from('users')
             .select('id')
             .eq('id', user.id)
