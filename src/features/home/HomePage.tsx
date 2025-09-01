@@ -341,6 +341,104 @@ const HomePage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+      {/* Welcome Section at Top - Full Width */}
+      <div className="w-full bg-gradient-to-r from-slate-50 via-white to-blue-50 border-b border-slate-200/50 shadow-sm">
+        <div className="w-full px-4 sm:px-6 lg:px-8 py-4">
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1, duration: 0.6 }}
+            className="w-full"
+          >
+            {/* Main Header Row */}
+            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 mb-4">
+              {/* Welcome Message */}
+              <div className="flex items-center gap-4 flex-1">
+                <div className="relative">
+                  <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
+                    <span className="text-2xl">👋</span>
+                  </div>
+                  <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-white flex items-center justify-center">
+                    <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                  </div>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h1 className="text-2xl lg:text-3xl font-bold text-slate-800 mb-1 truncate">
+                    Bonjour {user?.name || 'Emilie Pajor'} ! 🌟
+                  </h1>
+                  <p className="text-slate-600 text-base lg:text-lg">
+                    Découvrez les opportunités d'entraide autour de vous
+                  </p>
+                </div>
+              </div>
+
+              {/* Location Status + Action Buttons */}
+              <div className="flex flex-col lg:flex-row items-start lg:items-center gap-3 lg:gap-4">
+                {/* Location Status Compact */}
+                <div className="flex items-center">
+                  {locationLoading ? (
+                    <div className="flex items-center space-x-2 text-slate-600 bg-slate-50 px-3 py-2 rounded-xl border">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                      <span className="text-sm font-medium">Localisation...</span>
+                    </div>
+                  ) : latitude && longitude ? (
+                    <div className="flex items-center space-x-2 text-emerald-700 bg-emerald-50 px-3 py-2 rounded-xl border border-emerald-200">
+                      <div className="relative">
+                        <div className="w-4 h-4 bg-emerald-500 rounded-full flex items-center justify-center">
+                          <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
+                        </div>
+                        <div className="absolute inset-0 bg-emerald-500 rounded-full animate-ping opacity-40"></div>
+                      </div>
+                      <DetailedAddressDisplay
+                        address={address}
+                        isLoading={!address}
+                        error={null}
+                        showIcon={false}
+                        className="text-emerald-700 text-sm font-medium truncate max-w-[200px]"
+                        onRetry={retry}
+                      />
+                    </div>
+                  ) : locationError ? (
+                    <div className="flex items-center space-x-2 text-red-600 bg-red-50 px-3 py-2 rounded-xl border border-red-200">
+                      <AlertCircle className="w-4 h-4" />
+                      <span className="text-sm font-medium">❌ Erreur localisation</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center space-x-2 text-slate-500 bg-slate-50 px-3 py-2 rounded-xl border">
+                      <Navigation className="w-4 h-4" />
+                      <span className="text-sm font-medium">📍 Non localisé</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex items-center gap-2 lg:gap-3">
+                  <Button
+                    onClick={() => navigate('/create-task')}
+                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-4 lg:px-6 py-2 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    <span className="hidden sm:inline">Créer une tâche</span>
+                    <span className="sm:hidden">Créer</span>
+                  </Button>
+                  <Button
+                    onClick={() => navigate('/dashboard')}
+                    variant="outline"
+                    className="border-slate-300 hover:border-blue-500 hover:text-blue-600 px-4 lg:px-6 py-2 rounded-xl transition-all duration-200"
+                  >
+                    <BarChart3 className="w-4 h-4 mr-2" />
+                    <span className="hidden sm:inline">Tableau de bord</span>
+                    <span className="sm:hidden">Stats</span>
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            
+          </motion.div>
+        </div>
+      </div>
+
       {/* Enhanced Hero Section */}
       <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-700 text-white">
         <div className="absolute inset-0 bg-black/10"></div>
@@ -451,103 +549,7 @@ const HomePage: React.FC = () => {
       {/* Main Content */}
       <div className="relative z-10 px-6 py-8">
         <div className="max-w-7xl mx-auto">
-          {/* Enhanced Welcome Section */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.8 }}
-            className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-white/50 p-8 mb-8"
-          >
-            <div className="flex flex-col lg:flex-row items-start justify-between gap-6">
-              <div className="flex-1">
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
-                    <span className="text-2xl">👋</span>
-                  </div>
-                  <div>
-                    <h2 className="text-3xl font-bold text-slate-800 mb-1">
-                      Bonjour {user?.name || 'Utilisateur'} !
-                    </h2>
-                    <p className="text-slate-600 text-lg">
-                      Découvrez les opportunités d'entraide autour de vous
-                    </p>
-                  </div>
-                </div>
 
-                {/* Enhanced Location Status */}
-                <div className="bg-gradient-to-r from-slate-50 to-blue-50 rounded-2xl p-6 border border-slate-200">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      {locationLoading ? (
-                        <div className="flex items-center space-x-3 text-slate-600">
-                          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-                          <div>
-                            <div className="font-medium">Localisation en cours...</div>
-                            <div className="text-sm text-slate-500">Détection de votre position</div>
-                          </div>
-                        </div>
-                      ) : latitude && longitude ? (
-                        <div className="flex items-center space-x-3 text-green-700">
-                          <div className="relative">
-                            <div className="w-4 h-4 bg-green-500 rounded-full"></div>
-                            <div className="absolute inset-0 bg-green-500 rounded-full animate-ping opacity-50"></div>
-                          </div>
-                          <Navigation className="w-6 h-6" />
-                          <div>
-                            <div className="font-medium flex items-center gap-2">
-                              Position détectée
-                              <Shield className="w-4 h-4 text-slate-500" />
-                            </div>
-                            <DetailedAddressDisplay
-                              address={address}
-                              isLoading={!address}
-                              error={null}
-                              showIcon={false}
-                              className="text-slate-600 text-sm"
-                              onRetry={retry}
-                            />
-                          </div>
-                        </div>
-                      ) : locationError ? (
-                        <div className="flex items-center space-x-3 text-red-600">
-                          <AlertCircle className="w-6 h-6" />
-                          <div>
-                            <div className="font-medium">Erreur de localisation</div>
-                            <div className="text-sm text-red-500">Impossible de vous localiser</div>
-                          </div>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            onClick={requestLocation}
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                          >
-                            Réessayer
-                          </Button>
-                        </div>
-                      ) : (
-                        <div className="flex items-center space-x-3 text-slate-500">
-                          <Navigation className="w-6 h-6" />
-                          <div>
-                            <div className="font-medium">Localisation non disponible</div>
-                            <div className="text-sm">Activez la géolocalisation pour une meilleure expérience</div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                    
-                    <Button
-                      onClick={() => navigate('/dashboard')}
-                      variant="outline"
-                      className="hidden lg:flex items-center space-x-2 border-slate-300 hover:border-blue-500 hover:text-blue-600"
-                    >
-                      <BarChart3 className="w-4 h-4" />
-                      <span>Tableau de bord</span>
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
 
           {/* Quick Actions Section */}
           <AnimatePresence>
