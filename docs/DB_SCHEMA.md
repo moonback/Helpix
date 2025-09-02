@@ -1,8 +1,8 @@
-# 🗄️ Schéma de Base de Données - Entraide Universelle
+# 🗄️ Schéma de Base de Données - Helpix
 
 ## 🎯 Vue d'Ensemble
 
-La base de données d'Entraide Universelle est construite sur **PostgreSQL** via Supabase, avec une architecture optimisée pour la géolocalisation, la messagerie temps réel et la gestion des crédits. Le schéma suit les principes de normalisation tout en maintenant des performances optimales.
+La base de données d'Helpix est construite sur **PostgreSQL** via Supabase, avec une architecture optimisée pour la géolocalisation, la messagerie temps réel et la gestion des crédits. Le schéma suit les principes de normalisation tout en maintenant des performances optimales.
 
 ## 🏗️ Architecture Générale
 
@@ -769,4 +769,4 @@ $$ LANGUAGE plpgsql;
 
 ---
 
-Ce schéma de base de données est conçu pour être performant, sécurisé et évolutif, supportant les besoins actuels et futurs d'Entraide Universelle tout en maintenant l'intégrité des données et la conformité aux réglementations.
+Ce schéma de base de données est conçu pour être performant, sécurisé et évolutif, supportant les besoins actuels et futurs d'Helpix tout en maintenant l'intégrité des données et la conformité aux réglementations.

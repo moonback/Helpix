@@ -1,8 +1,8 @@
-# 🤝 Guide de Contribution - Entraide Universelle
+# 🤝 Guide de Contribution - Helpix
 
 ## 🎯 Bienvenue !
 
-Merci de votre intérêt pour contribuer à **Entraide Universelle** ! Ce guide vous aidera à comprendre comment participer au développement de cette plateforme d'entraide communautaire.
+Merci de votre intérêt pour contribuer à **Helpix** ! Ce guide vous aidera à comprendre comment participer au développement de cette plateforme d'entraide communautaire.
 
 ## 📋 Table des Matières
 
@@ -540,7 +540,7 @@ Toute autre information ou contexte pertinent.
 
 ### **Contributeurs**
 
-Nous reconnaissons et remercions tous les contributeurs qui aident à faire d'Entraide Universelle une plateforme meilleure :
+Nous reconnaissons et remercions tous les contributeurs qui aident à faire d'Helpix une plateforme meilleure :
 
 - **Code Contributors** : Développeurs qui contribuent au code
 - **Documentation Contributors** : Amélioration de la documentation
@@ -558,7 +558,7 @@ Les contributeurs les plus actifs sont reconnus dans notre Hall of Fame :
 
 ## 📄 Licence
 
-En contribuant à Entraide Universelle, vous acceptez que vos contributions soient sous la licence MIT. Voir le fichier [LICENSE](LICENSE) pour plus de détails.
+En contribuant à Helpix, vous acceptez que vos contributions soient sous la licence MIT. Voir le fichier [LICENSE](LICENSE) pour plus de détails.
 
 ## 🙏 Remerciements
 

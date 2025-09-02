@@ -1,8 +1,8 @@
-# 📚 Documentation API - Entraide Universelle
+# 📚 Documentation API - Helpix
 
 ## 🎯 Vue d'Ensemble
 
-L'API d'Entraide Universelle est construite sur **Supabase** et expose des endpoints RESTful pour toutes les fonctionnalités de la plateforme. Cette documentation couvre tous les endpoints disponibles, leurs paramètres, réponses et exemples d'utilisation.
+L'API d'Helpix est construite sur **Supabase** et expose des endpoints RESTful pour toutes les fonctionnalités de la plateforme. Cette documentation couvre tous les endpoints disponibles, leurs paramètres, réponses et exemples d'utilisation.
 
 ## 🔐 Authentification
 
@@ -670,4 +670,4 @@ curl -X GET 'https://your-project.supabase.co/rest/v1/tasks?select=*&status=eq.o
 
 ---
 
-Cette documentation API couvre tous les endpoints disponibles dans Entraide Universelle. Pour toute question ou clarification, consultez les exemples d'utilisation ou contactez l'équipe de développement.
+Cette documentation API couvre tous les endpoints disponibles dans Helpix. Pour toute question ou clarification, consultez les exemples d'utilisation ou contactez l'équipe de développement.

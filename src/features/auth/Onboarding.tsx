@@ -8,7 +8,7 @@ import { OnboardingSlide } from '@/types';
 const onboardingSlides: OnboardingSlide[] = [
   {
     id: 1,
-    title: 'Bienvenue dans l\'entraide universelle',
+    title: 'Bienvenue dans l\'Helpix',
     description: 'Une économie de proximité mondiale où vous pouvez échanger du temps, des compétences et des objets avec votre communauté.',
     icon: '🌍',
   },
@@ -51,7 +51,7 @@ const Onboarding: React.FC = () => {
       {/* Header */}
       <div className="flex justify-between items-center p-6">
         <div className="text-primary-600 font-semibold text-lg">
-          Entraide Universelle
+          Helpix
         </div>
         <Button
           variant="ghost"

@@ -1,8 +1,8 @@
-# 📱 Améliorations Responsive - Entraide Universelle
+# 📱 Améliorations Responsive - Helpix
 
 ## 🎯 Vue d'ensemble
 
-Ce document détaille les améliorations apportées au design responsive de l'application Entraide Universelle pour optimiser l'expérience utilisateur sur tous les appareils.
+Ce document détaille les améliorations apportées au design responsive de l'application Helpix pour optimiser l'expérience utilisateur sur tous les appareils.
 
 ## 🛠️ Améliorations Apportées
 

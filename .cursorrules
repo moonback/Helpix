@@ -1,4 +1,4 @@
-# 🚀 Règles Cursor pour Entraide Universelle
+# 🚀 Règles Cursor pour Helpix
 
 ## 📋 Vue d'ensemble du projet
 
@@ -264,4 +264,4 @@ export const calculateDistance = (lat1: number, lng1: number, lat2: number, lng2
 
 ---
 
-**Ces règles garantissent la qualité, la maintenabilité et la scalabilité du projet Entraide Universelle.**
+**Ces règles garantissent la qualité, la maintenabilité et la scalabilité du projet Helpix.**

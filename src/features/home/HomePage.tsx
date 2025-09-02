@@ -328,7 +328,7 @@ const HomePage: React.FC = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4, duration: 0.8 }}
             >
-              Entraide Universelle
+              Helpix
             </motion.h1>
             
             <motion.p 

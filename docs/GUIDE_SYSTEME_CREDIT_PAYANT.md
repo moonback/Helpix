@@ -2,7 +2,7 @@
 
 ## 📋 Vue d'ensemble
 
-Le système de crédits payants transforme Entraide Universelle en une plateforme où chaque tâche a une valeur économique. Les utilisateurs doivent maintenant payer des crédits pour créer des tâches, ce qui améliore la qualité des demandes et crée une économie circulaire.
+Le système de crédits payants transforme Helpix en une plateforme où chaque tâche a une valeur économique. Les utilisateurs doivent maintenant payer des crédits pour créer des tâches, ce qui améliore la qualité des demandes et crée une économie circulaire.
 
 ## 🔄 Comment ça fonctionne
 
@@ -183,4 +183,4 @@ Pour toute question sur le système de crédits, contactez le support via l'appl
 
 ---
 
-*Ce système transforme Entraide Universelle en une vraie économie collaborative où chacun contribue et bénéficie de la valeur créée par la communauté.*
+*Ce système transforme Helpix en une vraie économie collaborative où chacun contribue et bénéficie de la valeur créée par la communauté.*

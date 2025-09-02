@@ -1,8 +1,8 @@
-# 🗺️ Roadmap - Entraide Universelle
+# 🗺️ Roadmap - Helpix
 
 ## 🎯 Vision à Long Terme
 
-**Entraide Universelle** vise à devenir la plateforme de référence pour l'entraide locale et la solidarité communautaire, connectant des millions d'utilisateurs à travers le monde pour créer un écosystème d'aide mutuelle durable et éthique.
+**Helpix** vise à devenir la plateforme de référence pour l'entraide locale et la solidarité communautaire, connectant des millions d'utilisateurs à travers le monde pour créer un écosystème d'aide mutuelle durable et éthique.
 
 ## 📅 Timeline de Développement
 
@@ -383,7 +383,7 @@
 
 ## 🎉 Conclusion
 
-Cette roadmap trace le chemin vers la transformation d'Entraide Universelle en une plateforme mondiale de solidarité et d'entraide. Chaque phase est conçue pour apporter de la valeur aux utilisateurs tout en construisant une base solide pour la croissance future.
+Cette roadmap trace le chemin vers la transformation d'Helpix en une plateforme mondiale de solidarité et d'entraide. Chaque phase est conçue pour apporter de la valeur aux utilisateurs tout en construisant une base solide pour la croissance future.
 
 **Notre mission :** Connecter les gens pour créer un monde plus solidaire, une tâche à la fois.
 

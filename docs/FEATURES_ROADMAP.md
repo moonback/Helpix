@@ -1,8 +1,8 @@
-# 🚀 Feuille de Route des Fonctionnalités - Entraide Universelle
+# 🚀 Feuille de Route des Fonctionnalités - Helpix
 
 ## 📋 Vue d'ensemble
 
-Ce document détaille la feuille de route complète des fonctionnalités à implémenter dans l'application **Entraide Universelle**, organisée par phases de développement avec estimations de temps et priorités.
+Ce document détaille la feuille de route complète des fonctionnalités à implémenter dans l'application **Helpix**, organisée par phases de développement avec estimations de temps et priorités.
 
 ---
 
@@ -615,7 +615,7 @@ interface SystemHealth {
 
 ## 🎉 **Conclusion**
 
-Cette feuille de route représente une vision complète et réaliste du développement de **Entraide Universelle** sur les 12-18 prochains mois. 
+Cette feuille de route représente une vision complète et réaliste du développement de **Helpix** sur les 12-18 prochains mois. 
 
 **Priorités immédiates** :
 1. Implémenter le système de messagerie
@@ -628,4 +628,4 @@ Cette feuille de route représente une vision complète et réaliste du dévelop
 
 *Dernière mise à jour : ${new Date().toLocaleDateString('fr-FR')}*
 *Version : 1.0*
-*Responsable : Équipe de développement Entraide Universelle*
+*Responsable : Équipe de développement Helpix*

@@ -51,7 +51,7 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({ className = '' }) => {
               <Heart className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-slate-800">Entraide Universelle</h1>
+              <h1 className="text-xl font-bold text-slate-800">Helpix</h1>
               <p className="text-sm text-slate-500">
                 Bonjour {user?.email?.split('@')[0] || 'Utilisateur'} !
               </p>
@@ -135,7 +135,7 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({ className = '' }) => {
               </div>
               <div>
                 <h1 className="text-base sm:text-lg font-bold text-slate-800 leading-tight">
-                  Entraide Universelle
+                  Helpix
                 </h1>
                 <p className="text-xs sm:text-sm text-slate-500 hidden xs:block">
                   Bonjour {user?.email?.split('@')[0] || 'Utilisateur'} !

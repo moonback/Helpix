@@ -1,13 +1,13 @@
 ---
 
-title: Analyse de l'application Entraide Universelle
+title: Analyse de l'application Helpix
 author: Équipe Conseil
 date: 2025-09-02
 ----------------
 
 ## Résumé exécutif
 
-Entraide Universelle est une plateforme mobile-first d’entraide géolocalisée, permettant aux particuliers de demander ou proposer de l’aide au sein de leur zone via un système de crédits. La solution combine pertinence locale, expérience utilisateur fluide et paiements sécurisés, tout en offrant un modèle de monétisation multiple (vente de crédits, frais de service, location d’objets).
+Helpix est une plateforme mobile-first d’entraide géolocalisée, permettant aux particuliers de demander ou proposer de l’aide au sein de leur zone via un système de crédits. La solution combine pertinence locale, expérience utilisateur fluide et paiements sécurisés, tout en offrant un modèle de monétisation multiple (vente de crédits, frais de service, location d’objets).
 
 Les principales priorités pour maximiser l’engagement et la croissance sont : finaliser la messagerie et les notifications avancées, déployer le système de notation/avis, optimiser le funnel de crédits et renforcer la conformité RGPD. La plateforme dispose d’un fort potentiel de rétention et de monétisation durable si ces briques clés sont complétées.
 
@@ -17,7 +17,7 @@ Les principales priorités pour maximiser l’engagement et la croissance sont :
 
 ### 1.1 Vision
 
-Entraide Universelle connecte des particuliers pour solliciter ou proposer de l’aide locale (bricolage, garde, déménagement, etc.) via un système de crédits, en s’appuyant sur une expérience mobile-first et une interface intuitive.
+Helpix connecte des particuliers pour solliciter ou proposer de l’aide locale (bricolage, garde, déménagement, etc.) via un système de crédits, en s’appuyant sur une expérience mobile-first et une interface intuitive.
 
 ### 1.2 Fonctionnalités principales (MVP + V1)
 
@@ -124,7 +124,7 @@ G --> H[Suivi historique wallet & avis]
 
 ## 6) Conclusion
 
-Entraide Universelle combine utilité sociale, pertinence locale et solidité technique. Avec la finalisation des briques d’engagement et de confiance, la plateforme possède un fort potentiel de rétention et de monétisation via un écosystème de crédits, services et partenariats locaux.
+Helpix combine utilité sociale, pertinence locale et solidité technique. Avec la finalisation des briques d’engagement et de confiance, la plateforme possède un fort potentiel de rétention et de monétisation via un écosystème de crédits, services et partenariats locaux.
 
 
 

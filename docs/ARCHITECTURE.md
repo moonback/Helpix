@@ -1,8 +1,8 @@
-# 🏗️ Architecture Technique - Entraide Universelle
+# 🏗️ Architecture Technique - Helpix
 
 ## 🎯 Vue d'Ensemble
 
-Entraide Universelle suit une **architecture moderne frontend-first** avec un backend-as-a-service (Supabase), conçue pour être scalable, maintenable et performante. L'application adopte une approche component-driven avec séparation claire des responsabilités.
+Helpix suit une **architecture moderne frontend-first** avec un backend-as-a-service (Supabase), conçue pour être scalable, maintenable et performante. L'application adopte une approche component-driven avec séparation claire des responsabilités.
 
 ## 📐 Principes Architecturaux
 

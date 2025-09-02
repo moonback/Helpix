@@ -76,7 +76,7 @@ const SidebarNavigation: React.FC<SidebarNavigationProps> = ({ isOpen, onClose }
               </div>
               <div>
                 <h2 className="text-lg font-bold text-gray-900 dark:text-white">
-                  Entraide Universelle
+                  Helpix
                 </h2>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
                   {user?.email}

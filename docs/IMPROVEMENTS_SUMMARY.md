@@ -2,7 +2,7 @@
 
 ## 🎯 Objectif
 
-Résoudre le problème de persistance de session après un rafraîchissement de page (F5) dans l'application Entraide Universelle.
+Résoudre le problème de persistance de session après un rafraîchissement de page (F5) dans l'application Helpix.
 
 ## 🔧 Problèmes Identifiés
 

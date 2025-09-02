@@ -1,8 +1,8 @@
-# 🚀 Système Complet de Suivi des Tâches - Entraide Universelle
+# 🚀 Système Complet de Suivi des Tâches - Helpix
 
 ## 📋 Vue d'ensemble
 
-Le système de suivi des tâches d'Entraide Universelle est une solution complète et avancée qui permet aux utilisateurs de gérer, suivre et optimiser leurs tâches d'entraide. Il combine des fonctionnalités de gestion de projet avec des outils de collaboration et de communication.
+Le système de suivi des tâches d'Helpix est une solution complète et avancée qui permet aux utilisateurs de gérer, suivre et optimiser leurs tâches d'entraide. Il combine des fonctionnalités de gestion de projet avec des outils de collaboration et de communication.
 
 ## ✨ Fonctionnalités principales
 
@@ -289,6 +289,6 @@ describe('TaskStore', () => {
 
 ## 🎉 Conclusion
 
-Le système de suivi des tâches d'Entraide Universelle représente une solution complète et moderne pour la gestion de projets d'entraide. Il combine simplicité d'utilisation avec des fonctionnalités avancées, offrant aux utilisateurs tous les outils nécessaires pour collaborer efficacement et atteindre leurs objectifs.
+Le système de suivi des tâches d'Helpix représente une solution complète et moderne pour la gestion de projets d'entraide. Il combine simplicité d'utilisation avec des fonctionnalités avancées, offrant aux utilisateurs tous les outils nécessaires pour collaborer efficacement et atteindre leurs objectifs.
 
-**Fait avec ❤️ pour la communauté d'entraide universelle**
+**Fait avec ❤️ pour la communauté d'Helpix**

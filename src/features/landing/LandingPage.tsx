@@ -141,7 +141,7 @@ const testimonialsData = [
     name: 'Marie Dubois',
     role: 'Utilisatrice depuis 6 mois',
     avatar: '👩‍🦰',
-    text: 'Grâce à Entraide Universelle, j\'ai trouvé de l\'aide pour mon déménagement en 2 heures ! La communauté est vraiment bienveillante.',
+    text: 'Grâce à Helpix, j\'ai trouvé de l\'aide pour mon déménagement en 2 heures ! La communauté est vraiment bienveillante.',
     rating: 5
   },
   {
@@ -212,7 +212,7 @@ const LandingPage = () => {
               <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
                 <Heart className="w-6 h-6 text-white" />
               </div>
-              <span className="text-xl font-bold text-slate-800">Entraide Universelle</span>
+              <span className="text-xl font-bold text-slate-800">Helpix</span>
             </div>
 
             {/* Desktop Navigation Menu */}
@@ -591,7 +591,7 @@ const LandingPage = () => {
                 <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center">
                   <Heart className="w-6 h-6 text-white" />
                 </div>
-                <span className="text-xl font-bold">Entraide Universelle</span>
+                <span className="text-xl font-bold">Helpix</span>
               </div>
               <p className="text-slate-300 mb-6 max-w-md">
                 La plateforme qui connecte les communautés pour créer un monde plus solidaire et bienveillant.
@@ -633,7 +633,7 @@ const LandingPage = () => {
           </div>
 
           <div className="border-t border-slate-800 mt-8 pt-6 text-center text-slate-400">
-            <p>&copy; 2024 Entraide Universelle. Tous droits réservés.</p>
+            <p>&copy; 2024 Helpix. Tous droits réservés.</p>
           </div>
         </div>
       </footer>
@@ -656,7 +656,7 @@ const LandingPage = () => {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex justify-between items-center mb-4 sm:mb-6">
-                <h3 className="text-xl sm:text-2xl font-bold text-slate-800">Découvrez Entraide Universelle</h3>
+                <h3 className="text-xl sm:text-2xl font-bold text-slate-800">Découvrez Helpix</h3>
                 <button
                   onClick={() => setIsVideoPlaying(false)}
                   className="w-8 h-8 sm:w-10 sm:h-10 bg-slate-100 hover:bg-slate-200 rounded-full flex items-center justify-center transition-colors"

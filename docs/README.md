@@ -1,8 +1,8 @@
-# 🌍 Entraide Universelle
+# 🌍 Helpix
 
 **Une plateforme d'entraide géolocalisée qui connecte les communautés locales pour créer un écosystème de solidarité et d'échange de services.**
 
-Entraide Universelle permet aux utilisateurs de proposer et demander de l'aide dans leur région, en utilisant un système de crédits équitable et une interface moderne et intuitive.
+Helpix permet aux utilisateurs de proposer et demander de l'aide dans leur région, en utilisant un système de crédits équitable et une interface moderne et intuitive.
 
 ## 🚀 Fonctionnalités Principales
 
@@ -124,7 +124,7 @@ VITE_LOCATIONIQ_API_KEY=your_locationiq_key
 VITE_STRIPE_PUBLIC_KEY=your_stripe_public_key
 
 # Configuration App
-VITE_APP_NAME="Entraide Universelle"
+VITE_APP_NAME="Helpix"
 VITE_APP_VERSION="1.0.0"
 ```
 
@@ -261,7 +261,7 @@ VITE_NOMINATIM_URL=https://nominatim.openstreetmap.org
 VITE_STRIPE_PUBLIC_KEY=pk_test_your_stripe_public_key
 
 # === CONFIGURATION APP ===
-VITE_APP_NAME="Entraide Universelle"
+VITE_APP_NAME="Helpix"
 VITE_APP_VERSION="1.0.0"
 VITE_APP_DESCRIPTION="Plateforme d'entraide géolocalisée"
 VITE_APP_URL=https://entraide-universelle.com
@@ -410,7 +410,7 @@ Ce projet est sous licence **MIT**. Voir le fichier [LICENSE](LICENSE) pour plus
 ```
 MIT License
 
-Copyright (c) 2024 Entraide Universelle
+Copyright (c) 2024 Helpix
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -451,7 +451,7 @@ Ce projet s'inspire des valeurs de solidarité, d'entraide et de communauté. No
 
 ## 🌟 **Ensemble, construisons un monde plus solidaire !**
 
-**Développé avec ❤️ par l'équipe Entraide Universelle**
+**Développé avec ❤️ par l'équipe Helpix**
 
 [Site Web](https://entraide-universelle.com) • [Twitter](https://twitter.com/entraide_univ) • [LinkedIn](https://linkedin.com/company/entraide-universelle) • [Blog](https://blog.entraide-universelle.com)
 
