@@ -125,7 +125,31 @@ begin
   end if;
 end $$;
 
--- 8) Index pour améliorer les performances
+-- 8) Corriger les clés étrangères manquantes dans la table rentals
+do $$
+begin
+  -- Ajouter la contrainte de clé étrangère pour owner_id si elle n'existe pas
+  if not exists (
+    select 1 from pg_constraint 
+    where conname = 'rentals_owner_id_fkey'
+  ) then
+    alter table public.rentals 
+    add constraint rentals_owner_id_fkey 
+    foreign key (owner_id) references public.users(id) on delete cascade;
+  end if;
+  
+  -- Ajouter la contrainte de clé étrangère pour renter_id si elle n'existe pas
+  if not exists (
+    select 1 from pg_constraint 
+    where conname = 'rentals_renter_id_fkey'
+  ) then
+    alter table public.rentals 
+    add constraint rentals_renter_id_fkey 
+    foreign key (renter_id) references public.users(id) on delete cascade;
+  end if;
+end $$;
+
+-- 9) Index pour améliorer les performances
 create index if not exists idx_items_category on public.items(category) where is_rentable = true;
 create index if not exists idx_items_condition on public.items(condition) where is_rentable = true;
 create index if not exists idx_items_daily_price on public.items(daily_price) where is_rentable = true;
@@ -135,7 +159,7 @@ create index if not exists idx_items_location on public.items using gist(ll_to_e
 create index if not exists idx_rental_reviews_item_id on public.rental_reviews(item_id);
 create index if not exists idx_rental_reviews_rating on public.rental_reviews(rating);
 
--- 9) Fonction pour calculer la note moyenne d'un item
+-- 10) Fonction pour calculer la note moyenne d'un item
 create or replace function public.calculate_item_average_rating(item_id_param integer)
 returns numeric as $$
 declare
@@ -149,7 +173,7 @@ begin
 end;
 $$ language plpgsql;
 
--- 10) Fonction pour compter le nombre total de locations d'un item
+-- 11) Fonction pour compter le nombre total de locations d'un item
 create or replace function public.count_item_rentals(item_id_param integer)
 returns integer as $$
 declare
@@ -163,7 +187,7 @@ begin
 end;
 $$ language plpgsql;
 
--- 11) Vue pour les statistiques du marketplace
+-- 12) Vue pour les statistiques du marketplace
 drop view if exists public.marketplace_stats;
 create view public.marketplace_stats as
 select 
@@ -175,7 +199,7 @@ select
 from public.items
 where is_rentable = true;
 
--- 12) Vue pour les items avec leurs statistiques
+-- 13) Vue pour les items avec leurs statistiques
 drop view if exists public.items_with_stats;
 create view public.items_with_stats as
 select 
@@ -188,7 +212,7 @@ from public.items i
 left join public.users u on i.user_id = u.id
 where i.is_rentable = true;
 
--- 13) Données de test pour les catégories
+-- 14) Données de test pour les catégories
 insert into public.items (
   user_id, 
   name, 
