@@ -263,7 +263,7 @@ export const useWalletStore = create<WalletStore>((set, get) => ({
       // Récupérer les statistiques du wallet
       const { data: walletData } = await supabase
         .from('wallets')
-        .select('id, balance, total_earned, total_spent')
+        .select('id, balance, total_earned, total_spent, reserved_credits')
         .eq('user_id', user.id)
         .single();
 
@@ -312,6 +312,7 @@ export const useWalletStore = create<WalletStore>((set, get) => ({
 
       const stats: WalletStats = {
         total_balance: walletData?.balance || 0,
+        reserved_credits: walletData?.reserved_credits || 0,
         monthly_earnings: monthlyEarningsTotal,
         pending_earnings: pendingEarningsTotal,
         total_transactions: recentTransactions?.length || 0,

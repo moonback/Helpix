@@ -68,5 +68,7 @@ export const SORT_OPTIONS = [
 export const VIEW_TABS = [
   { id: 'overview', label: 'Vue d\'ensemble', icon: 'BarChart3' },
   { id: 'tasks', label: 'Toutes les tâches', icon: 'FileText' },
-  { id: 'analytics', label: 'Analytics', icon: 'TrendingUp' }
+  { id: 'analytics', label: 'Analytics', icon: 'TrendingUp' },
+  { id: 'marketplace', label: 'Marketplace', icon: 'Package' },
+  { id: 'wallet', label: 'Wallet', icon: 'Wallet' }
 ] as const;

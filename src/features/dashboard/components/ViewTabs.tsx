@@ -1,17 +1,19 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { BarChart3, FileText, TrendingUp } from 'lucide-react';
+import { BarChart3, FileText, TrendingUp, Package, Wallet } from 'lucide-react';
 import { VIEW_TABS } from '../constants';
 
 interface ViewTabsProps {
-  selectedView: 'overview' | 'tasks' | 'analytics';
-  onViewChange: (view: 'overview' | 'tasks' | 'analytics') => void;
+  selectedView: 'overview' | 'tasks' | 'analytics' | 'marketplace' | 'wallet';
+  onViewChange: (view: 'overview' | 'tasks' | 'analytics' | 'marketplace' | 'wallet') => void;
 }
 
 const iconMap = {
   BarChart3,
   FileText,
-  TrendingUp
+  TrendingUp,
+  Package,
+  Wallet
 };
 
 const ViewTabs: React.FC<ViewTabsProps> = ({ selectedView, onViewChange }) => {
