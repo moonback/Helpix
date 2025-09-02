@@ -17,6 +17,7 @@ const WalletPage = React.lazy(() => import('@/features/wallet/WalletPage'));
 const ProfilePage = React.lazy(() => import('@/features/profile/ProfilePage'));
 const DashboardPage = React.lazy(() => import('@/features/dashboard/DashboardPage'));
 const RentalsPage = React.lazy(() => import('@/features/rentals/RentalsPage'));
+const RentableItemDetailPage = React.lazy(() => import('@/features/rentals/RentableItemDetailPage'));
 const TaskDetailPage = React.lazy(() => import('@/features/task-detail/TaskDetailPage'));
 const EditTaskPage = React.lazy(() => import('@/features/edit/EditTaskPage'));
 const HelpOffersPage = React.lazy(() => import('@/features/help-offers/HelpOffersPage'));
@@ -160,6 +161,11 @@ const App: React.FC = () => {
                 <div className="pb-16">
                   <RentalsPage />
                 </div>
+              </ProtectedRoute>
+            } />
+            <Route path="/rentals/:itemId" element={
+              <ProtectedRoute>
+                <RentableItemDetailPage />
               </ProtectedRoute>
             } />
             <Route path="/dashboard" element={
