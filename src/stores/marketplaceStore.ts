@@ -463,10 +463,10 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
       const depositCredits = rentalData.depositCredits || 0;
       const totalToReserve = totalCredits + depositCredits;
 
-      // Réserver les crédits pour cette demande (location + dépôt)
+      // Réserver SEULEMENT les crédits de location (pas la caution)
       const { error: reserveError } = await supabase.rpc('reserve_rental_credits', {
         p_user_id: user.id,
-        p_amount: totalToReserve,
+        p_amount: totalCredits, // SEULEMENT les crédits de location
         p_rental_id: 'temp_' + Date.now() // ID temporaire, sera remplacé après création
       });
 
@@ -494,7 +494,7 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
         // En cas d'erreur, libérer les crédits réservés
         await supabase.rpc('unreserve_rental_credits', {
           p_user_id: user.id,
-          p_amount: totalCredits,
+          p_amount: totalCredits, // SEULEMENT les crédits de location
           p_rental_id: 'temp_' + Date.now(),
           p_reason: 'Erreur création demande'
         });
@@ -550,11 +550,10 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
 
       // Gérer les crédits selon le changement de statut
       if (currentStatus === 'requested' && status === 'accepted') {
-        // Libérer les crédits réservés du locataire
-        const totalReserved = rentalData.total_credits + (rentalData.deposit_credits || 0);
+        // Libérer les crédits réservés du locataire (SEULEMENT les crédits de location)
         await supabase.rpc('unreserve_rental_credits', {
           p_user_id: rentalData.renter_id,
-          p_amount: totalReserved,
+          p_amount: rentalData.total_credits, // SEULEMENT les crédits de location
           p_rental_id: id,
           p_reason: 'Location acceptée'
         });
@@ -579,7 +578,7 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
           id
         );
         
-        // Si il y a un dépôt, le bloquer dans l'escrow (pas de crédit au propriétaire)
+        // Si il y a un dépôt, le bloquer dans l'escrow (débit direct du locataire)
         if (rentalData.deposit_credits > 0) {
           const { error: escrowError } = await supabase.rpc('hold_escrow_deposit', {
             p_rental_id: id,
@@ -610,10 +609,9 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
         // Gérer les remboursements selon le statut actuel
         if (currentStatus === 'requested') {
           // Libérer les crédits réservés (remboursement automatique)
-          const totalReserved = rentalData.total_credits + (rentalData.deposit_credits || 0);
           await supabase.rpc('unreserve_rental_credits', {
             p_user_id: rentalData.renter_id,
-            p_amount: totalReserved,
+            p_amount: rentalData.total_credits, // SEULEMENT les crédits de location
             p_rental_id: id,
             p_reason: 'Demande annulée'
           });
