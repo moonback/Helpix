@@ -286,7 +286,7 @@ const ProfilePage: React.FC = () => {
           </div>
           
           <motion.h1 
-            className="text-3xl font-bold mb-3"
+            className="text-2xl font-bold mb-3"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
@@ -305,19 +305,19 @@ const ProfilePage: React.FC = () => {
             <div className="text-center">
               {address ? (
                 <div>
-                  <div className="font-medium">{address}</div>
+                  <div className="font-medium text-sm">{address}</div>
                 </div>
               ) : user?.latitude && user?.longitude ? (
                 <div className="flex items-center gap-2">
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  <span>Chargement de l'adresse...</span>
+                  <span className="text-sm">Chargement de l'adresse...</span>
                 </div>
               ) : (
                 <div className="flex flex-col items-center gap-2">
-                  <span>Localisation non disponible</span>
+                  <span className="text-sm">Localisation non disponible</span>
                   <button
                     onClick={requestLocation}
-                    className="text-xs bg-white/20 hover:bg-white/30 px-3 py-1 rounded-full transition-colors"
+                    className="text-[10px] bg-white/20 hover:bg-white/30 px-3 py-1 rounded-full transition-colors"
                   >
                     Activer la localisation
                   </button>
@@ -341,10 +341,10 @@ const ProfilePage: React.FC = () => {
               <div className="w-12 h-12 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center mx-auto mb-3">
                 <Activity className="w-6 h-6 text-white" />
               </div>
-              <div className="text-2xl font-bold text-slate-800 mb-1">
+              <div className="text-xl font-bold text-slate-800 mb-1">
                 {stats.tasksCompleted}
               </div>
-              <div className="text-sm text-slate-600 font-medium">Tâches terminées</div>
+              <div className="text-xs text-slate-600 font-medium">Tâches terminées</div>
             </div>
           </Card>
           
@@ -353,10 +353,10 @@ const ProfilePage: React.FC = () => {
               <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-3">
                 <Plus className="w-6 h-6 text-white" />
               </div>
-              <div className="text-2xl font-bold text-slate-800 mb-1">
+              <div className="text-xl font-bold text-slate-800 mb-1">
                 {stats.tasksCreated}
               </div>
-              <div className="text-sm text-slate-600 font-medium">Tâches créées</div>
+              <div className="text-xs text-slate-600 font-medium">Tâches créées</div>
             </div>
           </Card>
           
@@ -365,10 +365,10 @@ const ProfilePage: React.FC = () => {
               <div className="w-12 h-12 bg-gradient-to-r from-yellow-500 to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-3">
                 <Star className="w-6 h-6 text-white fill-white" />
               </div>
-              <div className="text-2xl font-bold text-slate-800 mb-1">
+              <div className="text-xl font-bold text-slate-800 mb-1">
                 {stats.rating}
               </div>
-              <div className="text-sm text-slate-600 font-medium">Note moyenne</div>
+              <div className="text-xs text-slate-600 font-medium">Note moyenne</div>
             </div>
           </Card>
 
@@ -377,10 +377,10 @@ const ProfilePage: React.FC = () => {
               <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-600 rounded-2xl flex items-center justify-center mx-auto mb-3">
                 <Heart className="w-6 h-6 text-white" />
               </div>
-              <div className="text-2xl font-bold text-slate-800 mb-1">
+              <div className="text-xl font-bold text-slate-800 mb-1">
                 {stats.memberSince}
               </div>
-              <div className="text-sm text-slate-600 font-medium">Membre depuis</div>
+              <div className="text-xs text-slate-600 font-medium">Membre depuis</div>
             </div>
           </Card>
         </motion.div>
@@ -400,7 +400,7 @@ const ProfilePage: React.FC = () => {
                   <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center">
                     <Users className="w-5 h-5 text-white" />
                   </div>
-                  <h3 className="text-xl font-bold text-slate-800">
+                  <h3 className="text-lg font-bold text-slate-800">
                     Informations personnelles
                   </h3>
                 </div>
@@ -463,15 +463,15 @@ const ProfilePage: React.FC = () => {
                 <div className="space-y-6">
                   {user?.bio ? (
                     <div className="bg-gradient-to-r from-slate-50 to-blue-50 rounded-2xl p-6 border border-slate-200">
-                      <h4 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
+                      <h4 className="text-xs font-semibold text-slate-700 mb-3 flex items-center gap-2">
                         <Heart className="w-4 h-4 text-pink-500" />
                         À propos de moi
                       </h4>
-                      <p className="text-slate-700 leading-relaxed">{user.bio}</p>
+                      <p className="text-sm text-slate-700 leading-relaxed">{user.bio}</p>
                     </div>
                   ) : (
                     <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl p-6 border border-amber-200 text-center">
-                      <p className="text-amber-700 font-medium">
+                      <p className="text-sm text-amber-700 font-medium">
                         Ajoutez une bio pour que les autres membres puissent mieux vous connaître !
                       </p>
                     </div>
@@ -484,18 +484,18 @@ const ProfilePage: React.FC = () => {
                           <MapPin className="w-4 h-4 text-white" />
                         </div>
                         <div>
-                          <div className="text-sm font-semibold text-emerald-800">Localisation</div>
+                          <div className="text-xs font-semibold text-emerald-800">Localisation</div>
                           <div className="text-emerald-700">
                             {address ? (
-                              <div className="font-medium">{address}</div>
+                              <div className="font-medium text-sm">{address}</div>
                             ) : user?.location ? (
-                              <div className="font-medium">{user.location}</div>
+                              <div className="font-medium text-sm">{user.location}</div>
                             ) : (
                               <div className="flex flex-col gap-2">
-                                <span className="text-sm">Non spécifiée</span>
+                                <span className="text-xs">Non spécifiée</span>
                                 <button
                                   onClick={requestLocation}
-                                  className="text-xs bg-emerald-100 hover:bg-emerald-200 text-emerald-800 px-2 py-1 rounded-full transition-colors"
+                                  className="text-[10px] bg-emerald-100 hover:bg-emerald-200 text-emerald-800 px-2 py-1 rounded-full transition-colors"
                                 >
                                   Activer la localisation
                                 </button>
@@ -512,8 +512,8 @@ const ProfilePage: React.FC = () => {
                           <Award className="w-4 h-4 text-white" />
                         </div>
                         <div>
-                          <div className="text-sm font-semibold text-purple-800">Membre depuis</div>
-                          <div className="text-purple-700 font-medium">{stats.memberSince}</div>
+                          <div className="text-xs font-semibold text-purple-800">Membre depuis</div>
+                          <div className="text-sm text-purple-700 font-medium">{stats.memberSince}</div>
                         </div>
                       </div>
                     </div>
@@ -539,7 +539,7 @@ const ProfilePage: React.FC = () => {
                   <div className="w-10 h-10 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center">
                     <Award className="w-5 h-5 text-white" />
                   </div>
-                  <h3 className="text-xl font-bold text-slate-800">
+                  <h3 className="text-lg font-bold text-slate-800">
                     Mes compétences
                   </h3>
                 </div>
@@ -566,11 +566,11 @@ const ProfilePage: React.FC = () => {
                       placeholder="Ex: Jardinage"
                     />
                     <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-1">Niveau</label>
+                      <label className="block text-xs font-medium text-slate-700 mb-1">Niveau</label>
                       <select
                         value={newSkillLevel}
                         onChange={(e) => setNewSkillLevel(e.target.value as any)}
-                        className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                        className="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-400"
                       >
                         <option>Débutant</option>
                         <option>Intermédiaire</option>
@@ -593,9 +593,9 @@ const ProfilePage: React.FC = () => {
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex-1">
-                        <div className="font-semibold text-slate-800 mb-1">{skill.name}</div>
+                        <div className="font-semibold text-sm text-slate-800 mb-1">{skill.name}</div>
                         <div className="flex items-center gap-2">
-                          <div className={`px-2 py-1 text-xs rounded-full font-medium ${
+                          <div className={`px-2 py-1 text-[10px] rounded-full font-medium ${
                             skill.level === 'Expert' ? 'bg-emerald-100 text-emerald-800' :
                             skill.level === 'Avancé' ? 'bg-blue-100 text-blue-800' :
                             skill.level === 'Intermédiaire' ? 'bg-yellow-100 text-yellow-800' :
@@ -625,8 +625,8 @@ const ProfilePage: React.FC = () => {
                   <div className="w-16 h-16 bg-gradient-to-r from-slate-100 to-slate-200 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Award className="w-8 h-8 text-slate-400" />
                   </div>
-                  <p className="text-slate-500 font-medium">Aucune compétence ajoutée</p>
-                  <p className="text-slate-400 text-sm">Ajoutez vos compétences pour être trouvé plus facilement</p>
+                  <p className="text-sm text-slate-500 font-medium">Aucune compétence ajoutée</p>
+                  <p className="text-xs text-slate-400">Ajoutez vos compétences pour être trouvé plus facilement</p>
                 </div>
               )}
             </div>
@@ -648,7 +648,7 @@ const ProfilePage: React.FC = () => {
                   <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-red-600 rounded-2xl flex items-center justify-center">
                     <Globe className="w-5 h-5 text-white" />
                   </div>
-                  <h3 className="text-xl font-bold text-slate-800">
+                  <h3 className="text-lg font-bold text-slate-800">
                     Objets prêtables
                   </h3>
                 </div>
@@ -681,7 +681,7 @@ const ProfilePage: React.FC = () => {
                       placeholder="Détails..."
                     />
                     <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-1">Louable</label>
+                      <label className="block text-xs font-medium text-slate-700 mb-1">Louable</label>
                       <div className="flex items-center h-[42px] px-3 rounded-xl border border-slate-300 bg-white">
                         <input
                           type="checkbox"
@@ -689,7 +689,7 @@ const ProfilePage: React.FC = () => {
                           onChange={(e) => setNewItemIsRentable(e.target.checked)}
                           className="mr-2"
                         />
-                        <span className="text-sm">Permettre la location</span>
+                        <span className="text-xs">Permettre la location</span>
                       </div>
                     </div>
                     <Input
@@ -709,11 +709,11 @@ const ProfilePage: React.FC = () => {
                       disabled={!newItemIsRentable}
                     />
                     <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-1">Disponibilité</label>
+                      <label className="block text-xs font-medium text-slate-700 mb-1">Disponibilité</label>
                       <select
                         value={newItemAvailable ? 'oui' : 'non'}
                         onChange={(e) => setNewItemAvailable(e.target.value === 'oui')}
-                        className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+                        className="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-orange-400"
                       >
                         <option value="oui">Disponible</option>
                         <option value="non">Indisponible</option>
@@ -734,10 +734,10 @@ const ProfilePage: React.FC = () => {
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <div className="font-semibold text-slate-800 mb-2">{item.name}</div>
-                        <div className="text-sm text-slate-600 mb-3">{item.description}</div>
+                        <div className="font-semibold text-sm text-slate-800 mb-2">{item.name}</div>
+                        <div className="text-xs text-slate-600 mb-3">{item.description}</div>
                         <div className="flex flex-wrap items-center gap-2">
-                          <span className={`px-3 py-1 text-xs rounded-full font-medium ${
+                          <span className={`px-3 py-1 text-[10px] rounded-full font-medium ${
                             item.available 
                               ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' 
                               : 'bg-red-100 text-red-800 border border-red-200'
@@ -745,17 +745,17 @@ const ProfilePage: React.FC = () => {
                             {item.available ? '✅ Disponible' : '❌ Indisponible'}
                           </span>
                           {item.is_rentable ? (
-                            <span className="px-3 py-1 text-xs rounded-full font-medium bg-blue-100 text-blue-800 border border-blue-200">
+                            <span className="px-3 py-1 text-[10px] rounded-full font-medium bg-blue-100 text-blue-800 border border-blue-200">
                               Louable · {item.daily_price ?? '?'} /j · dépôt {item.deposit ?? 0}
                             </span>
                           ) : (
-                            <span className="px-3 py-1 text-xs rounded-full font-medium bg-slate-100 text-slate-700 border border-slate-200">
+                            <span className="px-3 py-1 text-[10px] rounded-full font-medium bg-slate-100 text-slate-700 border border-slate-200">
                               Non louable
                             </span>
                           )}
                           <button
                             onClick={() => toggleItemAvailability(item.id)}
-                            className="text-xs px-2 py-1 rounded-full border border-slate-300 hover:bg-slate-100"
+                            className="text-[10px] px-2 py-1 rounded-full border border-slate-300 hover:bg-slate-100"
                           >
                             {item.available ? 'Rendre indisponible' : 'Rendre disponible'}
                           </button>
@@ -773,7 +773,7 @@ const ProfilePage: React.FC = () => {
                               if (error) return console.error(error);
                               setItems(prev => prev.map(it => it.id === item.id ? { ...it, is_rentable: next } : it));
                             }}
-                            className="text-xs px-2 py-2 rounded-xl border border-slate-300 hover:bg-white"
+                            className="text-[10px] px-2 py-2 rounded-xl border border-slate-300 hover:bg-white"
                           >
                             {item.is_rentable ? 'Désactiver location' : 'Activer location'}
                           </button>
@@ -792,7 +792,7 @@ const ProfilePage: React.FC = () => {
                               if (error) return console.error(error);
                               setItems(prev => prev.map(it => it.id === item.id ? { ...it, daily_price: value } : it));
                             }}
-                            className="text-xs px-2 py-2 rounded-xl border border-slate-300 hover:bg-white"
+                            className="text-[10px] px-2 py-2 rounded-xl border border-slate-300 hover:bg-white"
                           >
                             Prix/jour
                           </button>
@@ -811,7 +811,7 @@ const ProfilePage: React.FC = () => {
                               if (error) return console.error(error);
                               setItems(prev => prev.map(it => it.id === item.id ? { ...it, deposit: value } : it));
                             }}
-                            className="text-xs px-2 py-2 rounded-xl border border-slate-300 hover:bg-white"
+                            className="text-[10px] px-2 py-2 rounded-xl border border-slate-300 hover:bg-white"
                           >
                             Dépôt
                           </button>
@@ -821,7 +821,7 @@ const ProfilePage: React.FC = () => {
                       <Button 
                         variant="ghost" 
                         size="sm"
-                          className="p-2 hover:bg-orange-100 hover:text-orange-600 rounded-xl"
+                          className="p-2 hover:bg-orange-100 hover:text-orange-600 rounded-xl text-xs"
                           onClick={() => removeItem(item.id)}
                       >
                           Supprimer
@@ -837,8 +837,8 @@ const ProfilePage: React.FC = () => {
                   <div className="w-16 h-16 bg-gradient-to-r from-slate-100 to-slate-200 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Globe className="w-8 h-8 text-slate-400" />
                   </div>
-                  <p className="text-slate-500 font-medium">Aucun objet prêté</p>
-                  <p className="text-slate-400 text-sm">Partagez vos objets avec la communauté</p>
+                  <p className="text-slate-500 font-medium text-sm">Aucun objet prêté</p>
+                  <p className="text-slate-400 text-xs">Partagez vos objets avec la communauté</p>
                 </div>
               )}
             </div>
@@ -859,7 +859,7 @@ const ProfilePage: React.FC = () => {
                 <div className="w-10 h-10 bg-gradient-to-r from-slate-500 to-gray-600 rounded-2xl flex items-center justify-center">
                   <Settings className="w-5 h-5 text-white" />
                 </div>
-                <h3 className="text-xl font-bold text-slate-800">
+                <h3 className="text-lg font-bold text-slate-800">
                   Paramètres du compte
                 </h3>
               </div>
@@ -872,8 +872,8 @@ const ProfilePage: React.FC = () => {
                     <Settings size={20} className="text-blue-600" />
                   </div>
                   <div>
-                    <div className="font-semibold text-slate-800">Paramètres généraux</div>
-                    <div className="text-sm text-slate-500">Notifications, confidentialité, préférences</div>
+                    <div className="font-semibold text-slate-800 text-sm">Paramètres généraux</div>
+                    <div className="text-xs text-slate-500">Notifications, confidentialité, préférences</div>
                   </div>
                 </button>
                 
@@ -885,8 +885,8 @@ const ProfilePage: React.FC = () => {
                     <LogOut size={20} className="text-red-600" />
                   </div>
                   <div>
-                    <div className="font-semibold text-red-600">Se déconnecter</div>
-                    <div className="text-sm text-red-500">Fermer votre session en cours</div>
+                    <div className="font-semibold text-red-600 text-sm">Se déconnecter</div>
+                    <div className="text-xs text-red-500">Fermer votre session en cours</div>
                   </div>
                 </button>
               </div>
