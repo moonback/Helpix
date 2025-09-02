@@ -20,7 +20,9 @@ import {
   Tag,
   CreditCard,
   AlertTriangle,
-  CheckCircle
+  CheckCircle,
+  Upload,
+  X
 } from 'lucide-react';
 
 const AddTaskPage: React.FC = () => {
@@ -39,7 +41,9 @@ const AddTaskPage: React.FC = () => {
     required_skills: '',
     budget_credits: '',
     deadline: '',
-    tags: ''
+    tags: '',
+    images: [] as string[],
+    imageFiles: [] as File[]
   });
 
   const [selectedLocation, setSelectedLocation] = useState<{
@@ -49,6 +53,25 @@ const AddTaskPage: React.FC = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCreditCheckOpen, setIsCreditCheckOpen] = useState(false);
+
+  // Gestion des images
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files) {
+      const newFiles = Array.from(files);
+      setFormData(prev => ({
+        ...prev,
+        imageFiles: [...prev.imageFiles, ...newFiles]
+      }));
+    }
+  };
+
+  const handleRemoveImage = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      imageFiles: prev.imageFiles.filter((_, i) => i !== index)
+    }));
+  };
 
   // Calculer le coût de la tâche (minimum 10 crédits)
   const taskCost = Math.max(10, parseInt(formData.budget_credits) || 0);
@@ -83,6 +106,7 @@ const AddTaskPage: React.FC = () => {
         deadline: formData.deadline || undefined,
         latitude: selectedLocation?.latitude,
         longitude: selectedLocation?.longitude,
+        images: formData.imageFiles.map(file => URL.createObjectURL(file)), // URLs temporaires pour l'instant
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
@@ -288,6 +312,60 @@ const AddTaskPage: React.FC = () => {
                 onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
                 leftIcon={Calendar}
               />
+            </div>
+          </Card>
+
+          {/* Images */}
+          <Card>
+            <div className="space-y-4">
+              <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                📸 Images (optionnel)
+              </h2>
+              <p className="text-sm text-gray-600">
+                Ajoutez des photos pour mieux illustrer votre tâche
+              </p>
+
+              <div className="space-y-4">
+                <div>
+                  <input
+                    type="file"
+                    id="task-image-upload"
+                    multiple
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                  <label
+                    htmlFor="task-image-upload"
+                    className="flex items-center gap-2 px-4 py-3 border-2 border-dashed border-slate-300 rounded-lg hover:border-emerald-500 cursor-pointer transition-colors"
+                  >
+                    <Upload className="w-5 h-5 text-slate-500" />
+                    <span className="text-slate-600">Ajouter des photos</span>
+                  </label>
+                </div>
+
+                {formData.imageFiles && formData.imageFiles.length > 0 && (
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {formData.imageFiles.map((file, index) => (
+                      <div key={index} className="relative">
+                        <img
+                          src={URL.createObjectURL(file)}
+                          alt={`Image ${index + 1}`}
+                          className="w-full h-24 object-cover rounded-lg"
+                          onLoad={(e) => URL.revokeObjectURL(e.currentTarget.src)}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveImage(index)}
+                          className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </Card>
 
