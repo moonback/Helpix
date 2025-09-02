@@ -62,7 +62,7 @@ interface MarketplaceStore {
   setError: (error: string | null) => void;
   
   // Fonction utilitaire pour gérer les crédits
-  updateUserCredits: (userId: string, amount: number, type: 'credit' | 'debit', description: string) => Promise<number>;
+  updateUserCredits: (userId: string, amount: number, type: 'credit' | 'debit', description: string, referenceType?: string, referenceId?: string) => Promise<number>;
   
   // Statistiques
   getMarketplaceStats: () => {
@@ -115,67 +115,30 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
   },
 
   // Fonction utilitaire pour gérer les crédits
-  updateUserCredits: async (userId: string, amount: number, type: 'credit' | 'debit', description: string) => {
+  updateUserCredits: async (userId: string, amount: number, type: 'credit' | 'debit', description: string, referenceType: string = 'rental_payment', referenceId?: string) => {
     try {
-      // Récupérer le portefeuille de l'utilisateur
-      const { data: wallet, error: walletError } = await supabase
+      // Utiliser la fonction SQL pour mettre à jour les crédits
+      const { error } = await supabase.rpc('update_user_credits', {
+        p_user_id: userId,
+        p_amount: amount,
+        p_type: type,
+        p_description: description,
+        p_reference_type: referenceType,
+        p_reference_id: referenceId || null
+      });
+
+      if (error) {
+        throw new Error(`Erreur lors de la mise à jour des crédits: ${error.message}`);
+      }
+
+      // Récupérer le nouveau solde
+      const { data: wallet } = await supabase
         .from('wallets')
-        .select('*')
+        .select('balance')
         .eq('user_id', userId)
         .single();
 
-      if (walletError && walletError.code !== 'PGRST116') {
-        throw walletError;
-      }
-
-      const currentBalance = wallet?.balance || 0;
-      const newBalance = type === 'credit' 
-        ? currentBalance + amount 
-        : currentBalance - amount;
-
-      if (newBalance < 0) {
-        throw new Error('Solde insuffisant');
-      }
-
-      // Mettre à jour ou créer le portefeuille
-      if (wallet) {
-        const { error: updateError } = await supabase
-          .from('wallets')
-          .update({ 
-            balance: newBalance,
-            updated_at: new Date().toISOString()
-          })
-          .eq('user_id', userId);
-
-        if (updateError) throw updateError;
-      } else {
-        const { error: createError } = await supabase
-          .from('wallets')
-          .insert({
-            user_id: userId,
-            balance: newBalance,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          });
-
-        if (createError) throw createError;
-      }
-
-      // Créer une transaction
-      const { error: transactionError } = await supabase
-        .from('transactions')
-        .insert({
-          user_id: userId,
-          amount: type === 'credit' ? amount : -amount,
-          type: type,
-          description: description,
-          balance_after: newBalance,
-          created_at: new Date().toISOString()
-        });
-
-      if (transactionError) throw transactionError;
-
-      return newBalance;
+      return wallet?.balance || 0;
     } catch (error: any) {
       console.error('Erreur lors de la mise à jour des crédits:', error);
       throw error;
@@ -567,7 +530,9 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
           rentalData.renter_id, 
           rentalData.total_credits, 
           'debit', 
-          `Réservation d'objet - Location #${id}`
+          `Réservation d'objet - Location #${id}`,
+          'rental_payment',
+          id
         );
         
         // Créditer le propriétaire
@@ -575,7 +540,9 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
           rentalData.owner_id, 
           rentalData.total_credits, 
           'credit', 
-          `Location acceptée - Location #${id}`
+          `Location acceptée - Location #${id}`,
+          'rental_payment',
+          id
         );
       } else if (currentStatus === 'accepted' && status === 'active') {
         // Aucun changement de crédits, juste démarrage de la location
@@ -586,7 +553,9 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
             rentalData.renter_id, 
             rentalData.deposit_credits, 
             'credit', 
-            `Remboursement dépôt - Location #${id}`
+            `Remboursement dépôt - Location #${id}`,
+            'rental_refund',
+            id
           );
         }
       } else if (status === 'cancelled') {
@@ -597,7 +566,9 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
             rentalData.renter_id, 
             rentalData.total_credits, 
             'credit', 
-            `Remboursement location annulée - Location #${id}`
+            `Remboursement location annulée - Location #${id}`,
+            'rental_refund',
+            id
           );
           
           // Débiter le propriétaire
@@ -605,7 +576,9 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
             rentalData.owner_id, 
             rentalData.total_credits, 
             'debit', 
-            `Location annulée - Location #${id}`
+            `Location annulée - Location #${id}`,
+            'rental_refund',
+            id
           );
         } else if (currentStatus === 'active') {
           // Rembourser partiellement le locataire (proportionnel)
@@ -614,7 +587,9 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
             rentalData.renter_id, 
             refundAmount, 
             'credit', 
-            `Remboursement partiel location annulée - Location #${id}`
+            `Remboursement partiel location annulée - Location #${id}`,
+            'rental_refund',
+            id
           );
           
           // Débiter le propriétaire
@@ -622,7 +597,9 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
             rentalData.owner_id, 
             refundAmount, 
             'debit', 
-            `Location annulée en cours - Location #${id}`
+            `Location annulée en cours - Location #${id}`,
+            'rental_refund',
+            id
           );
         }
       }
@@ -681,14 +658,18 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
             rentalData.renter_id, 
             rentalData.total_credits, 
             'credit', 
-            `Annulation par locataire - Location #${id}`
+            `Annulation par locataire - Location #${id}`,
+            'rental_refund',
+            id
           );
           
           await get().updateUserCredits(
             rentalData.owner_id, 
             rentalData.total_credits, 
             'debit', 
-            `Location annulée par locataire - Location #${id}`
+            `Location annulée par locataire - Location #${id}`,
+            'rental_refund',
+            id
           );
         } else {
           // Le propriétaire annule : remboursement + pénalité
@@ -696,7 +677,9 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
             rentalData.renter_id, 
             rentalData.total_credits, 
             'credit', 
-            `Remboursement annulation propriétaire - Location #${id}`
+            `Remboursement annulation propriétaire - Location #${id}`,
+            'rental_refund',
+            id
           );
           
           // Pénalité pour le propriétaire (10% des crédits)
@@ -705,7 +688,9 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
             rentalData.owner_id, 
             penalty, 
             'debit', 
-            `Pénalité annulation - Location #${id}`
+            `Pénalité annulation - Location #${id}`,
+            'rental_refund',
+            id
           );
         }
       } else if (rentalData.status === 'active') {
@@ -715,14 +700,18 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
           rentalData.renter_id, 
           refundAmount, 
           'credit', 
-          `Remboursement partiel annulation - Location #${id}`
+          `Remboursement partiel annulation - Location #${id}`,
+          'rental_refund',
+          id
         );
         
         await get().updateUserCredits(
           rentalData.owner_id, 
           refundAmount, 
           'debit', 
-          `Location annulée en cours - Location #${id}`
+          `Location annulée en cours - Location #${id}`,
+          'rental_refund',
+          id
         );
       }
 
