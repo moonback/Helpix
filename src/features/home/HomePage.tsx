@@ -325,160 +325,124 @@ const HomePage: React.FC = () => {
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, ease: "easeOut" }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
             className="text-center"
           >
-            
-
-            {/* Titre principal avec effet de dégradé et animation */}
+            {/* Titre principal */}
             <motion.h1 
-              className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold mb-6 leading-tight"
-              initial={{ opacity: 0, y: 30 }}
+              className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 leading-tight"
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2, duration: 0.8 }}
+              transition={{ delay: 0.1, duration: 0.6 }}
             >
               {user ? (
                 <>
-                  <span className="block bg-gradient-to-r from-white via-blue-100 to-blue-200 bg-clip-text text-transparent">
+                  <span className="block bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent">
                     Bonjour {user?.display_name || user?.email?.split('@')[0]}
                   </span>
-                  <span className="block bg-gradient-to-r from-blue-100 via-white to-purple-100 bg-clip-text text-transparent">
+                  <span className="block bg-gradient-to-r from-blue-100 to-white bg-clip-text text-transparent">
                     Prêt à aider aujourd'hui ?
                   </span>
                 </>
               ) : (
                 <>
-                  <span className="block bg-gradient-to-r from-white via-blue-100 to-blue-200 bg-clip-text text-transparent">
+                  <span className="block bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent">
                     L'entraide
                   </span>
-                  <span className="block bg-gradient-to-r from-blue-100 via-white to-purple-100 bg-clip-text text-transparent">
+                  <span className="block bg-gradient-to-r from-blue-100 to-white bg-clip-text text-transparent">
                     près de chez vous
                   </span>
                 </>
               )}
             </motion.h1>
 
-            {/* Sous-titre avec icônes animées */}
-            <motion.div
-              className="flex items-center justify-center gap-3 mb-8"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.4, duration: 0.6 }}
-            >
-              <motion.div
-                className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center"
-                animate={{ rotate: 360 }}
-                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-              >
-                <Users className="w-4 h-4 text-white" />
-              </motion.div>
-              <span className="text-lg lg:text-xl font-medium text-blue-100">
-                {user ? "Votre communauté vous attend" : "Rejoignez une communauté bienveillante"}
-              </span>
-              <motion.div
-                className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center"
-                animate={{ rotate: -360 }}
-                transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-              >
-                <Heart className="w-4 h-4 text-white" />
-              </motion.div>
-            </motion.div>
-            
+            {/* Sous-titre */}
             <motion.p 
-              className="text-base lg:text-lg text-blue-100/90 mb-10 max-w-4xl mx-auto leading-relaxed"
-              initial={{ opacity: 0, y: 20 }}
+              className="text-lg text-blue-100/90 mb-8 max-w-3xl mx-auto"
+              initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6, duration: 0.8 }}
+              transition={{ delay: 0.3, duration: 0.6 }}
             >
               {user ? (
                 <>
-                  Découvrez les demandes d'aide autour de vous ou proposez vos services à la communauté. 
-                  Ensemble, créons des liens authentiques et solidaires dans votre quartier.
-                  <span className="block mt-3 text-blue-200/80 text-sm">
-                    🎯 Votre impact : {wallet?.total_earned || 0} crédits gagnés • 🏆 Membre actif • ⚡ Réponses instantanées
+                  Découvrez les demandes d'aide autour de vous ou proposez vos services.
+                  <span className="block text-sm text-blue-200/80 mt-2">
+                    🎯 {wallet?.total_earned || 0} crédits • 🏆 Membre actif • ⚡ Réponses instantanées
                   </span>
                 </>
               ) : (
                 <>
-                  Donnez et recevez de l'aide dans votre quartier. Une plateforme qui connecte 
-                  les voisins pour créer des liens authentiques et solidaires.
-                  <span className="block mt-3 text-blue-200/80 text-sm">
-                    🌟 Plus de 500 membres actifs • 📍 Géolocalisation précise • ⚡ Réponses rapides
+                  Donnez et recevez de l'aide dans votre quartier.
+                  <span className="block text-sm text-blue-200/80 mt-2">
+                    🌟 500+ membres • 📍 Géolocalisation • ⚡ Réponses rapides
                   </span>
                 </>
               )}
             </motion.p>
             
-            {/* Boutons d'action améliorés */}
+            {/* Boutons d'action */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1, duration: 0.6 }}
-              className="flex flex-col sm:flex-row gap-4 justify-center items-center"
+              transition={{ delay: 0.5, duration: 0.6 }}
+              className="flex flex-col sm:flex-row gap-4 justify-center mb-8"
             >
               <Button
                 onClick={() => navigate('/create-task')}
-                className="group  text-indigo-600 hover:bg-blue-50 px-6 py-3 rounded-2xl font-semibold text-base shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 min-w-[200px] relative overflow-hidden"
+                className="group text-indigo-600 hover:bg-blue-50 px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
               >
-                <div className="absolute inset-0  opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <span className="relative flex items-center justify-center">
-                  <Plus className="w-5 h-5 mr-2 group-hover:rotate-90 transition-transform duration-300" />
-                  {user ? "Créer une nouvelle tâche" : "Créer ma première tâche"}
-                </span>
+                <Plus className="w-5 h-5 mr-2 group-hover:rotate-90 transition-transform duration-300" />
+                {user ? "Créer une tâche" : "Commencer"}
               </Button>
               
               <Button
                 onClick={() => navigate('/map')}
                 variant="secondary"
-                className="group bg-white/20 text-white border-2 border-white/30 hover:bg-white/30 hover:border-white/50 px-6 py-3 rounded-2xl font-semibold text-base backdrop-blur-sm transform hover:scale-105 transition-all duration-300 min-w-[200px]"
+                className="group bg-white/20 text-white border border-white/30 hover:bg-white/30 px-6 py-3 rounded-xl font-semibold backdrop-blur-sm transform hover:scale-105 transition-all duration-300"
               >
-                <span className="flex items-center justify-center">
-                  <MapPin className="w-5 h-5 mr-2 group-hover:bounce" />
-                  {user ? "Voir les demandes près de moi" : "Explorer les demandes"}
-                </span>
+                <MapPin className="w-5 h-5 mr-2" />
+                Voir la carte
               </Button>
             </motion.div>
 
-            {/* Statistiques visuelles */}
+            {/* Statistiques compactes */}
             <motion.div
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1.2, duration: 0.8 }}
-              className="mt-12 pt-8 border-t border-white/20"
+              transition={{ delay: 0.7, duration: 0.6 }}
+              className="grid grid-cols-3 gap-6 max-w-lg mx-auto pt-6 border-t border-white/20"
             >
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-2xl mx-auto">
-                {user ? (
-                  <>
-                    <div className="text-center">
-                      <div className="text-2xl lg:text-3xl font-bold text-white mb-2">{wallet?.total_earned || 0}</div>
-                      <div className="text-blue-200 text-xs font-medium">Crédits gagnés</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl lg:text-3xl font-bold text-white mb-2">⭐</div>
-                      <div className="text-blue-200 text-xs font-medium">Membre de confiance</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl lg:text-3xl font-bold text-white mb-2">{currentTasks?.length || 0}</div>
-                      <div className="text-blue-200 text-xs font-medium">Tâches actives</div>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div className="text-center">
-                      <div className="text-2xl lg:text-3xl font-bold text-white mb-2">500+</div>
-                      <div className="text-blue-200 text-xs font-medium">Tâches accomplies</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl lg:text-3xl font-bold text-white mb-2">4.9★</div>
-                      <div className="text-blue-200 text-xs font-medium">Note moyenne</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl lg:text-3xl font-bold text-white mb-2">24h</div>
-                      <div className="text-blue-200 text-xs font-medium">Temps de réponse</div>
-                    </div>
-                  </>
-                )}
-              </div>
+              {user ? (
+                <>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-white">{wallet?.total_earned || 0}</div>
+                    <div className="text-blue-200 text-xs">Crédits</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-white">⭐</div>
+                    <div className="text-blue-200 text-xs">Confiance</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-white">{currentTasks?.length || 0}</div>
+                    <div className="text-blue-200 text-xs">Actives</div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-white">500+</div>
+                    <div className="text-blue-200 text-xs">Tâches</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-white">4.9★</div>
+                    <div className="text-blue-200 text-xs">Note</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-white">24h</div>
+                    <div className="text-blue-200 text-xs">Réponse</div>
+                  </div>
+                </>
+              )}
             </motion.div>
           </motion.div>
         </div>

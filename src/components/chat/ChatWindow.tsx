@@ -21,7 +21,6 @@ import {
   Edit3,
   Copy,
   Reply,
-  Search,
   Info,
   ArrowDown,
   Mic
@@ -219,8 +218,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   const [showScrollButton, setShowScrollButton] = useState(false);
   
   const [isRecording, setIsRecording] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [showSearch, setShowSearch] = useState(false);
+
   const [userNamesMap, setUserNamesMap] = useState<Record<string, string>>({});
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -474,12 +472,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
     return <Check className="h-4 w-4 text-gray-400" />;
   };
 
-  // Filtrage des messages pour la recherche
-  const filteredMessages: Message[] = searchQuery 
-    ? messages.filter((message: Message) => 
-        message.content.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    : messages;
+  // Utilisation directe des messages sans filtrage
+  const filteredMessages: Message[] = messages;
 
   if (!conversation) {
     return (
@@ -537,7 +531,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
           </div>
           
             <div className="flex-1 ml-4">
-              <h3 className="font-bold text-gray-900 dark:text-white text-lg">
+              <h3 className="font-bold text-gray-900 dark:text-white text-base">
               {participantName}
             </h3>
               <div className="flex items-center space-x-2">
@@ -548,12 +542,12 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                       <div className="w-2 h-2 bg-blue-500 rounded-full typing-dot"></div>
                       <div className="w-2 h-2 bg-blue-500 rounded-full typing-dot"></div>
                     </div>
-                    <span className="text-sm text-blue-500 ml-2">en train d'écrire...</span>
+                    <span className="text-xs text-blue-500 ml-2">en train d'écrire...</span>
                   </div>
                 ) : (
                   <div className="flex items-center space-x-2">
                     <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    <p className="text-sm text-gray-600 dark:text-gray-300">En ligne</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-300">En ligne</p>
                   </div>
                 )}
               </div>
@@ -561,15 +555,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
 
             {/* Actions du header */}
             <div className="flex items-center space-x-1">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowSearch(!showSearch)}
-                className="p-3 hover:bg-white/20 dark:hover:bg-slate-700/50 rounded-xl transition-all hover:scale-105"
-                title="Rechercher"
-              >
-                <Search className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-              </Button>
+
               <Button
                 variant="ghost"
                 size="sm"
@@ -597,17 +583,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
             </div>
           </div>
 
-          {/* Barre de recherche */}
-          {showSearch && (
-            <div className="px-6 pb-4 animate-slideInUp">
-              <Input
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Rechercher dans la conversation..."
-                className="bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border-white/30 dark:border-slate-600/30"
-              />
-            </div>
-          )}
+
         </div>
 
         {/* Zone de réponse */}
@@ -617,10 +593,10 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
               <div className="flex items-center space-x-3">
                 <div className="w-1 h-8 bg-blue-500 rounded-full"></div>
                 <div>
-                  <p className="text-sm font-medium text-blue-700 dark:text-blue-300">
+                  <p className="text-xs font-medium text-blue-700 dark:text-blue-300">
                     Réponse à {replyTo.sender_id === user?.id ? 'vous' : participantName}
                   </p>
-                  <p className="text-sm text-blue-600 dark:text-blue-400 truncate max-w-xs">
+                  <p className="text-xs text-blue-600 dark:text-blue-400 truncate max-w-xs">
                     {replyTo.content}
             </p>
           </div>
@@ -660,13 +636,10 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                 </div>
                 <div>
                   <h3 className="text-2xl font-bold gradient-text mb-3">
-                    {searchQuery ? 'Aucun résultat' : 'Nouvelle conversation'}
+                    Nouvelle conversation
                   </h3>
                   <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-                    {searchQuery 
-                      ? 'Aucun message ne correspond à votre recherche.'
-                      : 'Envoyez votre premier message pour commencer cette conversation !'
-                    }
+                    Envoyez votre premier message pour commencer cette conversation !
                   </p>
                 </div>
               </div>
@@ -752,7 +725,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                                 </div>
                                 <div className="flex-1">
                                   <p className="font-medium text-sm">Fichier joint</p>
-                                  <p className="text-xs text-gray-500 dark:text-gray-400">Document</p>
+                                  <p className="text-[10px] text-gray-500 dark:text-gray-400">Document</p>
                                 </div>
                         </div>
                       </div>
@@ -820,7 +793,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                                       <div className="py-2 animate-fadeInUp">
                                         <button
                                           onClick={() => handleCopyMessage(message.content)}
-                                          className="w-full px-4 py-3 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 flex items-center space-x-2 transition-colors"
+                                          className="w-full px-4 py-3 text-left text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 flex items-center space-x-2 transition-colors"
                                         >
                                           <Copy className="h-4 w-4" />
                                           <span>Copier</span>
@@ -836,7 +809,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                                       <div className="border-t border-gray-200 dark:border-slate-600">
                                         <button
                                           onClick={() => setShowMessageMenu(null)}
-                                          className="w-full px-4 py-3 text-center text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+                                          className="w-full px-4 py-3 text-center text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
                                         >
                                           Annuler
                                         </button>
@@ -884,10 +857,10 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                 {getFileIcon(file)}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">
+                    <p className="text-xs font-medium text-gray-700 dark:text-gray-300 truncate">
                   {file.name}
                     </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                    <p className="text-[10px] text-gray-500 dark:text-gray-400">
                       {formatFileSize(file.size)}
                     </p>
                   </div>
