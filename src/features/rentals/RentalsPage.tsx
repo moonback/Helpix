@@ -24,8 +24,15 @@ const RentalsPage: React.FC = () => {
     try {
       await updateRentalStatus(id, status);
       // Le store se met à jour automatiquement
-    } catch (e) {
+    } catch (e: any) {
       console.error('Erreur lors de la mise à jour du statut:', e);
+      
+      // Afficher un message d'erreur plus clair à l'utilisateur
+      if (e.message?.includes('Solde insuffisant')) {
+        alert('❌ Impossible d\'accepter cette demande : le locataire n\'a pas suffisamment de crédits pour effectuer cette location.');
+      } else {
+        alert(`❌ Erreur lors de la mise à jour du statut : ${e.message || 'Erreur inconnue'}`);
+      }
     }
   };
 

@@ -85,6 +85,11 @@ DECLARE
   user_wallet wallets%ROWTYPE;
   transaction_amount DECIMAL(10,2);
 BEGIN
+  -- Vérifier que l'utilisateur est authentifié
+  IF auth.uid() IS NULL THEN
+    RAISE EXCEPTION 'Utilisateur non authentifié';
+  END IF;
+  
   -- Récupérer le wallet de l'utilisateur
   SELECT * INTO user_wallet FROM wallets WHERE user_id = p_user_id;
   
@@ -129,7 +134,7 @@ BEGIN
     p_reference_type, p_reference_id, 'completed', p_metadata
   );
 END;
-$$ language 'plpgsql';
+$$ language 'plpgsql' SECURITY DEFINER;
 
 -- 10. RLS (Row Level Security) Policies
 ALTER TABLE wallets ENABLE ROW LEVEL SECURITY;
@@ -156,6 +161,15 @@ CREATE POLICY "Users can view their own transactions" ON transactions
 DROP POLICY IF EXISTS "Users can insert their own transactions" ON transactions;
 CREATE POLICY "Users can insert their own transactions" ON transactions
   FOR INSERT WITH CHECK (auth.uid() = (SELECT user_id FROM wallets WHERE id = wallet_id));
+
+-- Politique pour permettre aux fonctions système de gérer les wallets
+DROP POLICY IF EXISTS "System can manage wallets" ON wallets;
+CREATE POLICY "System can manage wallets" ON wallets
+  FOR ALL USING (true);
+
+DROP POLICY IF EXISTS "System can manage transactions" ON transactions;
+CREATE POLICY "System can manage transactions" ON transactions
+  FOR ALL USING (true);
 
 -- 11. Créer des wallets pour les utilisateurs existants
 INSERT INTO wallets (user_id, balance, total_earned, total_spent)

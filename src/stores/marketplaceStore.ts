@@ -525,6 +525,17 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
 
       // Gérer les crédits selon le changement de statut
       if (currentStatus === 'requested' && status === 'accepted') {
+        // Vérifier le solde du locataire avant d'accepter
+        const { data: renterWallet } = await supabase
+          .from('wallets')
+          .select('balance')
+          .eq('user_id', rentalData.renter_id)
+          .single();
+
+        if (!renterWallet || renterWallet.balance < rentalData.total_credits) {
+          throw new Error(`Solde insuffisant. Le locataire a ${renterWallet?.balance || 0} crédits mais ${rentalData.total_credits} sont requis.`);
+        }
+
         // Débiter le locataire (réservation)
         await get().updateUserCredits(
           rentalData.renter_id, 
