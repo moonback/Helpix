@@ -2,13 +2,14 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
 import { useMessageStore } from '@/stores/messageStore';
-import { Home, Map, Plus, Wallet, User, MessageCircle, BarChart3, MoreHorizontal, Calendar } from 'lucide-react';
+import { Home, Map, Plus, Wallet, User, MessageCircle, BarChart3, MoreHorizontal, Calendar, Package } from 'lucide-react';
 
 // Centralize the tab configuration for better readability and reusability
 // Primary tabs shown in the bar
 const primaryTabs = [
   { path: '/', icon: Home, label: 'Accueil' },
   { path: '/map', icon: Map, label: 'Carte' },
+  { path: '/marketplace', icon: Package, label: 'Marketplace' },
   { path: '/chat', icon: MessageCircle, label: 'Messages' },
 ];
 
@@ -66,7 +67,7 @@ const BottomNavigation: React.FC = () => {
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-blue-500/20 to-transparent" />
         
         {/* Bar content - uniform spacing with grid */}
-        <div className="grid grid-cols-4 items-center h-16 px-2">
+        <div className="grid grid-cols-5 items-center h-16 px-2">
           {primaryTabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = location.pathname === tab.path;

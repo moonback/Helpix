@@ -129,6 +129,13 @@ const HomePage: React.FC = () => {
       description: 'Suivre votre activité',
       color: 'from-orange-500 to-red-600',
       action: () => navigate('/dashboard')
+    },
+    {
+      icon: <Package className="w-5 h-5" />,
+      title: 'Marketplace',
+      description: 'Objets à partager et louer',
+      color: 'from-emerald-500 to-green-600',
+      action: () => navigate('/marketplace')
     }
   ], [navigate]);
 
@@ -475,7 +482,7 @@ const HomePage: React.FC = () => {
                     Masquer
                   </Button>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                   {quickActions.map((action, index) => (
                     <motion.div
                       key={action.title}
