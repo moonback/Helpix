@@ -22,9 +22,7 @@ import LocationPermissionBanner from '@/components/ui/LocationPermissionBanner';
 import FilterModal from '@/components/ui/FilterModal';
 import FilterButton from '@/components/ui/FilterButton';
 import FilterBadge from '@/components/ui/FilterBadge';
-import EmptyState from '@/components/ui/EmptyState';
-import EncouragementBanner from '@/components/ui/EncouragementBanner';
-import SuccessMessage from '@/components/ui/SuccessMessage';
+
 
 // Icons
 import { 
@@ -42,7 +40,8 @@ import {
   MessageCircle,
   Hand,
   Lightbulb,
-  Sparkles
+  Heart,
+  MapPin
 } from 'lucide-react';
 
 // Types
@@ -80,7 +79,7 @@ const HomePage: React.FC = () => {
   const { tasks, fetchTasks, isLoading, setUserLocation, getTasksByProximity } = useTaskStore();
   const { user, updateUserLocation } = useAuthStore();
   const { createConversation } = useMessageStore();
-  const { fetchWallet } = useWalletStore();
+  const { wallet, fetchWallet } = useWalletStore();
   
   // Hooks
   const { latitude, longitude, requestLocation } = useGeolocation();
@@ -181,6 +180,15 @@ const HomePage: React.FC = () => {
       return sortOrder === 'desc' ? db - da : da - db;
     });
   }, [tasks, doesTaskMatchFilters, sortByProximity, latitude, longitude, getTasksByProximity, sortOrder]);
+
+  // Tâches actives de l'utilisateur connecté
+  const currentTasks = useMemo(() => {
+    if (!user) return [];
+    return (tasks as Task[]).filter(task => 
+      task.user_id === user.id && 
+      (task.status === 'open' || task.status === 'in_progress')
+    );
+  }, [tasks, user]);
 
   // Handlers
   const handleHelp = useCallback(async (taskId: number) => {
@@ -316,47 +324,155 @@ const HomePage: React.FC = () => {
             transition={{ duration: 1, ease: "easeOut" }}
             className="text-center"
           >
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.2, duration: 0.8, type: "spring", stiffness: 200 }}
-              className="inline-flex items-center justify-center w-16 h-16 bg-white/20 rounded-full mb-6 backdrop-blur-sm border border-white/30"
+            {/* Titre principal avec effet de dégradé et animation */}
+            <motion.h1 
+              className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-6 leading-tight"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.8 }}
             >
-              <Sparkles className="w-8 h-8" />
+              {user ? (
+                <>
+                  <span className="block bg-gradient-to-r from-white via-blue-100 to-blue-200 bg-clip-text text-transparent">
+                    Bonjour {user?.display_name || user?.email?.split('@')[0]}
+                  </span>
+                  <span className="block bg-gradient-to-r from-blue-100 via-white to-purple-100 bg-clip-text text-transparent">
+                    Prêt à aider aujourd'hui ?
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span className="block bg-gradient-to-r from-white via-blue-100 to-blue-200 bg-clip-text text-transparent">
+                    L'entraide
+                  </span>
+                  <span className="block bg-gradient-to-r from-blue-100 via-white to-purple-100 bg-clip-text text-transparent">
+                    près de chez vous
+                  </span>
+                </>
+              )}
+            </motion.h1>
+
+            {/* Sous-titre avec icônes animées */}
+            <motion.div
+              className="flex items-center justify-center gap-3 mb-8"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.4, duration: 0.6 }}
+            >
+              <motion.div
+                className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center"
+                animate={{ rotate: 360 }}
+                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+              >
+                <Users className="w-4 h-4 text-white" />
+              </motion.div>
+              <span className="text-xl lg:text-2xl font-medium text-blue-100">
+                {user ? "Votre communauté vous attend" : "Rejoignez une communauté bienveillante"}
+              </span>
+              <motion.div
+                className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center"
+                animate={{ rotate: -360 }}
+                transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+              >
+                <Heart className="w-4 h-4 text-white" />
+              </motion.div>
             </motion.div>
             
-            <motion.h1 
-              className="text-4xl lg:text-6xl font-bold mb-6 bg-gradient-to-r from-white via-blue-100 to-purple-100 bg-clip-text text-transparent"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4, duration: 0.8 }}
-            >
-              Helpix
-            </motion.h1>
-            
             <motion.p 
-              className="text-lg lg:text-xl text-blue-100 mb-8 max-w-3xl mx-auto leading-relaxed"
+              className="text-lg lg:text-xl text-blue-100/90 mb-10 max-w-4xl mx-auto leading-relaxed"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6, duration: 0.8 }}
             >
-              Une communauté bienveillante où chacun peut donner et recevoir de l'aide. 
-              <span className="block mt-2">Connectez-vous localement, agissez globalement.</span>
+              {user ? (
+                <>
+                  Découvrez les demandes d'aide autour de vous ou proposez vos services à la communauté. 
+                  Ensemble, créons des liens authentiques et solidaires dans votre quartier.
+                  <span className="block mt-3 text-blue-200/80 text-base">
+                    🎯 Votre impact : {wallet?.total_earned || 0} crédits gagnés • 🏆 Membre actif • ⚡ Réponses instantanées
+                  </span>
+                </>
+              ) : (
+                <>
+                  Donnez et recevez de l'aide dans votre quartier. Une plateforme qui connecte 
+                  les voisins pour créer des liens authentiques et solidaires.
+                  <span className="block mt-3 text-blue-200/80 text-base">
+                    🌟 Plus de 500 membres actifs • 📍 Géolocalisation précise • ⚡ Réponses rapides
+                  </span>
+                </>
+              )}
             </motion.p>
             
+            {/* Boutons d'action améliorés */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 1, duration: 0.6 }}
-              className="flex flex-col sm:flex-row gap-4 justify-center"
+              className="flex flex-col sm:flex-row gap-4 justify-center items-center"
             >
               <Button
                 onClick={() => navigate('/create-task')}
-                className="text-indigo-600 hover:bg-gray-50 px-8 py-4 rounded-2xl font-semibold text-lg shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300"
+                className="group bg-white text-indigo-600 hover:bg-blue-50 px-8 py-4 rounded-2xl font-semibold text-lg shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 min-w-[240px] relative overflow-hidden"
               >
-                <Plus className="w-5 h-5 mr-2" />
-                Créer ma première tâche
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-50 to-indigo-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <span className="relative flex items-center justify-center">
+                  <Plus className="w-5 h-5 mr-2 group-hover:rotate-90 transition-transform duration-300" />
+                  {user ? "Créer une nouvelle tâche" : "Créer ma première tâche"}
+                </span>
               </Button>
+              
+              <Button
+                onClick={() => navigate('/explore')}
+                variant="secondary"
+                className="group bg-white/20 text-white border-2 border-white/30 hover:bg-white/30 hover:border-white/50 px-8 py-4 rounded-2xl font-semibold text-lg backdrop-blur-sm transform hover:scale-105 transition-all duration-300 min-w-[240px]"
+              >
+                <span className="flex items-center justify-center">
+                  <MapPin className="w-5 h-5 mr-2 group-hover:bounce" />
+                  {user ? "Voir les demandes près de moi" : "Explorer les demandes"}
+                </span>
+              </Button>
+            </motion.div>
+
+            {/* Statistiques visuelles */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.2, duration: 0.8 }}
+              className="mt-12 pt-8 border-t border-white/20"
+            >
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-2xl mx-auto">
+                {user ? (
+                  <>
+                    <div className="text-center">
+                      <div className="text-3xl lg:text-4xl font-bold text-white mb-2">{wallet?.total_earned || 0}</div>
+                      <div className="text-blue-200 text-sm font-medium">Crédits gagnés</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl lg:text-4xl font-bold text-white mb-2">⭐</div>
+                      <div className="text-blue-200 text-sm font-medium">Membre de confiance</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl lg:text-4xl font-bold text-white mb-2">{currentTasks?.length || 0}</div>
+                      <div className="text-blue-200 text-sm font-medium">Tâches actives</div>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="text-center">
+                      <div className="text-3xl lg:text-4xl font-bold text-white mb-2">500+</div>
+                      <div className="text-blue-200 text-sm font-medium">Tâches accomplies</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl lg:text-4xl font-bold text-white mb-2">4.9★</div>
+                      <div className="text-blue-200 text-sm font-medium">Note moyenne</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl lg:text-4xl font-bold text-white mb-2">24h</div>
+                      <div className="text-blue-200 text-sm font-medium">Temps de réponse</div>
+                    </div>
+                  </>
+                )}
+              </div>
             </motion.div>
           </motion.div>
         </div>
