@@ -4,6 +4,8 @@ import { motion } from 'framer-motion';
 import { MapPin, Loader2 } from 'lucide-react';
 import { MapTask } from '../MapPage';
 import RecenterControl from './RecenterControl';
+import MapErrorBoundary from './MapErrorBoundary';
+import { useMapKey } from '@/hooks/useMapKey';
 
 // React-Leaflet components imported directly to avoid Suspense remounts
 
@@ -99,6 +101,7 @@ const MapContent: React.FC<MapViewProps> = (props) => {
   };
 
   const [mounted, setMounted] = useState(false);
+  const mapKey = useMapKey();
 
   useEffect(() => {
     setMounted(true);
@@ -109,8 +112,9 @@ const MapContent: React.FC<MapViewProps> = (props) => {
       {!mounted ? (
         <MapLoadingFallback />
       ) : (
-        <>
+        <MapErrorBoundary>
           <MapContainer
+            key={mapKey}
             center={userLocation || [48.8566, 2.3522]}
             zoom={userLocation ? 13 : 10}
             className="w-full h-full z-0"
@@ -150,7 +154,7 @@ const MapContent: React.FC<MapViewProps> = (props) => {
             onRecenter={onRecenter}
             userLocation={userLocation}
           />
-        </>
+        </MapErrorBoundary>
       )}
     </div>
   );

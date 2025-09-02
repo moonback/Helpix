@@ -4,6 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useRealtimeMessages } from '@/hooks/useRealtimeMessages';
 import BottomNavigation from '@/components/navigation/BottomNavigation';
 import PaymentNotificationContainer from '@/components/ui/PaymentNotificationContainer';
+import { routerConfig } from '@/lib/router';
 
 // Lazy loading des pages
 const LandingPage = React.lazy(() => import('@/features/landing/LandingPage'));
@@ -66,7 +67,7 @@ const App: React.FC = () => {
   useRealtimeMessages();
 
   return (
-    <Router>
+    <Router future={routerConfig.future}>
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <Suspense fallback={<LoadingScreen />}>
           <Routes>
