@@ -95,26 +95,26 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({ className = '' }) => {
             {/* Location Status */}
             <div className="flex items-center">
               {locationLoading ? (
-                <div className="flex items-center space-x-2 text-slate-600 bg-slate-50 px-3 py-2 rounded-lg text-sm border border-slate-200">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-                  <span>Localisation...</span>
+                <div className="flex items-center gap-1.5 text-slate-600 bg-slate-50 px-2 py-1 rounded-md text-xs border border-slate-200">
+                  <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-600"></div>
+                  <span>Position...</span>
                 </div>
               ) : latitude && longitude ? (
-                <div className="flex items-center space-x-2 text-emerald-700 bg-emerald-50 px-3 py-2 rounded-lg border border-emerald-200 text-sm shadow-sm">
-                  <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+                <div className="flex items-center gap-1.5 text-emerald-700 bg-emerald-50 px-2 py-1 rounded-md border border-emerald-200 text-xs">
+                  <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></div>
                   <DetailedAddressDisplay
                     address={address}
                     isLoading={isLoading}
                     error={error}
                     showIcon={false}
-                    className="text-emerald-700 font-medium truncate max-w-[120px] lg:max-w-[180px] xl:max-w-[220px]"
+                    className="text-emerald-700 font-medium truncate max-w-[100px] lg:max-w-[140px]"
                     onRetry={retry}
                   />
                 </div>
               ) : locationError ? (
-                <div className="flex items-center space-x-2 text-red-600 bg-red-50 px-3 py-2 rounded-lg border border-red-200 text-sm">
-                  <AlertCircle className="w-4 h-4" />
-                  <span>Erreur de localisation</span>
+                <div className="flex items-center gap-1.5 text-red-600 bg-red-50 px-2 py-1 rounded-md border border-red-200 text-xs">
+                  <AlertCircle className="w-3 h-3" />
+                  <span>Erreur</span>
                 </div>
               ) : (
                 <div className="flex items-center space-x-2 text-slate-500 bg-slate-50 px-3 py-2 rounded-lg text-sm border border-slate-200">

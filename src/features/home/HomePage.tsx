@@ -428,7 +428,7 @@ const HomePage: React.FC = () => {
               </Button>
               
               <Button
-                onClick={() => navigate('/explore')}
+                onClick={() => navigate('/map')}
                 variant="secondary"
                 className="group bg-white/20 text-white border-2 border-white/30 hover:bg-white/30 hover:border-white/50 px-8 py-4 rounded-2xl font-semibold text-lg backdrop-blur-sm transform hover:scale-105 transition-all duration-300 min-w-[240px]"
               >
