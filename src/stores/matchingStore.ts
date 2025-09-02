@@ -283,7 +283,9 @@ export const useMatchingStore = create<MatchingStore>((set, get) => ({
     complexity: task.complexity || 'moderate',
     required_skills: task.required_skills || [],
     user_id: task.user_id,
-    created_at: task.created_at
+    created_at: task.created_at,
+    urgency_level: task.urgency_level || 'normal',
+    skill_requirements: task.skill_requirements || []
   }),
 
   // Génération du tableau de bord
@@ -292,8 +294,7 @@ export const useMatchingStore = create<MatchingStore>((set, get) => ({
       user_profile: userProfile,
       recent_matches: [],
       pending_recommendations: [],
-      proximity_alerts: [],
-      success_rate: 0
+      proximity_alerts: []
     };
   },
 
