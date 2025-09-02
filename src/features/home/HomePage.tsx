@@ -941,21 +941,7 @@ const HomePage: React.FC = () => {
         />
       </div>
 
-      {/* Floating Action Button for Mobile */}
-      <div className="fixed bottom-6 right-6 lg:hidden z-50">
-        <motion.div
-          initial={{ opacity: 0, scale: 0 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 1.2, duration: 0.5, type: "spring", stiffness: 200 }}
-        >
-          <Button
-            onClick={() => navigate('/create-task')}
-            className="w-14 h-14 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-full shadow-2xl hover:shadow-3xl transform hover:scale-110 transition-all duration-300 flex items-center justify-center"
-          >
-            <Plus className="w-6 h-6" />
-          </Button>
-        </motion.div>
-      </div>
+      
 
       {/* Background Elements */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
