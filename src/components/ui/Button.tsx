@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { clsx } from 'clsx';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'accent';
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'accent' | 'success' | 'error';
   size?: 'sm' | 'md' | 'lg';
   loading?: boolean;
   icon?: React.ReactNode;
@@ -29,6 +29,8 @@ const Button: React.FC<ButtonProps> = ({
     outline: 'border-2 border-blue-500 text-blue-600 hover:bg-blue-50 focus:ring-blue-300',
     ghost: 'text-blue-600 hover:bg-blue-50 focus:ring-blue-300',
     danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 shadow-sm',
+    success: 'bg-green-600 text-white hover:bg-green-700 focus:ring-green-500 shadow-sm',
+    error: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 shadow-sm',
   };
 
   const sizes = {

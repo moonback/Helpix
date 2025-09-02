@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { useAuthStore } from '@/stores/authStore';
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { useReverseGeocoding } from '@/hooks/useReverseGeocoding';
+import { MatchingNotificationBadge } from '@/features/matching';
 import Button from '@/components/ui/Button';
 import DetailedAddressDisplay from '@/components/ui/DetailedAddressDisplay';
 import { 
@@ -240,6 +241,14 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({ className = '' }) => {
           </div>
         </div>
       </div>
+      
+      {/* Badge de notification de matching */}
+      {user && (
+        <MatchingNotificationBadge 
+          showDetails={true}
+          position="top-right"
+        />
+      )}
     </motion.header>
   );
 };
