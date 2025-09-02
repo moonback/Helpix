@@ -106,7 +106,7 @@ interface NotificationState {
 }
 
 const ChatPage: React.FC = () => {
-  const { currentConversation, setCurrentConversation, conversations, deleteConversation } = useMessageStore();
+  const { currentConversation, setCurrentConversation, conversations, deleteConversation, markConversationAsRead } = useMessageStore();
 
   const [isMultiSelectMode, setIsMultiSelectMode] = useState(false);
   const [selectedConversations, setSelectedConversations] = useState<Set<string>>(new Set());
@@ -135,7 +135,12 @@ const ChatPage: React.FC = () => {
 
   const handleConversationSelect = useCallback((conversation: Conversation) => {
     setCurrentConversation(conversation);
-  }, [setCurrentConversation]);
+    try {
+      // Marquer comme lue immédiatement à l'ouverture
+      // @ts-ignore store peut accepter l'id string
+      markConversationAsRead(conversation.id);
+    } catch {}
+  }, [setCurrentConversation, markConversationAsRead]);
 
   const handleBack = useCallback(() => {
     setCurrentConversation(null);

@@ -88,7 +88,7 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
     <>
       <motion.button
         onClick={onToggle}
-        className="flex items-center space-x-2 px-4 py-2 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors duration-200"
+        className="flex items-center space-x-2 px-4 py-2 bg-white/90 backdrop-blur border border-gray-300 rounded-xl hover:bg-white transition-colors duration-200 shadow-sm"
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
       >
@@ -103,55 +103,68 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
 
       <AnimatePresence>
         {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 mt-4"
-          >
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-gray-900">Filtres avancés</h3>
-              <div className="flex items-center space-x-2">
-                {getActiveFiltersCount() > 0 && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={onToggle}
+            />
+            {/* Panel */}
+            <motion.div
+              className="fixed right-0 top-0 bottom-0 z-50 w-full sm:max-w-md bg-white shadow-2xl border-l border-slate-200 p-6 overflow-y-auto"
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'tween', duration: 0.25 }}
+            >
+              <div className="flex items-center justify-between mb-6 sticky top-0 bg-white/80 backdrop-blur z-10 py-2">
+                <h3 className="text-lg font-semibold text-gray-900">Filtres avancés</h3>
+                <div className="flex items-center space-x-2">
+                  {getActiveFiltersCount() > 0 && (
+                    <button
+                      onClick={clearAllFilters}
+                      className="text-sm text-gray-500 hover:text-gray-700 transition-colors duration-200"
+                    >
+                      Effacer tout
+                    </button>
+                  )}
                   <button
-                    onClick={clearAllFilters}
-                    className="text-sm text-gray-500 hover:text-gray-700 transition-colors duration-200"
+                    onClick={onToggle}
+                    className="p-1 hover:bg-gray-100 rounded-lg transition-colors duration-200"
+                    aria-label="Fermer"
                   >
-                    Effacer tout
+                    <X className="w-4 h-4" />
                   </button>
-                )}
-                <button
-                  onClick={onToggle}
-                  className="p-1 hover:bg-gray-100 rounded-lg transition-colors duration-200"
-                >
-                  <X className="w-4 h-4" />
-                </button>
+                </div>
               </div>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <FilterSection
-                title="Statut"
-                type="status"
-                options={FILTER_OPTIONS.status}
-                getColor={getStatusColor}
-              />
-              
-              <FilterSection
-                title="Priorité"
-                type="priority"
-                options={FILTER_OPTIONS.priority}
-                getColor={getPriorityColor}
-              />
-              
-              <FilterSection
-                title="Complexité"
-                type="complexity"
-                options={FILTER_OPTIONS.complexity}
-                getColor={getComplexityColor}
-              />
-            </div>
-          </motion.div>
+              <div className="grid grid-cols-1 gap-6">
+                <FilterSection
+                  title="Statut"
+                  type="status"
+                  options={FILTER_OPTIONS.status}
+                  getColor={getStatusColor}
+                />
+                
+                <FilterSection
+                  title="Priorité"
+                  type="priority"
+                  options={FILTER_OPTIONS.priority}
+                  getColor={getPriorityColor}
+                />
+                
+                <FilterSection
+                  title="Complexité"
+                  type="complexity"
+                  options={FILTER_OPTIONS.complexity}
+                  getColor={getComplexityColor}
+                />
+              </div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </>

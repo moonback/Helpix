@@ -5,6 +5,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { Conversation, Message } from '@/types';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
+import { supabase } from '@/lib/supabase';
 import { 
   Send, 
   Paperclip, 
@@ -20,7 +21,6 @@ import {
   Edit3,
   Copy,
   Reply,
-  Smile,
   Search,
   Info,
   ArrowDown,
@@ -188,23 +188,7 @@ const customStyles = `
     }
   }
 
-  .emoji-picker {
-    position: absolute;
-    bottom: 100%;
-    right: 0;
-    background: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 16px;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-    z-index: 50;
-    animation: slideInUp 0.2s ease-out;
-  }
-
-  .dark .emoji-picker {
-    background: #1e293b;
-    border-color: #334155;
-  }
+  
 `;
 
 // Modal générique pour les menus (portal vers body)
@@ -233,10 +217,11 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   const [editText, setEditText] = useState('');
   const [replyTo, setReplyTo] = useState<Message | null>(null);
   const [showScrollButton, setShowScrollButton] = useState(false);
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  
   const [isRecording, setIsRecording] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
+  const [userNamesMap, setUserNamesMap] = useState<Record<string, string>>({});
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -244,8 +229,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   const imageInputRef = useRef<HTMLInputElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout>();
 
-  // Emojis populaires
-  const popularEmojis = ['😀', '😂', '😍', '🥰', '😘', '😊', '👍', '❤️', '🔥', '💯', '🎉', '👏'];
+  
 
   useEffect(() => {
     scrollToBottom();
@@ -273,9 +257,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
       if (!target.closest('.message-modal-content') && !target.closest('.menu-trigger')) {
         setShowMessageMenu(null);
       }
-      if (!target.closest('.emoji-picker') && !target.closest('.emoji-trigger')) {
-        setShowEmojiPicker(false);
-      }
+      
     };
 
     document.addEventListener('click', handleClickOutside);
@@ -302,6 +284,30 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
       });
     }
   }, [conversation, messages, user?.id, markAsRead]);
+
+  // Charger le nom de l'autre participant
+  useEffect(() => {
+    const loadParticipantNames = async () => {
+      try {
+        if (!conversation) return;
+        const ids = conversation.participants.filter(id => id && id !== user?.id && !userNamesMap[id]);
+        if (ids.length === 0) return;
+        const { data, error } = await supabase
+          .from('users')
+          .select('id, name')
+          .in('id', ids);
+        if (error) throw error;
+        const next: Record<string, string> = { ...userNamesMap };
+        (data || []).forEach((u: { id: string; name: string }) => {
+          next[u.id] = u.name || 'Utilisateur';
+        });
+        setUserNamesMap(next);
+      } catch (e) {
+        // Silent fallback
+      }
+    };
+    loadParticipantNames();
+  }, [conversation, user?.id, userNamesMap]);
 
   // Simulation de l'indicateur "en train d'écrire"
   const handleInputChange = useCallback((value: string) => {
@@ -419,10 +425,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
     setShowMessageMenu(showMessageMenu === messageId ? null : messageId);
   };
 
-  const addEmoji = (emoji: string) => {
-    setNewMessage(prev => prev + emoji);
-    setShowEmojiPicker(false);
-  };
+  
 
   const getFileIcon = (file: File) => {
     if (file.type.startsWith('image/')) return <ImageIcon className="h-4 w-4" />;
@@ -501,7 +504,9 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   }
 
   const otherParticipantId = conversation.participants.find(id => id !== user?.id);
-  const participantName = otherParticipantId ? `Utilisateur ${otherParticipantId.slice(0, 8)}...` : 'Utilisateur';
+  const participantName = otherParticipantId
+    ? (userNamesMap[otherParticipantId] || `Utilisateur ${otherParticipantId.slice(0, 8)}...`)
+    : 'Utilisateur';
 
   return (
     <>
@@ -635,7 +640,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
       {/* Messages */}
         <div 
           ref={messagesContainerRef}
-          className="relative flex-1 overflow-visible p-4 md:p-6 space-y-5 md:space-y-6 bg-gradient-to-b from-transparent to-gray-50/30 dark:to-slate-800/30 h-full"
+          className="relative flex-1 overflow-y-auto overscroll-contain p-4 md:p-6 pb-28 md:pb-44 space-y-5 md:space-y-6 bg-gradient-to-b from-transparent to-gray-50/30 dark:to-slate-800/30 h-full"
         >
         {isLoading ? (
           <div className="flex items-center justify-center h-32">
@@ -667,7 +672,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
               </div>
           </div>
         ) : (
-            filteredMessages.slice(-8).map((message: Message, index: number) => {
+            filteredMessages.map((message: Message, index: number) => {
             const isOwnMessage = message.sender_id === user?.id;
               const showAvatar = index === 0 || filteredMessages[index - 1]?.sender_id !== message.sender_id;
             return (
@@ -901,7 +906,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
       )}
 
         {/* Zone de saisie améliorée */}
-        <div className="p-4 md:p-5 border-t border-gray-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm mb-3 md:mb-4">
+        <div className="sticky bottom-16 md:bottom-20 lg:bottom-16 z-[60] p-4 md:p-5 border-t border-gray-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm pb-[env(safe-area-inset-bottom)]">
           <div className="input-container glass-effect rounded-xl p-3 md:p-4">
             <div className="flex items-end space-x-2 md:space-x-3">
               {/* Boutons d'actions rapides */}
@@ -926,37 +931,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                   <Paperclip className="h-5 w-5 text-purple-500" />
                 </Button>
                 
-                <div className="relative emoji-trigger">
-                  <Button
-                    onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                    variant="ghost"
-                    size="sm"
-                    className="p-2 hover:bg-yellow-50 dark:hover:bg-slate-700 rounded-xl transition-all hover:scale-110"
-                    title="Ajouter un emoji"
-                  >
-                    <Smile className="h-5 w-5 text-yellow-500" />
-                  </Button>
-                  
-                  {/* Sélecteur d'emojis */}
-                  {showEmojiPicker && (
-                    <div className="emoji-picker">
-                      <p className="text-sm font-medium mb-3 text-gray-700 dark:text-gray-300">
-                        Emojis populaires
-                      </p>
-                      <div className="grid grid-cols-6 gap-2">
-                        {popularEmojis.map((emoji, index) => (
-                          <button
-                            key={index}
-                            onClick={() => addEmoji(emoji)}
-                            className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors text-xl hover:scale-125 transform"
-                          >
-                            {emoji}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
+                
                 
                 <Button
                   onMouseDown={() => setIsRecording(true)}

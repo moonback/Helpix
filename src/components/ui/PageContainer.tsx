@@ -10,7 +10,7 @@ interface PageContainerProps {
 const widthToClass: Record<NonNullable<PageContainerProps['width']>, string> = {
   sm: 'max-w-3xl',
   md: 'max-w-5xl',
-  lg: 'max-w-7xl',
+  lg: 'max-w-12xl',
   xl: 'max-w-[90rem]',
   '2xl': 'max-w-[110rem]',
   full: 'max-w-none',

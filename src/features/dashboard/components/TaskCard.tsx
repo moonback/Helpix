@@ -55,7 +55,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
     >
       <Card 
         className={`
-          p-6 transition-all duration-300 hover:shadow-xl border-l-4
+          h-full flex flex-col p-6 transition-all duration-300 hover:shadow-xl border-l-4
           ${isCompleted 
             ? 'bg-gray-50 border-gray-200 opacity-75 border-l-gray-400' 
             : 'bg-white border-l-blue-500 hover:border-l-blue-600'

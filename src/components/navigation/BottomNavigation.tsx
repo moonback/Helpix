@@ -56,17 +56,17 @@ const BottomNavigation: React.FC = () => {
   }
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50">
+    <nav className="fixed bottom-0 left-0 right-0 z-40">
       {/* Gradient backdrop for depth */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent pointer-events-none" />
       
       {/* Main navigation bar with glassmorphism effect */}
-      <div className="relative bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border-t border-gray-200/50 dark:border-gray-700/50 pb-[env(safe-area-inset-bottom)]">
+      <div className="relative bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border-t border-gray-200/50 dark:border-gray-700/50 pb-[env(safe-area-inset-bottom)] z-40">
         {/* Subtle inner glow */}
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-blue-500/20 to-transparent" />
         
-        {/* Bar content */}
-        <div className="flex items-center h-16 px-2 gap-1 sm:gap-2 justify-around">
+        {/* Bar content - uniform spacing with grid */}
+        <div className="grid grid-cols-4 items-center h-16 px-2">
           {primaryTabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = location.pathname === tab.path;
@@ -77,7 +77,7 @@ const BottomNavigation: React.FC = () => {
                 key={tab.path}
                 onClick={() => handleNavigation(tab.path)}
                 className={`
-                  group relative flex flex-col items-center justify-center flex-1 h-full transition-all duration-200 ease-out
+                  group relative flex flex-col items-center justify-center w-full h-full transition-all duration-200 ease-out
                   hover:scale-105 active:scale-95
                   ${isActive
                     ? 'text-blue-600 dark:text-blue-400'
@@ -124,7 +124,7 @@ const BottomNavigation: React.FC = () => {
             ref={moreBtnRef}
             onClick={() => setIsMoreOpen((v) => !v)}
             className={`
-              group relative flex flex-col items-center justify-center flex-1 h-full transition-all duration-200 ease-out
+              group relative flex flex-col items-center justify-center w-full h-full transition-all duration-200 ease-out
               hover:scale-105 active:scale-95
               ${isMoreOpen 
                 ? 'text-blue-600 dark:text-blue-400' 
@@ -158,18 +158,18 @@ const BottomNavigation: React.FC = () => {
           </button>
         </div>
 
-        {/* Floating Add Action Button with enhanced styling */}
-        <div className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2">
+        {/* Floating Add Action Button aligned and scaled like other icons */}
+        <div className="pointer-events-none absolute top-3 left-1/2 -translate-x-1/2">
           <button
             onClick={() => handleNavigation('/add')}
-            className="pointer-events-auto group relative h-14 w-14 rounded-full bg-gradient-to-r from-blue-600 to-blue-700 text-white flex items-center justify-center shadow-2xl ring-4 ring-white/80 dark:ring-gray-900/80 hover:shadow-blue-500/25 hover:shadow-2xl transition-all duration-300 ease-out hover:scale-110 active:scale-95"
+            className="pointer-events-auto group relative h-12 w-12 rounded-full bg-gradient-to-r from-blue-600 to-blue-700 text-white flex items-center justify-center shadow-xl ring-4 ring-white/80 dark:ring-gray-900/80 hover:shadow-blue-500/25 transition-all duration-300 ease-out hover:scale-105 active:scale-95"
             aria-label="Ajouter"
           >
             {/* Animated background glow */}
             <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-400 to-blue-600 opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-300" />
             
             {/* Plus icon with rotation on hover */}
-            <Plus className="relative h-7 w-7 transition-transform duration-200 group-hover:rotate-90" />
+            <Plus className="relative h-6 w-6 transition-transform duration-200 group-hover:rotate-90" />
             
             {/* Subtle pulse effect */}
             <div className="absolute inset-0 rounded-full bg-white/20 animate-ping opacity-0 group-active:opacity-100" />
