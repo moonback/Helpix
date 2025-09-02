@@ -4,6 +4,7 @@ import { useAuthStore } from '@/stores/authStore';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
+import { supabase } from '@/lib/supabase';
 import { 
   Trash2, 
   AlertTriangle, 
@@ -70,6 +71,7 @@ const ConversationList: React.FC<ConversationListProps> = ({
   const [showFilters, setShowFilters] = useState(false);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
+  const [userNamesMap, setUserNamesMap] = useState<Record<string, string>>({});
 
 
   // Gestion de l'état de connexion
@@ -114,6 +116,44 @@ const ConversationList: React.FC<ConversationListProps> = ({
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [fetchConversations, isOnline]);
+
+  // Récupérer les noms des utilisateurs participants pour affichage
+  useEffect(() => {
+    const fetchUserNames = async () => {
+      try {
+        const allParticipantIds = new Set<string>();
+        conversations.forEach(conv => {
+          conv.participants?.forEach(id => {
+            if (id && id !== user?.id && !userNamesMap[id]) {
+              allParticipantIds.add(id);
+            }
+          });
+        });
+
+        if (allParticipantIds.size === 0) return;
+
+        const idsToFetch = Array.from(allParticipantIds);
+        const { data, error } = await supabase
+          .from('users')
+          .select('id, name')
+          .in('id', idsToFetch);
+
+        if (error) throw error;
+
+        const nextMap: Record<string, string> = { ...userNamesMap };
+        (data || []).forEach((u: { id: string; name: string }) => {
+          nextMap[u.id] = u.name || 'Utilisateur';
+        });
+        setUserNamesMap(nextMap);
+      } catch (e) {
+        // Ne bloque pas l'UI si échec; fallback sur IDs tronqués
+      }
+    };
+
+    if (conversations.length > 0) {
+      fetchUserNames();
+    }
+  }, [conversations, user?.id, userNamesMap]);
 
   // Fermer les menus contextuels
   useEffect(() => {
@@ -229,7 +269,19 @@ const ConversationList: React.FC<ConversationListProps> = ({
     if (conversation.name) return conversation.name;
     const otherParticipants = conversation.participants?.filter((p: string) => p !== user?.id) || [];
     if (otherParticipants.length === 1) {
-      return `${otherParticipants[0].slice(0, 8)}...`;
+      const otherId = otherParticipants[0];
+      return userNamesMap[otherId] || `${otherId.slice(0, 8)}...`;
+    }
+    if (otherParticipants.length > 1) {
+      const names = otherParticipants
+        .map((id: string) => userNamesMap[id])
+        .filter(Boolean)
+        .slice(0, 2);
+      if (names.length > 0) {
+        const label = names.join(', ');
+        const remaining = otherParticipants.length - names.length;
+        return remaining > 0 ? `${label} +${remaining}` : label;
+      }
     }
     return `Groupe (${conversation.participants?.length || 0})`;
   };
