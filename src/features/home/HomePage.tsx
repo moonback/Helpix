@@ -332,7 +332,7 @@ const HomePage: React.FC = () => {
 
             {/* Titre principal avec effet de dégradé et animation */}
             <motion.h1 
-              className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-6 leading-tight"
+              className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold mb-6 leading-tight"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.8 }}
@@ -372,7 +372,7 @@ const HomePage: React.FC = () => {
               >
                 <Users className="w-4 h-4 text-white" />
               </motion.div>
-              <span className="text-xl lg:text-2xl font-medium text-blue-100">
+              <span className="text-lg lg:text-xl font-medium text-blue-100">
                 {user ? "Votre communauté vous attend" : "Rejoignez une communauté bienveillante"}
               </span>
               <motion.div
@@ -385,7 +385,7 @@ const HomePage: React.FC = () => {
             </motion.div>
             
             <motion.p 
-              className="text-lg lg:text-xl text-blue-100/90 mb-10 max-w-4xl mx-auto leading-relaxed"
+              className="text-base lg:text-lg text-blue-100/90 mb-10 max-w-4xl mx-auto leading-relaxed"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6, duration: 0.8 }}
@@ -394,7 +394,7 @@ const HomePage: React.FC = () => {
                 <>
                   Découvrez les demandes d'aide autour de vous ou proposez vos services à la communauté. 
                   Ensemble, créons des liens authentiques et solidaires dans votre quartier.
-                  <span className="block mt-3 text-blue-200/80 text-base">
+                  <span className="block mt-3 text-blue-200/80 text-sm">
                     🎯 Votre impact : {wallet?.total_earned || 0} crédits gagnés • 🏆 Membre actif • ⚡ Réponses instantanées
                   </span>
                 </>
@@ -402,7 +402,7 @@ const HomePage: React.FC = () => {
                 <>
                   Donnez et recevez de l'aide dans votre quartier. Une plateforme qui connecte 
                   les voisins pour créer des liens authentiques et solidaires.
-                  <span className="block mt-3 text-blue-200/80 text-base">
+                  <span className="block mt-3 text-blue-200/80 text-sm">
                     🌟 Plus de 500 membres actifs • 📍 Géolocalisation précise • ⚡ Réponses rapides
                   </span>
                 </>
@@ -418,7 +418,7 @@ const HomePage: React.FC = () => {
             >
               <Button
                 onClick={() => navigate('/create-task')}
-                className="group  text-indigo-600 hover:bg-blue-50 px-8 py-4 rounded-2xl font-semibold text-lg shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 min-w-[240px] relative overflow-hidden"
+                className="group  text-indigo-600 hover:bg-blue-50 px-6 py-3 rounded-2xl font-semibold text-base shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 min-w-[200px] relative overflow-hidden"
               >
                 <div className="absolute inset-0  opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <span className="relative flex items-center justify-center">
@@ -430,7 +430,7 @@ const HomePage: React.FC = () => {
               <Button
                 onClick={() => navigate('/map')}
                 variant="secondary"
-                className="group bg-white/20 text-white border-2 border-white/30 hover:bg-white/30 hover:border-white/50 px-8 py-4 rounded-2xl font-semibold text-lg backdrop-blur-sm transform hover:scale-105 transition-all duration-300 min-w-[240px]"
+                className="group bg-white/20 text-white border-2 border-white/30 hover:bg-white/30 hover:border-white/50 px-6 py-3 rounded-2xl font-semibold text-base backdrop-blur-sm transform hover:scale-105 transition-all duration-300 min-w-[200px]"
               >
                 <span className="flex items-center justify-center">
                   <MapPin className="w-5 h-5 mr-2 group-hover:bounce" />
@@ -450,31 +450,31 @@ const HomePage: React.FC = () => {
                 {user ? (
                   <>
                     <div className="text-center">
-                      <div className="text-3xl lg:text-4xl font-bold text-white mb-2">{wallet?.total_earned || 0}</div>
-                      <div className="text-blue-200 text-sm font-medium">Crédits gagnés</div>
+                      <div className="text-2xl lg:text-3xl font-bold text-white mb-2">{wallet?.total_earned || 0}</div>
+                      <div className="text-blue-200 text-xs font-medium">Crédits gagnés</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-3xl lg:text-4xl font-bold text-white mb-2">⭐</div>
-                      <div className="text-blue-200 text-sm font-medium">Membre de confiance</div>
+                      <div className="text-2xl lg:text-3xl font-bold text-white mb-2">⭐</div>
+                      <div className="text-blue-200 text-xs font-medium">Membre de confiance</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-3xl lg:text-4xl font-bold text-white mb-2">{currentTasks?.length || 0}</div>
-                      <div className="text-blue-200 text-sm font-medium">Tâches actives</div>
+                      <div className="text-2xl lg:text-3xl font-bold text-white mb-2">{currentTasks?.length || 0}</div>
+                      <div className="text-blue-200 text-xs font-medium">Tâches actives</div>
                     </div>
                   </>
                 ) : (
                   <>
                     <div className="text-center">
-                      <div className="text-3xl lg:text-4xl font-bold text-white mb-2">500+</div>
-                      <div className="text-blue-200 text-sm font-medium">Tâches accomplies</div>
+                      <div className="text-2xl lg:text-3xl font-bold text-white mb-2">500+</div>
+                      <div className="text-blue-200 text-xs font-medium">Tâches accomplies</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-3xl lg:text-4xl font-bold text-white mb-2">4.9★</div>
-                      <div className="text-blue-200 text-sm font-medium">Note moyenne</div>
+                      <div className="text-2xl lg:text-3xl font-bold text-white mb-2">4.9★</div>
+                      <div className="text-blue-200 text-xs font-medium">Note moyenne</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-3xl lg:text-4xl font-bold text-white mb-2">24h</div>
-                      <div className="text-blue-200 text-sm font-medium">Temps de réponse</div>
+                      <div className="text-2xl lg:text-3xl font-bold text-white mb-2">24h</div>
+                      <div className="text-blue-200 text-xs font-medium">Temps de réponse</div>
                     </div>
                   </>
                 )}
@@ -498,8 +498,8 @@ const HomePage: React.FC = () => {
             >
               <Card className="p-6">
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-                    <Lightbulb className="w-5 h-5 text-yellow-500" />
+                  <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <Lightbulb className="w-4 h-4 text-yellow-500" />
                     Actions rapides
                   </h2>
                   <Button
@@ -525,10 +525,10 @@ const HomePage: React.FC = () => {
                         <div className={`w-10 h-10 bg-gradient-to-r ${action.color} rounded-lg flex items-center justify-center mb-3 text-white group-hover:scale-110 transition-transform duration-300`}>
                           {action.icon}
                         </div>
-                        <h3 className="font-semibold text-slate-800 mb-1 group-hover:text-blue-600 transition-colors">
+                        <h3 className="font-semibold text-slate-800 mb-1 group-hover:text-blue-600 transition-colors text-sm">
                           {action.title}
                         </h3>
-                        <p className="text-slate-600 text-sm leading-relaxed">
+                        <p className="text-slate-600 text-xs leading-relaxed">
                           {action.description}
                         </p>
                       </div>
@@ -738,10 +738,10 @@ const HomePage: React.FC = () => {
           ) : getFilteredAndSortedTasks.length === 0 ? (
             <Card className="text-center py-16">
               <div className="text-6xl mb-6">🤝</div>
-              <h3 className="text-2xl font-bold text-slate-800 mb-4">
+              <h3 className="text-xl font-bold text-slate-800 mb-4">
                 Aucune tâche trouvée
               </h3>
-              <p className="text-slate-600 text-lg mb-8 max-w-2xl mx-auto">
+              <p className="text-slate-600 text-base mb-8 max-w-2xl mx-auto">
                 {searchTerm || selectedCategory !== 'all' || selectedPriority !== 'all'
                   ? 'Aucune tâche ne correspond à vos critères de recherche. Essayez de modifier vos filtres.'
                   : 'Soyez le premier à créer une tâche et inspirez votre communauté à s\'entraider !'
@@ -817,10 +817,10 @@ const HomePage: React.FC = () => {
         <section className="mb-8">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-2xl font-bold text-slate-800 mb-2">
+              <h2 className="text-xl font-bold text-slate-800 mb-2">
                 Objets à louer
               </h2>
-              <p className="text-slate-600">
+              <p className="text-slate-600 text-sm">
                 Découvrez les objets disponibles à la location près de chez vous
               </p>
             </div>
@@ -862,10 +862,10 @@ const HomePage: React.FC = () => {
                 ) : rentableItems.length === 0 ? (
                   <Card className="text-center py-16">
                     <div className="text-6xl mb-6">📦</div>
-                    <h3 className="text-2xl font-bold text-slate-800 mb-4">
+                    <h3 className="text-xl font-bold text-slate-800 mb-4">
                       Aucun objet à louer
                     </h3>
-                    <p className="text-slate-600 text-lg mb-8 max-w-2xl mx-auto">
+                    <p className="text-slate-600 text-base mb-8 max-w-2xl mx-auto">
                       Aucun objet n'est actuellement disponible à la location. Soyez le premier à proposer un objet !
                     </p>
                     

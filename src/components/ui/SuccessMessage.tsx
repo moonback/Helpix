@@ -44,7 +44,7 @@ const SuccessMessage: React.FC<SuccessMessageProps> = ({
             <CheckCircle className="h-5 w-5 text-green-400" />
           </div>
           <div className="ml-3 flex-1">
-            <p className="text-sm font-medium text-green-800">
+            <p className="text-xs font-medium text-green-800">
               {displayMessage}
             </p>
           </div>

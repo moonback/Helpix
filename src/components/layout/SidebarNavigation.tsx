@@ -72,13 +72,13 @@ const SidebarNavigation: React.FC<SidebarNavigationProps> = ({ isOpen, onClose }
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
-                <span className="text-white font-bold text-lg">EU</span>
+                <span className="text-white font-bold text-sm">EU</span>
               </div>
               <div>
-                <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+                <h2 className="text-base font-bold text-gray-900 dark:text-white">
                   Helpix
                 </h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-xs text-gray-500 dark:text-gray-400">
                   {user?.email}
                 </p>
               </div>
@@ -116,10 +116,10 @@ const SidebarNavigation: React.FC<SidebarNavigationProps> = ({ isOpen, onClose }
               >
                 <div className="flex items-center space-x-3">
                   <Icon className="w-5 h-5" />
-                  <span className="font-medium">{item.label}</span>
+                  <span className="font-medium text-sm">{item.label}</span>
                 </div>
                 {item.badge && item.badge > 0 && (
-                  <span className="bg-red-500 text-white text-xs rounded-full px-2 py-1 min-w-[20px] text-center">
+                  <span className="bg-red-500 text-white text-[10px] rounded-full px-1.5 py-0.5 min-w-[18px] text-center">
                     {item.badge > 99 ? '99+' : item.badge}
                   </span>
                 )}
@@ -135,7 +135,7 @@ const SidebarNavigation: React.FC<SidebarNavigationProps> = ({ isOpen, onClose }
             className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors"
           >
             <Settings className="w-5 h-5" />
-            <span className="font-medium">Paramètres</span>
+            <span className="font-medium text-sm">Paramètres</span>
           </button>
           
           <button
@@ -143,7 +143,7 @@ const SidebarNavigation: React.FC<SidebarNavigationProps> = ({ isOpen, onClose }
             className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
           >
             <LogOut className="w-5 h-5" />
-            <span className="font-medium">Se déconnecter</span>
+            <span className="font-medium text-sm">Se déconnecter</span>
           </button>
         </div>
       </motion.div>

@@ -110,7 +110,7 @@ const BottomNavigation: React.FC = () => {
                 </div>
                 
                 {/* Label with fade animation */}
-                <span className={`hidden sm:block text-xs font-medium transition-all duration-200 ${
+                <span className={`hidden sm:block text-[10px] font-medium transition-all duration-200 ${
                   isActive ? 'opacity-100 font-semibold' : 'opacity-75 group-hover:opacity-100'
                 }`}>
                   {tab.label}
@@ -150,7 +150,7 @@ const BottomNavigation: React.FC = () => {
               }`} />
             </div>
             
-            <span className={`hidden sm:block text-xs font-medium transition-all duration-200 ${
+            <span className={`hidden sm:block text-[10px] font-medium transition-all duration-200 ${
               isMoreOpen ? 'opacity-100 font-semibold' : 'opacity-75 group-hover:opacity-100'
             }`}>
               Plus
@@ -206,7 +206,7 @@ const BottomNavigation: React.FC = () => {
                       setIsMoreOpen(false);
                     }}
                     className={`
-                      group w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm transition-all duration-200 ease-out
+                      group w-full flex items-center gap-3 px-3 py-3 rounded-xl text-xs transition-all duration-200 ease-out
                       hover:scale-[1.02] active:scale-98
                       ${isActive
                         ? 'bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700 dark:from-blue-950/50 dark:to-blue-900/50 dark:text-blue-300 shadow-sm'

@@ -57,7 +57,7 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
     getColor: (value: string) => string;
   }) => (
     <div>
-      <h4 className="text-sm font-semibold text-gray-700 mb-3">{title}</h4>
+      <h4 className="text-xs font-semibold text-gray-700 mb-3">{title}</h4>
       <div className="flex flex-wrap gap-2">
         {options.map((option) => {
           const isActive = filters[type]?.includes(option.value) || false;
@@ -67,7 +67,7 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
               key={option.value}
               onClick={() => handleFilterToggle(type, option.value)}
               className={`
-                px-3 py-2 rounded-full text-sm font-medium border transition-all duration-200
+                px-2 py-1 rounded-full text-xs font-medium border transition-all duration-200
                 ${isActive 
                   ? `${getColor(option.value)} shadow-sm` 
                   : 'bg-white text-gray-600 border-gray-300 hover:border-gray-400'

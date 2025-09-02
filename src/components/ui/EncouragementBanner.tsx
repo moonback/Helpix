@@ -30,7 +30,7 @@ const EncouragementBanner: React.FC<EncouragementBannerProps> = ({
       <div className={`bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-3 ${className}`}>
         <div className="flex items-center space-x-2">
           {showIcon && <Heart className="h-4 w-4 text-blue-600" />}
-          <p className="text-sm text-blue-800 font-medium">{message}</p>
+          <p className="text-xs text-blue-800 font-medium">{message}</p>
         </div>
       </div>
     );
@@ -47,7 +47,7 @@ const EncouragementBanner: React.FC<EncouragementBannerProps> = ({
           </div>
         )}
         <div className="flex-1">
-          <p className="text-blue-800 font-medium">{message}</p>
+          <p className="text-sm text-blue-800 font-medium">{message}</p>
         </div>
       </div>
     </div>

@@ -39,8 +39,8 @@ const EmptyState: React.FC<EmptyStateProps> = ({
   return (
     <div className={`text-center py-16 bg-white rounded-xl border border-slate-200 shadow-sm ${className}`}>
       <div className="text-6xl mb-6">{content.emoji}</div>
-      <h3 className="text-2xl font-bold text-slate-800 mb-3">{content.title}</h3>
-      {content.description && <p className="text-slate-600 text-lg mb-8 max-w-2xl mx-auto">{content.description}</p>}
+      <h3 className="text-xl font-bold text-slate-800 mb-3">{content.title}</h3>
+      {content.description && <p className="text-slate-600 text-base mb-8 max-w-2xl mx-auto">{content.description}</p>}
       {(primaryAction || secondaryAction) && (
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           {primaryAction}

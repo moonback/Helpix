@@ -58,7 +58,7 @@ const Input: React.FC<InputProps> = ({
   return (
     <div className="space-y-2">
       {label && (
-        <label className="block text-sm font-medium text-gray-700">
+        <label className="block text-xs font-medium text-gray-700">
           {label}
         </label>
       )}
@@ -80,11 +80,11 @@ const Input: React.FC<InputProps> = ({
       </div>
       
       {error && (
-        <p className="text-sm text-red-600">{error}</p>
+        <p className="text-xs text-red-600">{error}</p>
       )}
       
       {helperText && !error && (
-        <p className="text-sm text-gray-500">{helperText}</p>
+        <p className="text-xs text-gray-500">{helperText}</p>
       )}
     </div>
   );

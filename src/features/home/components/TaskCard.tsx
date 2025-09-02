@@ -122,16 +122,16 @@ const TaskCard: React.FC<TaskCardProps> = React.memo(({
             </div>
             <div className="flex-1 min-w-0">
               <h3 
-                className="text-lg font-bold text-slate-800 mb-2 line-clamp-2 cursor-pointer hover:text-blue-600 transition-colors"
+                className="text-base font-bold text-slate-800 mb-2 line-clamp-2 cursor-pointer hover:text-blue-600 transition-colors"
                 onClick={() => onViewTask(task.id)}
               >
                 {task.title}
               </h3>
               <div className="flex items-center flex-wrap gap-3">
-                <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${priorityColors[task.priority]}`}>
+                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium border ${priorityColors[task.priority]}`}>
                   {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
                 </span>
-                <span className="text-sm text-slate-500 flex items-center">
+                <span className="text-xs text-slate-500 flex items-center">
                   {task.category === 'local' ? (
                     <>
                       <MapPin className="w-3 h-3 mr-1" />
@@ -145,7 +145,7 @@ const TaskCard: React.FC<TaskCardProps> = React.memo(({
                   )}
                 </span>
                 {task.category === 'local' && latitude && longitude && task.latitude && task.longitude && (
-                  <span className="text-sm text-emerald-600 flex items-center font-medium">
+                  <span className="text-xs text-emerald-600 flex items-center font-medium">
                     <Compass className="w-3 h-3 mr-1" />
                     {formatDistance(calculateDistance(latitude, longitude, task.latitude, task.longitude))}
                   </span>
@@ -179,7 +179,7 @@ const TaskCard: React.FC<TaskCardProps> = React.memo(({
         </div>
 
         {/* Description */}
-        <p className="text-slate-600 mb-6 leading-relaxed line-clamp-3">
+        <p className="text-slate-600 text-sm mb-6 leading-relaxed line-clamp-3">
           {task.description}
         </p>
 
@@ -191,8 +191,8 @@ const TaskCard: React.FC<TaskCardProps> = React.memo(({
                 <Clock className="w-4 h-4 text-white" />
               </div>
               <div>
-                <div className="text-sm font-semibold text-slate-700">{task.estimated_duration}h</div>
-                <div className="text-xs text-slate-500">Durée estimée</div>
+                <div className="text-xs font-semibold text-slate-700">{task.estimated_duration}h</div>
+                <div className="text-[10px] text-slate-500">Durée estimée</div>
               </div>
             </div>
           </div>
@@ -203,8 +203,8 @@ const TaskCard: React.FC<TaskCardProps> = React.memo(({
                 <DollarSign className="w-4 h-4 text-white" />
               </div>
               <div>
-                <div className="text-sm font-semibold text-slate-700">{task.budget_credits}</div>
-                <div className="text-xs text-slate-500">Crédits</div>
+                <div className="text-xs font-semibold text-slate-700">{task.budget_credits}</div>
+                <div className="text-[10px] text-slate-500">Crédits</div>
               </div>
             </div>
           </div>
@@ -212,15 +212,15 @@ const TaskCard: React.FC<TaskCardProps> = React.memo(({
 
         {/* Location */}
         <div className="mb-6">
-          <div className="flex items-center space-x-2 text-sm text-slate-600 bg-slate-50 rounded-xl p-3">
-            <MapPin className="w-4 h-4 text-red-500" />
+          <div className="flex items-center space-x-2 text-xs text-slate-600 bg-slate-50 rounded-xl p-3">
+            <MapPin className="w-3 h-3 text-red-500" />
             <span className="font-medium truncate">{task.location}</span>
           </div>
         </div>
 
         {/* Skills */}
         <div className="mb-4">
-          <h4 className="text-xs font-semibold text-slate-700 mb-2 flex items-center">
+          <h4 className="text-[10px] font-semibold text-slate-700 mb-2 flex items-center">
             <Target className="w-3 h-3 mr-1 text-purple-600" />
             Compétences
           </h4>
@@ -228,13 +228,13 @@ const TaskCard: React.FC<TaskCardProps> = React.memo(({
             {task.required_skills.slice(0, viewMode === 'grid' ? 2 : 3).map((skill, skillIndex) => (
               <span
                 key={skillIndex}
-                className="inline-flex items-center px-2 py-0.5 bg-gradient-to-r from-purple-50 to-indigo-50 text-purple-700 text-xs font-medium rounded-full border border-purple-200"
+                className="inline-flex items-center px-1.5 py-0.5 bg-gradient-to-r from-purple-50 to-indigo-50 text-purple-700 text-[10px] font-medium rounded-full border border-purple-200"
               >
                 {skill}
               </span>
             ))}
             {task.required_skills.length > (viewMode === 'grid' ? 2 : 3) && (
-              <span className="inline-flex items-center px-2 py-0.5 bg-slate-100 text-slate-600 text-xs rounded-full">
+              <span className="inline-flex items-center px-1.5 py-0.5 bg-slate-100 text-slate-600 text-[10px] rounded-full">
                 +{task.required_skills.length - (viewMode === 'grid' ? 2 : 3)}
               </span>
             )}
@@ -248,13 +248,13 @@ const TaskCard: React.FC<TaskCardProps> = React.memo(({
               {task.tags.slice(0, viewMode === 'grid' ? 2 : 4).map((tag, tagIndex) => (
                 <span
                   key={tagIndex}
-                  className="inline-flex items-center px-1.5 py-0.5 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs rounded-full cursor-pointer transition-colors"
+                  className="inline-flex items-center px-1 py-0.5 bg-slate-100 hover:bg-slate-200 text-slate-600 text-[10px] rounded-full cursor-pointer transition-colors"
                 >
                   #{tag}
                 </span>
               ))}
               {task.tags.length > (viewMode === 'grid' ? 2 : 4) && (
-                <span className="inline-flex items-center px-1.5 py-0.5 bg-slate-100 text-slate-500 text-xs rounded-full">
+                <span className="inline-flex items-center px-1 py-0.5 bg-slate-100 text-slate-500 text-[10px] rounded-full">
                   +{task.tags.length - (viewMode === 'grid' ? 2 : 4)}
                 </span>
               )}
@@ -298,16 +298,16 @@ const TaskCard: React.FC<TaskCardProps> = React.memo(({
                 <span className="sm:hidden">Se connecter</span>
               </Button>
             ) : (
-              <div className="text-responsive-sm text-slate-500 italic flex items-center">
-                <Award className="w-4 h-4 mr-2" />
+              <div className="text-xs text-slate-500 italic flex items-center">
+                <Award className="w-3 h-3 mr-2" />
                 Votre tâche
               </div>
             )}
           </div>
           
-          <div className="text-left sm:text-right text-responsive-sm text-slate-500">
+          <div className="text-left sm:text-right text-xs text-slate-500">
             <div className="flex items-center space-x-2">
-              <Calendar className="w-4 h-4" />
+              <Calendar className="w-3 h-3" />
               <span>{new Date(task.created_at).toLocaleDateString('fr-FR', { 
                 day: 'numeric', 
                 month: 'short',

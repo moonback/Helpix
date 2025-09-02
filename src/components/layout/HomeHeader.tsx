@@ -68,14 +68,14 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({ className = '' }) => {
             {/* Texte du logo avec animations améliorées */}
             <div className="flex flex-col">
               <motion.h1 
-                className="text-xl font-bold bg-gradient-to-r from-slate-800 via-blue-700 to-indigo-700 bg-clip-text text-transparent cursor-pointer hover:from-blue-600 hover:via-indigo-600 hover:to-purple-600 transition-all duration-300"
+                className="text-lg font-bold bg-gradient-to-r from-slate-800 via-blue-700 to-indigo-700 bg-clip-text text-transparent cursor-pointer hover:from-blue-600 hover:via-indigo-600 hover:to-purple-600 transition-all duration-300"
                 whileHover={{ scale: 1.02 }}
                 onClick={() => navigate('/')}
               >
                 Helpix
               </motion.h1>
               <motion.p 
-                className="text-sm text-slate-500 font-medium leading-tight"
+                className="text-xs text-slate-500 font-medium leading-tight"
                 initial={{ opacity: 0.7 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.4, duration: 0.4 }}
@@ -220,12 +220,12 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({ className = '' }) => {
                 />
               </div>
             ) : locationError ? (
-              <div className="flex items-center space-x-2 text-red-600 bg-red-50 px-3 py-2 rounded-lg border border-red-200 text-xs sm:text-sm w-full max-w-sm justify-center">
+              <div className="flex items-center space-x-2 text-red-600 bg-red-50 px-3 py-2 rounded-lg border border-red-200 text-[10px] sm:text-xs w-full max-w-sm justify-center">
                 <AlertCircle className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
                 <span>Erreur de localisation</span>
               </div>
             ) : (
-              <div className="flex items-center space-x-2 text-slate-500 bg-slate-50 px-3 py-2 rounded-lg text-xs sm:text-sm border border-slate-200 w-full max-w-sm justify-center">
+              <div className="flex items-center space-x-2 text-slate-500 bg-slate-50 px-3 py-2 rounded-lg text-[10px] sm:text-xs border border-slate-200 w-full max-w-sm justify-center">
                 <Navigation className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
                 <span>Aucune localisation</span>
               </div>
@@ -234,7 +234,7 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({ className = '' }) => {
 
           {/* User greeting for very small screens */}
           <div className="xs:hidden mt-2 text-center">
-            <p className="text-xs text-slate-500">
+            <p className="text-[10px] text-slate-500">
               Bonjour {user?.email?.split('@')[0] || 'Utilisateur'} !
             </p>
           </div>

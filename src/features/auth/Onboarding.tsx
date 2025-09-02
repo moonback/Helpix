@@ -56,7 +56,7 @@ const Onboarding: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-primary-50 to-primary-100 flex flex-col">
       {/* Header */}
       <div className="flex justify-between items-center p-6">
-        <div className="text-primary-600 font-semibold text-lg">
+        <div className="text-primary-600 font-semibold text-base">
           Helpix
         </div>
         <Button
@@ -84,11 +84,11 @@ const Onboarding: React.FC = () => {
                 {onboardingSlides[currentSlide].icon}
               </div>
               
-              <h1 className="text-3xl font-bold text-gray-900 mb-4">
+              <h1 className="text-2xl font-bold text-gray-900 mb-4">
                 {onboardingSlides[currentSlide].title}
               </h1>
               
-              <p className="text-lg text-gray-600 leading-relaxed">
+              <p className="text-base text-gray-600 leading-relaxed">
                 {onboardingSlides[currentSlide].description}
               </p>
             </motion.div>
