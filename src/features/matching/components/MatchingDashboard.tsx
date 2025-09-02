@@ -204,9 +204,9 @@ const MatchingDashboard: React.FC<MatchingDashboardProps> = ({ className = '' })
                   {Math.round(stats?.compatibilityScore || 0)}%
                 </p>
                 <ProgressBar 
-                  value={stats?.compatibilityScore || 0} 
-                  max={100} 
-                  className="mt-2 h-2"
+                  progress={stats?.compatibilityScore || 0} 
+                  height="h-2"
+                  className="mt-2"
                 />
               </div>
               <Target className="h-8 w-8 text-purple-500" />
@@ -373,7 +373,7 @@ const OverviewTab: React.FC<{ dashboard: MatchingDashboardType; stats: any }> = 
             <span>Taux de réponse</span>
             <span>{stats?.responseRate || 0}%</span>
           </div>
-          <ProgressBar value={stats?.responseRate || 0} max={100} className="h-2" />
+          <ProgressBar progress={stats?.responseRate || 0} height="h-2" />
         </div>
         
         <div>
@@ -381,7 +381,7 @@ const OverviewTab: React.FC<{ dashboard: MatchingDashboardType; stats: any }> = 
             <span>Taux de completion</span>
             <span>{dashboard.matching_stats.completion_rate}%</span>
           </div>
-          <ProgressBar value={dashboard.matching_stats.completion_rate} max={100} className="h-2" />
+          <ProgressBar progress={dashboard.matching_stats.completion_rate} height="h-2" />
         </div>
 
         <div className="grid grid-cols-2 gap-4 pt-4 border-t">

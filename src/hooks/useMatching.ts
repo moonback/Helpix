@@ -23,7 +23,6 @@ export const useMatching = () => {
     initializeMatching,
     generateRecommendations,
     generateProximityAlerts,
-    findBestMatchesForTask,
     findBestTasksForUser,
     calculateCompatibility,
     acceptRecommendation,
@@ -114,7 +113,7 @@ export const useMatching = () => {
     markAllAsRead,
 
     // Actions de matching
-    findBestMatchesForTask,
+
     findBestTasksForUser,
     calculateCompatibility,
 

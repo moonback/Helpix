@@ -14,8 +14,7 @@ import {
   UserPreferences,
   UserAvailability
 } from '@/types/matching';
-import { Task } from '@/types';
-import { MatchingAlgorithm, RecommendationService } from '@/lib/matchingAlgorithm';
+
 
 interface MatchingStore {
   // État
@@ -196,25 +195,25 @@ export const useMatchingStore = create<MatchingStore>((set, get) => ({
   },
 
   // Chargement des recommandations (version simplifiée)
-  loadRecommendations: async (userId: string): Promise<Recommendation[]> => {
+  loadRecommendations: async (_userId: string): Promise<Recommendation[]> => {
     // Retourner un tableau vide en attendant la migration
     return [];
   },
 
   // Chargement des alertes de proximité (version simplifiée)
-  loadProximityAlerts: async (userId: string): Promise<ProximityAlert[]> => {
+  loadProximityAlerts: async (_userId: string): Promise<ProximityAlert[]> => {
     // Retourner un tableau vide en attendant la migration
     return [];
   },
 
   // Chargement des matches récents (version simplifiée)
-  loadRecentMatches: async (userId: string): Promise<MatchResult[]> => {
+  loadRecentMatches: async (_userId: string): Promise<MatchResult[]> => {
     // Retourner un tableau vide en attendant la migration
     return [];
   },
 
   // Chargement des notifications intelligentes (version simplifiée)
-  loadSmartNotifications: async (userId: string): Promise<SmartNotification[]> => {
+  loadSmartNotifications: async (_userId: string): Promise<SmartNotification[]> => {
     // Retourner un tableau vide en attendant la migration
     return [];
   },
@@ -277,11 +276,15 @@ export const useMatchingStore = create<MatchingStore>((set, get) => ({
     location: task.location,
     latitude: task.latitude,
     longitude: task.longitude,
-    budget: task.budget_credits || task.budget || 0,
+    category: task.category || 'general',
+    budget_credits: task.budget_credits || 0,
+    estimated_duration: task.estimated_duration || 60,
     priority: task.priority || 'medium',
     complexity: task.complexity || 'moderate',
     required_skills: task.required_skills || [],
-    created_at: task.created_at
+    user_id: task.user_id,
+    created_at: task.created_at,
+    updated_at: task.updated_at
   }),
 
   // Génération du tableau de bord
@@ -291,15 +294,13 @@ export const useMatchingStore = create<MatchingStore>((set, get) => ({
       recent_matches: [],
       pending_recommendations: [],
       proximity_alerts: [],
-      smart_notifications: [],
-      compatibility_score: 0,
       response_time: 0,
       success_rate: 0
     };
   },
 
   // Calcul des statistiques utilisateur
-  calculateUserStats: async (userId: string) => {
+  calculateUserStats: async (_userId: string) => {
     return {
       totalRecommendations: 0,
       unreadRecommendations: 0,
@@ -346,7 +347,7 @@ export const useMatchingStore = create<MatchingStore>((set, get) => ({
   },
 
   // Actions de matching (version simplifiée)
-  findBestTasksForUser: async (userId: string): Promise<MatchResult[]> => {
+  findBestTasksForUser: async (_userId: string): Promise<MatchResult[]> => {
     return [];
   },
 
@@ -368,6 +369,19 @@ export const useMatchingStore = create<MatchingStore>((set, get) => ({
       recommendations: [],
       created_at: new Date().toISOString()
     };
+  },
+
+  // Actions manquantes
+  updateUserProfile: async (profile: Partial<UserProfile>) => {
+    console.log('Mettre à jour le profil:', profile);
+  },
+
+  generateRecommendations: async () => {
+    console.log('Générer des recommandations');
+  },
+
+  generateProximityAlerts: async () => {
+    console.log('Générer des alertes de proximité');
   },
 
   // Actions utilitaires
