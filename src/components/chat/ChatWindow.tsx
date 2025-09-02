@@ -5,6 +5,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { Conversation, Message } from '@/types';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
+import { supabase } from '@/lib/supabase';
 import { 
   Send, 
   Paperclip, 
@@ -237,6 +238,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   const [isRecording, setIsRecording] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
+  const [userNamesMap, setUserNamesMap] = useState<Record<string, string>>({});
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -302,6 +304,30 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
       });
     }
   }, [conversation, messages, user?.id, markAsRead]);
+
+  // Charger le nom de l'autre participant
+  useEffect(() => {
+    const loadParticipantNames = async () => {
+      try {
+        if (!conversation) return;
+        const ids = conversation.participants.filter(id => id && id !== user?.id && !userNamesMap[id]);
+        if (ids.length === 0) return;
+        const { data, error } = await supabase
+          .from('users')
+          .select('id, name')
+          .in('id', ids);
+        if (error) throw error;
+        const next: Record<string, string> = { ...userNamesMap };
+        (data || []).forEach((u: { id: string; name: string }) => {
+          next[u.id] = u.name || 'Utilisateur';
+        });
+        setUserNamesMap(next);
+      } catch (e) {
+        // Silent fallback
+      }
+    };
+    loadParticipantNames();
+  }, [conversation, user?.id, userNamesMap]);
 
   // Simulation de l'indicateur "en train d'écrire"
   const handleInputChange = useCallback((value: string) => {
@@ -501,7 +527,9 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   }
 
   const otherParticipantId = conversation.participants.find(id => id !== user?.id);
-  const participantName = otherParticipantId ? `Utilisateur ${otherParticipantId.slice(0, 8)}...` : 'Utilisateur';
+  const participantName = otherParticipantId
+    ? (userNamesMap[otherParticipantId] || `Utilisateur ${otherParticipantId.slice(0, 8)}...`)
+    : 'Utilisateur';
 
   return (
     <>
