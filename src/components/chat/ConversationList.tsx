@@ -147,9 +147,10 @@ const ConversationList: React.FC<ConversationListProps> = ({
         const matchesParticipants = conv.participants?.some(p => 
           p.toLowerCase().includes(searchLower)
         );
-        const matchesLastMessage = conv.lastMessage?.content
+        const matchesLastMessage = (conv.lastMessage?.content || '')
           .toLowerCase()
           .includes(searchLower);
+        const matchesName = (conv.name || '').toLowerCase().includes(searchLower);
         if (!matchesParticipants && !matchesLastMessage) return false;
       }
 

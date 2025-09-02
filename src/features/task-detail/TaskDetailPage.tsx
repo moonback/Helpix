@@ -6,12 +6,14 @@ import { useAuthStore } from '@/stores/authStore';
 import TaskTracker from '@/components/ui/TaskTracker';
 import Button from '@/components/ui/Button';
 import { ArrowLeft, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
+import { useMessageStore } from '@/stores/messageStore';
 
 const TaskDetailPage: React.FC = () => {
   const { taskId } = useParams<{ taskId: string }>();
   const navigate = useNavigate();
   const { tasks, fetchTasks, updateTaskProgress, updateTaskStatus, addTaskComment, addTaskAttachment, removeTaskAttachment, deleteTask } = useTaskStore();
   const { user } = useAuthStore();
+  const { createConversation } = useMessageStore();
   
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -114,6 +116,20 @@ const TaskDetailPage: React.FC = () => {
 
   const handleViewOffers = () => {
     navigate(`/task/${taskId}/offers`);
+  };
+
+  const handleCreateGroupConversation = async () => {
+    if (!task || !user) return;
+    try {
+      const participants: string[] = [];
+      participants.push(task.user_id);
+      if (task.assigned_to && task.assigned_to !== task.user_id) participants.push(task.assigned_to);
+      if (!participants.includes(user.id)) participants.push(user.id);
+      await createConversation(participants);
+      navigate('/chat');
+    } catch (e) {
+      console.error('Erreur création conversation de groupe:', e);
+    }
   };
 
   const isOwner = user?.id === task?.user_id;
@@ -220,6 +236,11 @@ const TaskDetailPage: React.FC = () => {
               isOwner={isOwner}
               canEdit={canEdit}
             />
+            <div className="mt-4 flex flex-wrap gap-3">
+              <Button onClick={handleCreateGroupConversation} className="bg-emerald-600 hover:bg-emerald-700 text-white">
+                Créer conversation de groupe
+              </Button>
+            </div>
           </motion.div>
         </div>
       </div>
