@@ -71,3 +71,100 @@ FROM pg_constraint
 WHERE conrelid = 'public.rental_reviews'::regclass 
 AND contype = 'f'
 ORDER BY conname;
+
+-- Ajouter les politiques RLS pour la table rentals
+DO $$
+BEGIN
+  -- Politique pour permettre aux utilisateurs de voir leurs propres locations
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies 
+    WHERE tablename = 'rentals' AND policyname = 'rentals_select_own'
+  ) THEN
+    CREATE POLICY "rentals_select_own" ON public.rentals
+      FOR SELECT USING (
+        auth.uid() = owner_id OR auth.uid() = renter_id
+      );
+  END IF;
+
+  -- Politique pour permettre aux utilisateurs de créer des locations
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies 
+    WHERE tablename = 'rentals' AND policyname = 'rentals_insert_own'
+  ) THEN
+    CREATE POLICY "rentals_insert_own" ON public.rentals
+      FOR INSERT WITH CHECK (
+        auth.uid() = renter_id
+      );
+  END IF;
+
+  -- Politique pour permettre aux propriétaires de mettre à jour leurs locations
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies 
+    WHERE tablename = 'rentals' AND policyname = 'rentals_update_own'
+  ) THEN
+    CREATE POLICY "rentals_update_own" ON public.rentals
+      FOR UPDATE USING (
+        auth.uid() = owner_id
+      );
+  END IF;
+
+  -- Politique pour permettre aux propriétaires de supprimer leurs locations
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies 
+    WHERE tablename = 'rentals' AND policyname = 'rentals_delete_own'
+  ) THEN
+    CREATE POLICY "rentals_delete_own" ON public.rentals
+      FOR DELETE USING (
+        auth.uid() = owner_id
+      );
+  END IF;
+END $$;
+
+-- Activer RLS sur la table rental_reviews si pas déjà fait
+ALTER TABLE public.rental_reviews ENABLE ROW LEVEL SECURITY;
+
+-- Ajouter les politiques RLS pour la table rental_reviews
+DO $$
+BEGIN
+  -- Politique pour permettre aux utilisateurs de voir les avis
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies 
+    WHERE tablename = 'rental_reviews' AND policyname = 'rental_reviews_select_all'
+  ) THEN
+    CREATE POLICY "rental_reviews_select_all" ON public.rental_reviews
+      FOR SELECT USING (true);
+  END IF;
+
+  -- Politique pour permettre aux utilisateurs de créer des avis
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies 
+    WHERE tablename = 'rental_reviews' AND policyname = 'rental_reviews_insert_own'
+  ) THEN
+    CREATE POLICY "rental_reviews_insert_own" ON public.rental_reviews
+      FOR INSERT WITH CHECK (
+        auth.uid() = reviewer_id
+      );
+  END IF;
+
+  -- Politique pour permettre aux utilisateurs de mettre à jour leurs propres avis
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies 
+    WHERE tablename = 'rental_reviews' AND policyname = 'rental_reviews_update_own'
+  ) THEN
+    CREATE POLICY "rental_reviews_update_own" ON public.rental_reviews
+      FOR UPDATE USING (
+        auth.uid() = reviewer_id
+      );
+  END IF;
+
+  -- Politique pour permettre aux utilisateurs de supprimer leurs propres avis
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies 
+    WHERE tablename = 'rental_reviews' AND policyname = 'rental_reviews_delete_own'
+  ) THEN
+    CREATE POLICY "rental_reviews_delete_own" ON public.rental_reviews
+      FOR DELETE USING (
+        auth.uid() = reviewer_id
+      );
+  END IF;
+END $$;

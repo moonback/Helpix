@@ -358,6 +358,23 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
 
   requestRental: async (rentalData) => {
     try {
+      // Récupérer l'utilisateur actuel
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('Utilisateur non authentifié');
+      }
+
+      // Récupérer les informations de l'objet pour obtenir l'owner_id
+      const { data: itemData, error: itemError } = await supabase
+        .from('items')
+        .select('user_id')
+        .eq('id', rentalData.itemId)
+        .single();
+
+      if (itemError || !itemData) {
+        throw new Error('Objet non trouvé');
+      }
+
       const totalDays = Math.max(1, Math.ceil(
         (new Date(rentalData.endDate).getTime() - new Date(rentalData.startDate).getTime()) / (1000 * 60 * 60 * 24)
       ));
@@ -367,6 +384,8 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
         .from('rentals')
         .insert({
           item_id: rentalData.itemId,
+          owner_id: itemData.user_id, // ID du propriétaire de l'objet
+          renter_id: user.id, // ID de l'utilisateur qui fait la demande
           start_date: rentalData.startDate,
           end_date: rentalData.endDate,
           daily_price: rentalData.dailyPrice,
@@ -407,12 +426,19 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
 
   cancelRental: async (id: string, reason?: string) => {
     try {
+      const updateData: any = { 
+        status: 'cancelled',
+      };
+      
+      // Ajouter la raison si fournie (quand le champ sera ajouté à la DB)
+      if (reason) {
+        // updateData.cancellation_reason = reason;
+        console.log('Raison d\'annulation:', reason);
+      }
+
       const { error } = await supabase
         .from('rentals')
-        .update({ 
-          status: 'cancelled',
-          // TODO: Ajouter un champ reason si nécessaire
-        })
+        .update(updateData)
         .eq('id', id);
 
       if (error) throw error;
