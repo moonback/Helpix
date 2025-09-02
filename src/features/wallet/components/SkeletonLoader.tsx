@@ -58,7 +58,7 @@ const SkeletonLoader: React.FC = () => {
       </div>
 
       <div className="p-6">
-        <div className="max-w-7xl mx-auto space-y-6">
+        <div className="max-w-12xl mx-auto space-y-6">
           {/* Balance Card Skeleton */}
           <Card className="p-8">
             <div className="animate-pulse">
