@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { MapPin, Users, Filter, Navigation } from 'lucide-react';
+import { MapPin, Users, Filter, Navigation, ShoppingBag, X } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup, useMap, Circle } from 'react-leaflet';
 import { useNavigate } from 'react-router-dom';
 import 'leaflet/dist/leaflet.css';
@@ -10,6 +10,8 @@ import { useTaskStore } from '@/stores/taskStore';
 import { useAuthStore } from '@/stores/authStore';
 import { Task } from '@/types';
 import { calculateDistance, formatDistance } from '@/lib/utils';
+import { supabase } from '@/lib/supabase';
+import { requestRental } from '@/lib/rentals';
 
 // Fix pour les icônes Leaflet
 import L from 'leaflet';
@@ -67,10 +69,79 @@ const MapPage: React.FC = () => {
   const [filterPriority, setFilterPriority] = useState<'urgent' | 'high' | 'medium' | 'low' | 'all'>('all');
   const [radiusKm, setRadiusKm] = useState<number>(0);
   const [sortByDistance, setSortByDistance] = useState<boolean>(false);
+  // Louables
+  interface RentableItemMarker {
+    id: number;
+    name: string;
+    description: string;
+    daily_price: number | null;
+    deposit: number;
+    available: boolean;
+    owner_id: string;
+    location: { lat: number; lng: number } | null;
+  }
+  const [rentableItems, setRentableItems] = useState<RentableItemMarker[]>([]);
+  const [itemsLoading, setItemsLoading] = useState(false);
+  const [isItemsSidebarOpen, setIsItemsSidebarOpen] = useState(false);
+  const [itemSearch, setItemSearch] = useState('');
+  const [onlyAvailableItems, setOnlyAvailableItems] = useState(true);
+  const [minPrice, setMinPrice] = useState<number>(0);
+  const [maxPrice, setMaxPrice] = useState<number>(100);
+  const [maxDeposit, setMaxDeposit] = useState<number>(1000);
 
   useEffect(() => {
     fetchTasks();
   }, [fetchTasks]);
+
+  // Charger objets louables et positions propriétaires
+  useEffect(() => {
+    (async () => {
+      setItemsLoading(true);
+      try {
+        const { data: items, error } = await supabase
+          .from('items')
+          .select('*')
+          .eq('is_rentable', true);
+        if (error) throw error;
+        const ownerIds = Array.from(new Set((items || []).map((i: any) => i.user_id)));
+        const ownersLocationMap = new Map<string, { lat: number; lng: number } | null>();
+        if (ownerIds.length > 0) {
+          const { data: usersRows, error: usersErr } = await supabase
+            .from('users')
+            .select('id, location')
+            .in('id', ownerIds);
+          if (usersErr) throw usersErr;
+          (usersRows || []).forEach((u: any) => {
+            const parts = String(u.location || '').split(',');
+            if (parts.length === 2) {
+              const lat = Number(parts[0]);
+              const lng = Number(parts[1]);
+              if (!Number.isNaN(lat) && !Number.isNaN(lng)) {
+                ownersLocationMap.set(u.id, { lat, lng });
+                return;
+              }
+            }
+            ownersLocationMap.set(u.id, null);
+          });
+        }
+        const mapped: RentableItemMarker[] = (items || []).map((it: any) => ({
+          id: it.id,
+          name: it.name ?? it.item_name,
+          description: it.description || '',
+          daily_price: it.daily_price ?? null,
+          deposit: it.deposit ?? 0,
+          available: !!it.available,
+          owner_id: it.user_id,
+          location: ownersLocationMap.get(it.user_id) ?? null,
+        }));
+        setRentableItems(mapped.filter(m => m.location));
+      } catch (e) {
+        console.error('Erreur chargement objets louables:', e);
+      } finally {
+        setItemsLoading(false);
+      }
+    })();
+  }, []);
 
   // Récupération position utilisateur (pour distance et rayon)
   useEffect(() => {
@@ -166,6 +237,27 @@ const MapPage: React.FC = () => {
     return result;
   })();
 
+  const filteredRentableItems = useMemo(() => {
+    let items = [...rentableItems];
+    if (itemSearch.trim()) {
+      const q = itemSearch.toLowerCase();
+      items = items.filter(i => i.name.toLowerCase().includes(q) || i.description.toLowerCase().includes(q));
+    }
+    if (onlyAvailableItems) items = items.filter(i => i.available);
+    items = items.filter(i => (i.daily_price ?? 0) >= minPrice && (i.daily_price ?? 0) <= maxPrice);
+    items = items.filter(i => (i.deposit ?? 0) <= maxDeposit);
+    if (radiusKm > 0 && userLocation) {
+      items = items.filter(i => i.location && calculateDistance(userLocation.lat, userLocation.lng, i.location.lat, i.location.lng) <= radiusKm);
+    }
+    if (sortByDistance && userLocation) {
+      items = items.sort((a, b) =>
+        calculateDistance(userLocation.lat, userLocation.lng, a.location!.lat, a.location!.lng) -
+        calculateDistance(userLocation.lat, userLocation.lng, b.location!.lat, b.location!.lng)
+      );
+    }
+    return items;
+  }, [rentableItems, itemSearch, onlyAvailableItems, minPrice, maxPrice, maxDeposit, radiusKm, sortByDistance, userLocation]);
+
   const recenterToUser = () => {
     if (!mapInstance) return;
     if (userLocation) {
@@ -258,7 +350,8 @@ const MapPage: React.FC = () => {
                    </div>
                  </div>
                ) : (
-                 filteredTasks.map((task) => (
+                 <>
+                 {filteredTasks.map((task) => (
                                        <Marker
                       key={task.id}
                       position={[task.location.lat, task.location.lng]}
@@ -383,10 +476,110 @@ const MapPage: React.FC = () => {
                         </div>
                       </Popup>
                    </Marker>
-                 ))
+                 ))}
+                 {filteredRentableItems.length === 0 && filteredTasks.length === 0 ? null : filteredRentableItems.map((it) => (
+                   <Marker key={`item-${it.id}`} position={[it.location!.lat, it.location!.lng]}>
+                     <Popup className="min-w-[280px]">
+                       <div className="p-3">
+                         <div className="flex items-center gap-2 mb-2">
+                           <div className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center">
+                             <ShoppingBag size={16} />
+                           </div>
+                           <div>
+                             <div className="font-semibold text-gray-900">{it.name}</div>
+                             <div className="text-xs text-gray-500">Objet louable</div>
+                           </div>
+                         </div>
+                         <p className="text-sm text-gray-700 mb-2">{it.description}</p>
+                         <div className="text-sm text-gray-800 mb-2">{it.daily_price ?? '?'} crédits/jour • Dépôt {it.deposit ?? 0}</div>
+                         {userLocation && it.location && (
+                           <div className="text-xs text-primary-600 font-medium mb-2">
+                             {formatDistance(calculateDistance(userLocation.lat, userLocation.lng, it.location.lat, it.location.lng))}
+                           </div>
+                         )}
+                         <div className="space-y-2 mb-2">
+                           <div className="grid grid-cols-2 gap-2">
+                             <input type="date" className="border rounded-md px-2 py-1 text-sm" onChange={(e) => (it as any)._start = e.target.value} />
+                             <input type="date" className="border rounded-md px-2 py-1 text-sm" onChange={(e) => (it as any)._end = e.target.value} />
+                           </div>
+                           <div className="text-xs text-gray-600">
+                             Total estimé: {(() => {
+                               const start = (it as any)._start; const end = (it as any)._end;
+                               if (!start || !end || !it.daily_price) return '—';
+                               const days = Math.max(1, Math.ceil((new Date(end).getTime() - new Date(start).getTime()) / (1000*60*60*24)));
+                               return `${days * it.daily_price} crédits`;
+                             })()}
+                           </div>
+                         </div>
+                         <div className="flex gap-2">
+                           <Button size="sm" className="flex-1" onClick={async () => {
+                             if (!user) { navigate('/login'); return; }
+                             const start = (it as any)._start; const end = (it as any)._end;
+                             if (!start || !end || !it.daily_price) { alert('Sélectionnez des dates valides.'); return; }
+                             try {
+                               await requestRental({
+                                 itemId: it.id,
+                                 ownerId: it.owner_id,
+                                 renterId: user.id,
+                                 startDate: start,
+                                 endDate: end,
+                                 dailyPrice: it.daily_price,
+                                 depositCredits: it.deposit ?? 0,
+                               });
+                               alert('Demande envoyée');
+                             } catch (e) {
+                               console.error(e);
+                               alert('Erreur lors de la demande');
+                             }
+                           }}>Demander la location</Button>
+                           <a className="text-xs px-2 py-1 border rounded-md hover:bg-gray-50" href={`https://www.google.com/maps/dir/?api=1&destination=${it.location!.lat},${it.location!.lng}`} target="_blank" rel="noopener noreferrer">Itinéraire</a>
+                         </div>
+                       </div>
+                     </Popup>
+                   </Marker>
+                 ))}
+               </>
                )}
              </MapContainer>
            )}
+
+          {/* Sidebar gauche: filtres objets louables */}
+          <div className={`absolute top-4 left-0 h-[calc(100%-2rem)] z-[2100] transition-transform ${isItemsSidebarOpen ? 'translate-x-0' : '-translate-x-[calc(100%-3rem)]'} pointer-events-none`}>
+            <div className="pointer-events-auto w-72 max-w-[85vw] h-full bg-white shadow-2xl border-r border-gray-200 rounded-r-2xl p-4 flex flex-col">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                  <ShoppingBag size={16} /> Objets louables
+                </div>
+                <button onClick={() => setIsItemsSidebarOpen(false)} className="p-1 rounded-md hover:bg-gray-100">
+                  <X size={16} />
+                </button>
+              </div>
+              <input
+                type="text"
+                value={itemSearch}
+                onChange={(e) => setItemSearch(e.target.value)}
+                placeholder="Rechercher un objet..."
+                className="w-full rounded-md border-gray-300 focus:border-primary-500 focus:ring-primary-500 text-sm mb-3"
+              />
+              <label className="flex items-center gap-2 text-sm text-gray-700 mb-3">
+                <input type="checkbox" checked={onlyAvailableItems} onChange={(e) => setOnlyAvailableItems(e.target.checked)} />
+                Uniquement disponibles
+              </label>
+              <div className="text-xs text-gray-600 mb-1">Prix/jour (crédits)</div>
+              <div className="flex items-center gap-2 mb-2">
+                <input type="number" value={minPrice} onChange={(e)=>setMinPrice(Number(e.target.value))} className="w-20 rounded-md border-gray-300 text-sm" />
+                <span className="text-gray-400">—</span>
+                <input type="number" value={maxPrice} onChange={(e)=>setMaxPrice(Number(e.target.value))} className="w-20 rounded-md border-gray-300 text-sm" />
+              </div>
+              <div className="text-xs text-gray-600 mb-1">Dépôt max (crédits)</div>
+              <input type="number" value={maxDeposit} onChange={(e)=>setMaxDeposit(Number(e.target.value))} className="w-full rounded-md border-gray-300 text-sm mb-4" />
+              <div className="mt-auto text-xs text-gray-500">{itemsLoading ? 'Chargement des objets...' : `${filteredRentableItems.length} objet(s)`}</div>
+            </div>
+            {/* Poignée de toggle */}
+            <button onClick={() => setIsItemsSidebarOpen(v => !v)} className="pointer-events-auto absolute top-1/2 -right-4 -translate-y-1/2 h-10 w-10 rounded-full bg-white shadow-lg border flex items-center justify-center">
+              <ShoppingBag size={18} className="text-gray-700" />
+            </button>
+          </div>
 
           {/* Map Controls */}
           <div className="absolute top-4 right-4 space-y-2 w-[320px] max-w-[90vw] z-[2000]">
