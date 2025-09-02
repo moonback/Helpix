@@ -13,12 +13,12 @@ import { useRentableItems } from '@/features/map/hooks/useRentableItems';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
+import HomeHeader from '@/components/layout/HomeHeader';
 import TaskCard from './components/TaskCard';
 import TaskCardSkeleton from './components/TaskCardSkeleton';
 import RentableItemCard from './components/RentableItemCard';
 import RentableItemCardSkeleton from './components/RentableItemCardSkeleton';
 import LocationPermissionBanner from '@/components/ui/LocationPermissionBanner';
-import DetailedAddressDisplay from '@/components/ui/DetailedAddressDisplay';
 import FilterModal from '@/components/ui/FilterModal';
 import FilterButton from '@/components/ui/FilterButton';
 import FilterBadge from '@/components/ui/FilterBadge';
@@ -28,7 +28,6 @@ import {
   Search, 
   Plus, 
   Users, 
-  Heart, 
   Clock,
   Filter,
   SortAsc,
@@ -81,8 +80,8 @@ const HomePage: React.FC = () => {
   const { fetchWallet } = useWalletStore();
   
   // Hooks
-  const { latitude, longitude, error: locationError, isLoading: locationLoading, requestLocation } = useGeolocation();
-  const { address, getAddressFromCoords, retry } = useReverseGeocoding();
+  const { latitude, longitude, requestLocation } = useGeolocation();
+  const { getAddressFromCoords } = useReverseGeocoding();
   const { items: rentableItems, loading: rentableItemsLoading, error: rentableItemsError } = useRentableItems();
 
   // State
@@ -297,77 +296,7 @@ const HomePage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-sm border-b border-slate-200/50 shadow-sm sticky top-0 z-40">
-        <div className="max-w-12xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            {/* Logo */}
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
-                <Heart className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-slate-800">Entraide Universelle</h1>
-                <p className="text-sm text-slate-500">Bonjour {user?.email?.split('@')[0]} !</p>
-              </div>
-            </div>
-
-            {/* Location & Actions */}
-            <div className="flex items-center space-x-4">
-              {/* Location Status */}
-              <div className="flex items-center">
-                {locationLoading ? (
-                  <div className="flex items-center space-x-2 text-slate-600 bg-slate-50 px-3 py-2 rounded-lg text-sm">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-                    <span className="hidden sm:inline">Localisation...</span>
-                  </div>
-                ) : latitude && longitude ? (
-                  <div className="flex items-center space-x-2 text-emerald-700 bg-emerald-50 px-3 py-2 rounded-lg border border-emerald-200 text-sm">
-                    <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
-                    <DetailedAddressDisplay
-                      address={address}
-                      isLoading={!address}
-                      error={null}
-                      showIcon={false}
-                      className="text-emerald-700 font-medium truncate max-w-[120px] lg:max-w-[180px]"
-                      onRetry={retry}
-                    />
-                  </div>
-                ) : locationError ? (
-                  <div className="flex items-center space-x-2 text-red-600 bg-red-50 px-3 py-2 rounded-lg border border-red-200 text-sm">
-                    <AlertCircle className="w-4 h-4" />
-                    <span className="hidden sm:inline">Erreur</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center space-x-2 text-slate-500 bg-slate-50 px-3 py-2 rounded-lg text-sm">
-                    <Navigation className="w-4 h-4" />
-                    <span className="hidden sm:inline">Non localisé</span>
-                  </div>
-                )}
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex items-center space-x-2">
-                <Button
-                  onClick={() => navigate('/create-task')}
-                  size="sm"
-                  className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
-                >
-                  <Plus className="w-4 h-4 mr-1" />
-                  <span className="hidden sm:inline">Créer</span>
-                </Button>
-                <Button
-                  onClick={() => navigate('/dashboard')}
-                  variant="outline"
-                  size="sm"
-                  className="border-slate-300 hover:border-blue-500 hover:text-blue-600"
-                >
-                  <BarChart3 className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
+      <HomeHeader />
 
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-700 text-white">
@@ -880,8 +809,8 @@ const HomePage: React.FC = () => {
       <div className="px-4 sm:px-6 lg:px-8 pb-6">
         <LocationPermissionBanner
           hasPermission={!!(latitude && longitude)}
-          isLoading={locationLoading}
-          error={locationError}
+          isLoading={false}
+          error={null}
           onRequestLocation={requestLocation}
           onSetManualLocation={handleManualLocation}
         />
