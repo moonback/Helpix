@@ -7,6 +7,12 @@ import { Task } from '@/types';
 import { usePaymentNotifications } from '@/hooks/usePaymentNotifications';
 import { useRentableItems } from './hooks/useRentableItems';
 import { useGeolocation } from '@/hooks/useGeolocation';
+import PageContainer from '@/components/ui/PageContainer';
+import SectionHeader from '@/components/ui/SectionHeader';
+import SkeletonList from '@/components/ui/SkeletonList';
+import EmptyState from '@/components/ui/EmptyState';
+import FilterBadge from '@/components/ui/FilterBadge';
+import { MapPin } from 'lucide-react';
 
 // Lazy load des composants lourds
 const MapView = lazy(() => import('./components/MapView'));
@@ -221,46 +227,103 @@ const MapPageOptimized: React.FC = () => {
           onSearchChange={setSearchQuery}
         />
 
-        {/* Contenu principal */}
-        <div className="flex-1">
-          {mapView === 'map' ? (
-            <div className="h-[calc(100vh-140px)] sm:h-[calc(100vh-180px)] lg:h-[calc(100vh-200px)]">
-              <MapView
-                tasks={mapTasks}
-                userLocation={userLocation}
-                onTaskClick={handleTaskClick}
-                onOfferHelp={handleOfferHelp}
-                rentableItems={rentableItems}
-                onItemClick={handleItemClick}
-                filterCategory={filterCategory}
-                filterPriority={filterPriority}
-                radiusKm={radiusKm}
-                itemSearch={itemSearch}
-                onlyAvailableItems={onlyAvailableItems}
-                minPrice={minPrice}
-                maxPrice={maxPrice}
-                isLoading={isLoading}
-                itemsLoading={itemsLoading}
-                onRecenter={handleRecenter}
-              />
-            </div>
-          ) : (
-            <div className="h-[calc(100vh-140px)] sm:h-[calc(100vh-180px)] lg:h-[calc(100vh-200px)] overflow-y-auto">
-              <TasksListView
-                tasks={mapTasks}
-                userLocation={userLocation}
-                searchQuery={searchQuery}
-                filterCategory={filterCategory}
-                filterPriority={filterPriority}
-                radiusKm={radiusKm}
-                sortByDistance={sortByDistance}
-                isLoading={isLoading}
-                onTaskClick={handleTaskClick}
-                onOfferHelp={handleOfferHelp}
-              />
-            </div>
+        <PageContainer className="py-4">
+          {mapView !== 'map' && (
+            <SectionHeader
+              title={'Tâches à proximité'}
+              subtitle={'Filtrez et triez pour trouver la meilleure opportunité'}
+              icon={<MapPin className="w-5 h-5" />}
+            />
           )}
-        </div>
+
+          {/* Badges de filtres actifs + compteur */}
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            {filterCategory !== 'all' && (
+              <FilterBadge
+                icon="📍"
+                label={filterCategory === 'local' ? 'Sur place' : 'À distance'}
+                onRemove={() => setFilterCategory('all')}
+              />
+            )}
+            {filterPriority !== 'all' && (
+              <FilterBadge
+                icon="⭐"
+                label={`Priorité: ${filterPriority}`}
+                onRemove={() => setFilterPriority('all')}
+                variant="secondary"
+              />
+            )}
+            {radiusKm > 0 && (
+              <FilterBadge
+                icon="🧭"
+                label={`Rayon: ${radiusKm} km`}
+                onRemove={() => setRadiusKm(0)}
+                variant="success"
+              />
+            )}
+            {sortByDistance && (
+              <FilterBadge
+                icon="↔️"
+                label="Tri: distance"
+                onRemove={() => setSortByDistance(false)}
+              />
+            )}
+            <span className="ml-auto text-sm text-slate-500">
+              {mapView === 'map' ? `${mapTasks.length} tâches` : `${mapTasks.length} résultats`}
+            </span>
+          </div>
+
+          {/* Contenu principal */}
+          <div className="flex-1 mt-4">
+            {mapView === 'map' ? (
+              <div className="h-[calc(100vh-140px)] sm:h-[calc(100vh-180px)] lg:h-[calc(100vh-200px)]">
+                <MapView
+                  tasks={mapTasks}
+                  userLocation={userLocation}
+                  onTaskClick={handleTaskClick}
+                  onOfferHelp={handleOfferHelp}
+                  rentableItems={rentableItems}
+                  onItemClick={handleItemClick}
+                  filterCategory={filterCategory}
+                  filterPriority={filterPriority}
+                  radiusKm={radiusKm}
+                  itemSearch={itemSearch}
+                  onlyAvailableItems={onlyAvailableItems}
+                  minPrice={minPrice}
+                  maxPrice={maxPrice}
+                  isLoading={isLoading}
+                  itemsLoading={itemsLoading}
+                  onRecenter={handleRecenter}
+                />
+              </div>
+            ) : (
+              <div className="h-[calc(100vh-140px)] sm:h-[calc(100vh-180px)] lg:h-[calc(100vh-200px)] overflow-y-auto">
+                {isLoading ? (
+                  <SkeletonList />
+                ) : mapTasks.length === 0 ? (
+                  <EmptyState
+                    emoji="🤝"
+                    title="Aucune tâche trouvée"
+                    description={searchQuery ? 'Aucune tâche ne correspond à votre recherche. Essayez d\'ajuster vos filtres.' : 'Aucune tâche disponible pour le moment autour de vous.'}
+                  />
+                ) : (
+                  <TasksListView
+                    tasks={mapTasks}
+                    userLocation={userLocation}
+                    searchQuery={searchQuery}
+                    filterCategory={filterCategory}
+                    filterPriority={filterPriority}
+                    radiusKm={radiusKm}
+                    sortByDistance={sortByDistance}
+                    isLoading={isLoading}
+                    onTaskClick={handleTaskClick}
+                    onOfferHelp={handleOfferHelp}
+                  />
+                )}
+              </div>
+            )}
+          </div>
+        </PageContainer>
 
         {/* Sidebar des filtres */}
         <FiltersSidebar
