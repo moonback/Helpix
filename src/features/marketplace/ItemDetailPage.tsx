@@ -73,8 +73,10 @@ const ItemDetailPage: React.FC = () => {
   useEffect(() => {
     if (itemId) {
       const loadRentals = async () => {
-        const rentalsData = await fetchRentals();
-        const itemRentals = rentalsData.filter(rental => rental.item_id === parseInt(itemId));
+        await fetchRentals();
+        // Les rentals sont maintenant dans le store, on les récupère
+        const { rentals } = useMarketplaceStore.getState();
+        const itemRentals = rentals.filter(rental => rental.item_id === parseInt(itemId));
         setRentals(itemRentals);
       };
       loadRentals();

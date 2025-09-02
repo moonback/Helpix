@@ -42,6 +42,8 @@ interface MarketplaceStore {
   fetchReviews: (itemId?: number, userId?: string) => Promise<void>;
   createReview: (reviewData: {
     rentalId: string;
+    itemId: number;
+    revieweeId: string;
     rating: number;
     comment?: string;
   }) => Promise<RentalReview>;
@@ -309,25 +311,7 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
     try {
       let query = supabase
         .from('rentals')
-        .select(`
-          *,
-          items (
-            id,
-            name,
-            description,
-            images
-          ),
-          users!rentals_owner_id_fkey (
-            id,
-            name,
-            avatar_url
-          ),
-          users!rentals_renter_id_fkey (
-            id,
-            name,
-            avatar_url
-          )
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
       if (userId) {
@@ -340,9 +324,6 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
 
       const processedRentals: Rental[] = (data || []).map((rental: any) => ({
         ...rental,
-        item: rental.items,
-        owner: rental.users_owner_id_fkey,
-        renter: rental.users_renter_id_fkey,
       }));
 
       set({ rentals: processedRentals });
@@ -357,30 +338,7 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
     try {
       const { data, error } = await supabase
         .from('rentals')
-        .select(`
-          *,
-          items (
-            id,
-            name,
-            description,
-            images,
-            users!items_user_id_fkey (
-              id,
-              name,
-              avatar_url
-            )
-          ),
-          users!rentals_owner_id_fkey (
-            id,
-            name,
-            avatar_url
-          ),
-          users!rentals_renter_id_fkey (
-            id,
-            name,
-            avatar_url
-          )
-        `)
+        .select('*')
         .eq('id', id)
         .single();
 
@@ -389,12 +347,6 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
       if (data) {
         return {
           ...data,
-          item: {
-            ...data.items,
-            owner: data.items.users,
-          },
-          owner: data.users_owner_id_fkey,
-          renter: data.users_renter_id_fkey,
         };
       }
       return null;
@@ -478,14 +430,7 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
     try {
       let query = supabase
         .from('rental_reviews')
-        .select(`
-          *,
-          users!rental_reviews_reviewer_id_fkey (
-            id,
-            name,
-            avatar_url
-          )
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
       if (itemId) {
@@ -502,7 +447,6 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
 
       const processedReviews: RentalReview[] = (data || []).map((review: any) => ({
         ...review,
-        reviewer: review.users,
       }));
 
       set({ reviews: processedReviews });
@@ -513,10 +457,19 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
 
   createReview: async (reviewData) => {
     try {
+      // Récupérer l'utilisateur actuel
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('Utilisateur non authentifié');
+      }
+
       const { data, error } = await supabase
         .from('rental_reviews')
         .insert({
           rental_id: reviewData.rentalId,
+          item_id: reviewData.itemId,
+          reviewer_id: user.id,
+          reviewee_id: reviewData.revieweeId,
           rating: reviewData.rating,
           comment: reviewData.comment,
         })
