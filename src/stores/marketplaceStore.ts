@@ -458,6 +458,17 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
       ));
       const totalCredits = totalDays * rentalData.dailyPrice;
 
+      // Réserver les crédits pour cette demande
+      const { error: reserveError } = await supabase.rpc('reserve_rental_credits', {
+        p_user_id: user.id,
+        p_amount: totalCredits,
+        p_rental_id: 'temp_' + Date.now() // ID temporaire, sera remplacé après création
+      });
+
+      if (reserveError) {
+        throw new Error(`Solde insuffisant : ${reserveError.message}`);
+      }
+
       const { data, error } = await supabase
         .from('rentals')
         .insert({
@@ -474,7 +485,16 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        // En cas d'erreur, libérer les crédits réservés
+        await supabase.rpc('unreserve_rental_credits', {
+          p_user_id: user.id,
+          p_amount: totalCredits,
+          p_rental_id: 'temp_' + Date.now(),
+          p_reason: 'Erreur création demande'
+        });
+        throw error;
+      }
 
       // Rafraîchir les locations
       await get().fetchRentals();
@@ -525,26 +545,13 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
 
       // Gérer les crédits selon le changement de statut
       if (currentStatus === 'requested' && status === 'accepted') {
-        // Vérifier le solde du locataire avant d'accepter
-        const { data: renterWallet } = await supabase
-          .from('wallets')
-          .select('balance')
-          .eq('user_id', rentalData.renter_id)
-          .single();
-
-        if (!renterWallet || renterWallet.balance < rentalData.total_credits) {
-          throw new Error(`Solde insuffisant. Le locataire a ${renterWallet?.balance || 0} crédits mais ${rentalData.total_credits} sont requis.`);
-        }
-
-        // Débiter le locataire (réservation)
-        await get().updateUserCredits(
-          rentalData.renter_id, 
-          rentalData.total_credits, 
-          'debit', 
-          `Réservation d'objet - Location #${id}`,
-          'rental_payment',
-          id
-        );
+        // Libérer les crédits réservés du locataire
+        await supabase.rpc('unreserve_rental_credits', {
+          p_user_id: rentalData.renter_id,
+          p_amount: rentalData.total_credits,
+          p_rental_id: id,
+          p_reason: 'Location acceptée'
+        });
         
         // Créditer le propriétaire
         await get().updateUserCredits(
@@ -571,8 +578,16 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
         }
       } else if (status === 'cancelled') {
         // Gérer les remboursements selon le statut actuel
-        if (currentStatus === 'accepted') {
-          // Rembourser le locataire
+        if (currentStatus === 'requested') {
+          // Libérer les crédits réservés (remboursement automatique)
+          await supabase.rpc('unreserve_rental_credits', {
+            p_user_id: rentalData.renter_id,
+            p_amount: rentalData.total_credits,
+            p_rental_id: id,
+            p_reason: 'Demande annulée'
+          });
+        } else if (currentStatus === 'accepted') {
+          // Rembourser le locataire et débitter le propriétaire
           await get().updateUserCredits(
             rentalData.renter_id, 
             rentalData.total_credits, 
@@ -582,7 +597,6 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
             id
           );
           
-          // Débiter le propriétaire
           await get().updateUserCredits(
             rentalData.owner_id, 
             rentalData.total_credits, 
@@ -603,7 +617,6 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
             id
           );
           
-          // Débiter le propriétaire
           await get().updateUserCredits(
             rentalData.owner_id, 
             refundAmount, 
@@ -662,7 +675,15 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
       }
 
       // Gérer les crédits selon le statut actuel et qui annule
-      if (rentalData.status === 'accepted') {
+      if (rentalData.status === 'requested') {
+        // Demande en attente : libérer les crédits réservés
+        await supabase.rpc('unreserve_rental_credits', {
+          p_user_id: rentalData.renter_id,
+          p_amount: rentalData.total_credits,
+          p_rental_id: id,
+          p_reason: 'Annulation par utilisateur'
+        });
+      } else if (rentalData.status === 'accepted') {
         if (user.id === rentalData.renter_id) {
           // Le locataire annule : remboursement complet
           await get().updateUserCredits(
