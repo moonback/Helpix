@@ -322,26 +322,79 @@ const DashboardPage: React.FC = () => {
                     </div>
                     <div>
                       <h4 className="text-sm font-medium text-gray-700 mb-3">Locations récentes</h4>
-                      <div className="space-y-2">
-                        {rentals.slice(0, 3).map((rental, index) => (
-                          <motion.div
-                            key={rental.id}
-                            initial={{ opacity: 0, x: 20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: 0.9 + index * 0.1 }}
-                            className="flex items-center justify-between p-2 bg-slate-50 rounded-lg"
-                          >
-                            <div>
-                              <p className="text-sm font-medium text-gray-900">
-                                {items.find(item => item.id === rental.item_id)?.name || 'Objet'}
-                              </p>
-                              <p className="text-xs text-gray-600">{rental.status}</p>
-                            </div>
-                            <span className="text-xs text-gray-500">
-                              {new Date(rental.created_at).toLocaleDateString()}
-                            </span>
-                          </motion.div>
-                        ))}
+                      <div className="space-y-3">
+                        {rentals.slice(0, 3).map((rental, index) => {
+                          const item = items.find(item => item.id === rental.item_id);
+                          const isOwner = rental.owner_id === user?.id;
+                          
+                          return (
+                            <motion.div
+                              key={rental.id}
+                              initial={{ opacity: 0, x: 20 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ delay: 0.9 + index * 0.1 }}
+                              className="p-3 bg-slate-50 rounded-lg border border-slate-200"
+                            >
+                              <div className="flex items-start justify-between mb-2">
+                                <div className="flex-1">
+                                  <p className="text-sm font-medium text-gray-900">
+                                    {item?.name || 'Objet'}
+                                  </p>
+                                  <p className="text-xs text-gray-600">
+                                    {isOwner ? 'Vous louez à' : 'Vous louez de'} {isOwner ? 'un utilisateur' : 'un propriétaire'}
+                                  </p>
+                                </div>
+                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                  rental.status === 'active' 
+                                    ? 'bg-green-100 text-green-800'
+                                    : rental.status === 'completed'
+                                    ? 'bg-blue-100 text-blue-800'
+                                    : rental.status === 'requested'
+                                    ? 'bg-yellow-100 text-yellow-800'
+                                    : rental.status === 'cancelled'
+                                    ? 'bg-red-100 text-red-800'
+                                    : 'bg-gray-100 text-gray-800'
+                                }`}>
+                                  {rental.status === 'requested' ? 'Demandée' :
+                                   rental.status === 'accepted' ? 'Acceptée' :
+                                   rental.status === 'active' ? 'Active' :
+                                   rental.status === 'completed' ? 'Terminée' :
+                                   rental.status === 'cancelled' ? 'Annulée' : rental.status}
+                                </span>
+                              </div>
+                              
+                              <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
+                                <div>
+                                  <span className="font-medium">Début:</span>
+                                  <br />
+                                  {new Date(rental.start_date).toLocaleDateString()}
+                                </div>
+                                <div>
+                                  <span className="font-medium">Fin:</span>
+                                  <br />
+                                  {new Date(rental.end_date).toLocaleDateString()}
+                                </div>
+                                <div>
+                                  <span className="font-medium">Prix/jour:</span>
+                                  <br />
+                                  {rental.daily_price} crédits
+                                </div>
+                                <div>
+                                  <span className="font-medium">Total:</span>
+                                  <br />
+                                  {rental.total_credits} crédits
+                                </div>
+                              </div>
+                              
+                              <div className="mt-2 pt-2 border-t border-slate-200">
+                                <div className="flex items-center justify-between text-xs text-gray-500">
+                                  <span>Créée le {new Date(rental.created_at).toLocaleDateString()}</span>
+                                  <span>Caution: {rental.deposit_credits} crédits</span>
+                                </div>
+                              </div>
+                            </motion.div>
+                          );
+                        })}
                       </div>
                     </div>
                   </div>
@@ -510,34 +563,104 @@ const DashboardPage: React.FC = () => {
                 >
                   <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6">
                     <h3 className="text-lg font-semibold text-gray-900 mb-4">Locations récentes</h3>
-                    <div className="space-y-3">
-                      {rentals.slice(0, 5).map((rental, index) => (
-                        <motion.div
-                          key={rental.id}
-                          initial={{ opacity: 0, x: 20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: 0.5 + index * 0.1 }}
-                          className="flex items-center justify-between p-3 bg-slate-50 rounded-lg"
-                        >
-                          <div>
-                            <p className="font-medium text-gray-900">
-                              {items.find(item => item.id === rental.item_id)?.name || 'Objet'}
-                            </p>
-                            <p className="text-sm text-gray-600">
-                              {new Date(rental.start_date).toLocaleDateString()}
-                            </p>
-                          </div>
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            rental.status === 'active' 
-                              ? 'bg-green-100 text-green-800'
-                              : rental.status === 'completed'
-                              ? 'bg-blue-100 text-blue-800'
-                              : 'bg-gray-100 text-gray-800'
-                          }`}>
-                            {rental.status}
-                          </span>
-                        </motion.div>
-                      ))}
+                    <div className="space-y-4">
+                      {rentals.slice(0, 5).map((rental, index) => {
+                        const item = items.find(item => item.id === rental.item_id);
+                        const isOwner = rental.owner_id === user?.id;
+                        const duration = Math.ceil((new Date(rental.end_date).getTime() - new Date(rental.start_date).getTime()) / (1000 * 60 * 60 * 24));
+                        
+                        return (
+                          <motion.div
+                            key={rental.id}
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.5 + index * 0.1 }}
+                            className="p-4 bg-slate-50 rounded-lg border border-slate-200 hover:bg-slate-100 transition-colors"
+                          >
+                            <div className="flex items-start justify-between mb-3">
+                              <div className="flex-1">
+                                <div className="flex items-center space-x-2 mb-1">
+                                  <h4 className="font-medium text-gray-900">
+                                    {item?.name || 'Objet'}
+                                  </h4>
+                                  <span className="text-xs text-gray-500">
+                                    ({item?.category || 'N/A'})
+                                  </span>
+                                </div>
+                                <p className="text-sm text-gray-600">
+                                  {isOwner ? 'Vous louez à un utilisateur' : 'Vous louez de quelqu\'un'}
+                                </p>
+                              </div>
+                              <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                                rental.status === 'active' 
+                                  ? 'bg-green-100 text-green-800'
+                                  : rental.status === 'completed'
+                                  ? 'bg-blue-100 text-blue-800'
+                                  : rental.status === 'requested'
+                                  ? 'bg-yellow-100 text-yellow-800'
+                                  : rental.status === 'cancelled'
+                                  ? 'bg-red-100 text-red-800'
+                                  : 'bg-gray-100 text-gray-800'
+                              }`}>
+                                {rental.status === 'requested' ? 'Demandée' :
+                                 rental.status === 'accepted' ? 'Acceptée' :
+                                 rental.status === 'active' ? 'Active' :
+                                 rental.status === 'completed' ? 'Terminée' :
+                                 rental.status === 'cancelled' ? 'Annulée' : rental.status}
+                              </span>
+                            </div>
+                            
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                              <div className="bg-white p-2 rounded border">
+                                <div className="text-xs text-gray-500 mb-1">Période</div>
+                                <div className="font-medium text-gray-900">
+                                  {new Date(rental.start_date).toLocaleDateString()}
+                                </div>
+                                <div className="text-xs text-gray-600">
+                                  au {new Date(rental.end_date).toLocaleDateString()}
+                                </div>
+                              </div>
+                              
+                              <div className="bg-white p-2 rounded border">
+                                <div className="text-xs text-gray-500 mb-1">Durée</div>
+                                <div className="font-medium text-gray-900">
+                                  {duration} jour{duration > 1 ? 's' : ''}
+                                </div>
+                              </div>
+                              
+                              <div className="bg-white p-2 rounded border">
+                                <div className="text-xs text-gray-500 mb-1">Prix/jour</div>
+                                <div className="font-medium text-emerald-600">
+                                  {rental.daily_price} crédits
+                                </div>
+                              </div>
+                              
+                              <div className="bg-white p-2 rounded border">
+                                <div className="text-xs text-gray-500 mb-1">Total</div>
+                                <div className="font-medium text-blue-600">
+                                  {rental.total_credits} crédits
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <div className="mt-3 pt-3 border-t border-slate-200">
+                              <div className="flex items-center justify-between text-xs text-gray-500">
+                                <div className="flex items-center space-x-4">
+                                  <span>Caution: {rental.deposit_credits} crédits</span>
+                                  <span>•</span>
+                                  <span>Créée le {new Date(rental.created_at).toLocaleDateString()}</span>
+                                </div>
+                                <button 
+                                  onClick={() => navigate(`/rentals/${rental.id}`)}
+                                  className="text-blue-600 hover:text-blue-800 font-medium"
+                                >
+                                  Voir détails →
+                                </button>
+                              </div>
+                            </div>
+                          </motion.div>
+                        );
+                      })}
                     </div>
                   </div>
                 </motion.div>
