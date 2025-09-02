@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { useTaskStore } from '@/stores/taskStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useWalletStore } from '@/features/wallet/stores/walletStore';
+import { uploadImages } from '@/lib/imageUpload';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
@@ -11,6 +12,7 @@ import AddressSearch from '@/components/ui/AddressSearch';
 import LocationMap from '@/components/ui/LocationMap';
 import CreditCheckModal from '@/components/ui/CreditCheckModal';
 import CreditsDisplayWithPurchase from '@/components/ui/CreditsDisplayWithPurchase';
+import SafeImage from '@/components/ui/SafeImage';
 import { 
   ArrowLeft, 
   Clock, 
@@ -106,7 +108,9 @@ const AddTaskPage: React.FC = () => {
         deadline: formData.deadline || undefined,
         latitude: selectedLocation?.latitude,
         longitude: selectedLocation?.longitude,
-        images: formData.imageFiles.map(file => URL.createObjectURL(file)), // URLs temporaires pour l'instant
+        images: formData.imageFiles.length > 0 
+          ? (await uploadImages(formData.imageFiles)).map(result => result.url)
+          : [],
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
@@ -348,12 +352,14 @@ const AddTaskPage: React.FC = () => {
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     {formData.imageFiles.map((file, index) => (
                       <div key={index} className="relative">
-                        <img
-                          src={URL.createObjectURL(file)}
-                          alt={`Image ${index + 1}`}
-                          className="w-full h-24 object-cover rounded-lg"
-                          onLoad={(e) => URL.revokeObjectURL(e.currentTarget.src)}
-                        />
+                                              <SafeImage
+                        src={URL.createObjectURL(file)}
+                        alt={`Image ${index + 1}`}
+                        className="w-full h-24 object-cover rounded-lg"
+                        fallbackIcon={<div className="w-full h-24 bg-slate-100 rounded-lg flex items-center justify-center">
+                          <span className="text-slate-400 text-xs">📷</span>
+                        </div>}
+                      />
                         <button
                           type="button"
                           onClick={() => handleRemoveImage(index)}

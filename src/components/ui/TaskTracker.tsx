@@ -4,6 +4,7 @@ import { Task, TaskComment } from '@/types';
 import Button from './Button';
 import Input from './Input';
 import Card from './Card';
+import SafeImage from './SafeImage';
 import { 
   Clock, 
   Target, 
@@ -181,6 +182,27 @@ const TaskTracker: React.FC<TaskTrackerProps> = ({
             </div>
             
             <p className="text-gray-600 text-lg leading-relaxed mb-4">{task.description}</p>
+            
+            {/* Images de la tâche */}
+            {task.images && task.images.length > 0 && (
+              <div className="mb-6">
+                <h3 className="text-sm font-medium text-gray-700 mb-3">Images de la tâche</h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {task.images.map((image, index) => (
+                    <div key={index} className="relative">
+                      <SafeImage
+                        src={image}
+                        alt={`Image ${index + 1} de la tâche`}
+                        className="w-full h-32 object-cover rounded-lg border border-gray-200"
+                        fallbackIcon={<div className="w-full h-32 bg-gray-100 rounded-lg flex items-center justify-center">
+                          <span className="text-gray-400">📷</span>
+                        </div>}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
             
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="flex items-center space-x-2 text-sm text-gray-600">

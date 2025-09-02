@@ -60,6 +60,7 @@ interface Task {
   status?: string;
   latitude?: number;
   longitude?: number;
+  images?: string[];
 }
 
 interface QuickAction {
