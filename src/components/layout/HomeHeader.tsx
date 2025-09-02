@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuthStore } from '@/stores/authStore';
@@ -22,7 +22,13 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({ className = '' }) => {
   const navigate = useNavigate();
   const { user } = useAuthStore();
   const { latitude, longitude, error: locationError, isLoading: locationLoading } = useGeolocation();
-  const { address, retry } = useReverseGeocoding();
+  const { address, isLoading, error, getAddressFromCoords, retry } = useReverseGeocoding();
+
+  useEffect(() => {
+    if (latitude && longitude) {
+      getAddressFromCoords(latitude, longitude);
+    }
+  }, [latitude, longitude, getAddressFromCoords]);
 
   return (
     <motion.header 
@@ -68,14 +74,14 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({ className = '' }) => {
               ) : latitude && longitude ? (
                 <div className="flex items-center space-x-2 text-emerald-700 bg-emerald-50 px-3 py-2 rounded-lg border border-emerald-200 text-sm shadow-sm">
                   <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
-                  <DetailedAddressDisplay
-                    address={address}
-                    isLoading={!address}
-                    error={null}
-                    showIcon={false}
-                    className="text-emerald-700 font-medium truncate max-w-[120px] lg:max-w-[180px]"
-                    onRetry={retry}
-                  />
+                                     <DetailedAddressDisplay
+                     address={address}
+                     isLoading={isLoading}
+                     error={error}
+                     showIcon={false}
+                     className="text-emerald-700 font-medium truncate max-w-[120px] lg:max-w-[180px]"
+                     onRetry={retry}
+                   />
                 </div>
               ) : locationError ? (
                 <div className="flex items-center space-x-2 text-red-600 bg-red-50 px-3 py-2 rounded-lg border border-red-200 text-sm">
