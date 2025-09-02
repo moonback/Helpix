@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { MapPin, Users, Filter } from 'lucide-react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { MapPin, Users, Filter, Navigation } from 'lucide-react';
+import { MapContainer, TileLayer, Marker, Popup, useMap, Circle } from 'react-leaflet';
 import { useNavigate } from 'react-router-dom';
 import 'leaflet/dist/leaflet.css';
 import Card from '@/components/ui/Card';
@@ -9,6 +9,7 @@ import Button from '@/components/ui/Button';
 import { useTaskStore } from '@/stores/taskStore';
 import { useAuthStore } from '@/stores/authStore';
 import { Task } from '@/types';
+import { calculateDistance, formatDistance } from '@/lib/utils';
 
 // Fix pour les icônes Leaflet
 import L from 'leaflet';
@@ -44,16 +45,47 @@ const LocationMarker: React.FC = () => {
   return null;
 };
 
+// Récupère l'instance de carte via useMap (compatible React-Leaflet v4)
+const MapInstanceSetter: React.FC<{ onReady: (map: L.Map) => void }> = ({ onReady }) => {
+  const map = useMap();
+  useEffect(() => {
+    onReady(map);
+  }, [map, onReady]);
+  return null;
+};
+
 const MapPage: React.FC = () => {
   const navigate = useNavigate();
   const { tasks, fetchTasks, isLoading } = useTaskStore();
   const { user } = useAuthStore();
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [mapView, setMapView] = useState<'map' | 'list'>('map');
+  const [mapInstance, setMapInstance] = useState<L.Map | null>(null);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterCategory, setFilterCategory] = useState<'local' | 'remote' | 'all'>('all');
+  const [filterPriority, setFilterPriority] = useState<'urgent' | 'high' | 'medium' | 'low' | 'all'>('all');
+  const [radiusKm, setRadiusKm] = useState<number>(0);
+  const [sortByDistance, setSortByDistance] = useState<boolean>(false);
 
   useEffect(() => {
     fetchTasks();
   }, [fetchTasks]);
+
+  // Récupération position utilisateur (pour distance et rayon)
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setUserLocation({ lat: latitude, lng: longitude });
+        },
+        () => {
+          setUserLocation(null);
+        }
+      );
+    }
+  }, []);
 
   // Utiliser uniquement les vraies tâches de la BDD avec localisation
   const allTasks: MapTask[] = tasks
@@ -97,6 +129,62 @@ const MapPage: React.FC = () => {
       return;
     }
     navigate(`/task/${taskId}/offers`);
+  };
+
+  // Filtrage, recherche et tri
+  const filteredTasks: MapTask[] = ((): MapTask[] => {
+    let result = [...allTasks];
+
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(t =>
+        t.title.toLowerCase().includes(q) ||
+        (t.description || '').toLowerCase().includes(q) ||
+        (t.tags || []).some(tag => tag.toLowerCase().includes(q))
+      );
+    }
+
+    if (filterCategory !== 'all') {
+      result = result.filter(t => t.category === filterCategory);
+    }
+
+    if (filterPriority !== 'all') {
+      result = result.filter(t => t.priority === filterPriority);
+    }
+
+    if (radiusKm > 0 && userLocation) {
+      result = result.filter(t => calculateDistance(userLocation.lat, userLocation.lng, t.location.lat, t.location.lng) <= radiusKm);
+    }
+
+    if (sortByDistance && userLocation) {
+      result = result.sort((a, b) =>
+        calculateDistance(userLocation.lat, userLocation.lng, a.location.lat, a.location.lng) -
+        calculateDistance(userLocation.lat, userLocation.lng, b.location.lat, b.location.lng)
+      );
+    }
+
+    return result;
+  })();
+
+  const recenterToUser = () => {
+    if (!mapInstance) return;
+    if (userLocation) {
+      mapInstance.flyTo([userLocation.lat, userLocation.lng], 13, { duration: 0.8 });
+      return;
+    }
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setUserLocation({ lat: latitude, lng: longitude });
+          mapInstance.flyTo([latitude, longitude], 13, { duration: 0.8 });
+        },
+        () => {
+          mapInstance.flyTo([48.8566, 2.3522], 13, { duration: 0.8 });
+        },
+        { enableHighAccuracy: true, timeout: 8000, maximumAge: 10000 }
+      );
+    }
   };
 
   return (
@@ -148,21 +236,29 @@ const MapPage: React.FC = () => {
                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                />
                <LocationMarker />
+               <MapInstanceSetter onReady={setMapInstance} />
+               {userLocation && radiusKm > 0 && (
+                 <Circle
+                   center={[userLocation.lat, userLocation.lng]}
+                   radius={radiusKm * 1000}
+                   pathOptions={{ color: '#3b82f6', fillColor: '#93c5fd', fillOpacity: 0.15 }}
+                 />
+               )}
                
-               {allTasks.length === 0 ? (
+               {filteredTasks.length === 0 ? (
                  <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-90">
                    <div className="text-center">
                      <div className="text-6xl mb-4">🗺️</div>
                      <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                       Aucune tâche localisée
-                     </h3>
+                        Aucune tâche localisée
+                      </h3>
                      <p className="text-gray-600">
-                       Créez des tâches avec localisation pour les voir sur la carte
+                      Ajustez vos filtres ou créez des tâches avec localisation
                      </p>
                    </div>
                  </div>
                ) : (
-                 allTasks.map((task) => (
+                 filteredTasks.map((task) => (
                                        <Marker
                       key={task.id}
                       position={[task.location.lat, task.location.lng]}
@@ -181,6 +277,11 @@ const MapPage: React.FC = () => {
                               <span className="text-xs text-gray-500">
                                 {new Date(task.created_at).toLocaleDateString('fr-FR')}
                               </span>
+                              {userLocation && (
+                                <span className="text-xs text-primary-600 font-medium">
+                                  {formatDistance(calculateDistance(userLocation.lat, userLocation.lng, task.location.lat, task.location.lng))}
+                                </span>
+                              )}
                             </div>
                           </div>
                           
@@ -271,6 +372,13 @@ const MapPage: React.FC = () => {
                             >
                               Aider
                             </Button>
+                            <a
+                              className="text-xs px-2 py-1 border rounded-md hover:bg-gray-50"
+                              href={`https://www.google.com/maps/dir/?api=1&destination=${task.location.lat},${task.location.lng}`}
+                              target="_blank" rel="noopener noreferrer"
+                            >
+                              Itinéraire
+                            </a>
                           </div>
                         </div>
                       </Popup>
@@ -281,15 +389,80 @@ const MapPage: React.FC = () => {
            )}
 
           {/* Map Controls */}
-          <div className="absolute top-4 right-4 space-y-2">
-            <Button
-              variant="outline"
-              size="sm"
-              icon={<Filter size={16} />}
-              className="bg-white shadow-lg"
-            >
-              Filtres
-            </Button>
+          <div className="absolute top-4 right-4 space-y-2 w-[320px] max-w-[90vw] z-[2000]">
+            <div className="bg-white shadow-lg rounded-lg p-3 border border-gray-200 space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                  <Filter size={16} /> Filtres
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  icon={<Navigation size={14} />}
+                  onClick={recenterToUser}
+                  className="text-xs"
+                >
+                  Me recentrer
+                </Button>
+              </div>
+
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Rechercher titre, description, tag..."
+                className="w-full rounded-md border-gray-300 focus:border-primary-500 focus:ring-primary-500 text-sm"
+              />
+
+              <div className="grid grid-cols-2 gap-2">
+                <select
+                  className="rounded-md border-gray-300 text-sm"
+                  value={filterCategory}
+                  onChange={(e) => setFilterCategory(e.target.value as any)}
+                >
+                  <option value="all">Toutes catégories</option>
+                  <option value="local">Sur place</option>
+                  <option value="remote">À distance</option>
+                </select>
+
+                <select
+                  className="rounded-md border-gray-300 text-sm"
+                  value={filterPriority}
+                  onChange={(e) => setFilterPriority(e.target.value as any)}
+                >
+                  <option value="all">Toutes priorités</option>
+                  <option value="urgent">Urgente</option>
+                  <option value="high">Élevée</option>
+                  <option value="medium">Moyenne</option>
+                  <option value="low">Faible</option>
+                </select>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
+                  <span>Rayon de proximité</span>
+                  <span>{radiusKm > 0 ? `${radiusKm} km` : 'désactivé'}</span>
+                </div>
+                <input
+                  type="range"
+                  min={0}
+                  max={50}
+                  step={1}
+                  value={radiusKm}
+                  onChange={(e) => setRadiusKm(Number(e.target.value))}
+                  className="w-full"
+                />
+              </div>
+
+              <label className="flex items-center gap-2 text-sm text-gray-700">
+                <input
+                  type="checkbox"
+                  checked={sortByDistance}
+                  onChange={(e) => setSortByDistance(e.target.checked)}
+                />
+                Trier par distance
+              </label>
+            </div>
           </div>
         </div>
       ) : (
@@ -300,12 +473,12 @@ const MapPage: React.FC = () => {
                Tâches à proximité
              </h2>
              <p className="text-gray-600">
-               {allTasks.length} tâche{allTasks.length !== 1 ? 's' : ''} trouvée{allTasks.length !== 1 ? 's' : ''}
+               {filteredTasks.length} tâche{filteredTasks.length !== 1 ? 's' : ''} trouvée{filteredTasks.length !== 1 ? 's' : ''}
              </p>
            </div>
 
            <div className="space-y-4">
-             {allTasks.map((task, index) => (
+             {filteredTasks.map((task, index) => (
               <motion.div
                 key={task.id}
                 initial={{ opacity: 0, y: 20 }}
