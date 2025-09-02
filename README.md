@@ -359,6 +359,7 @@ Nous utilisons [Conventional Commits](https://www.conventionalcommits.org/):
 ## 📖 Documentation
 
 ### **Documentation Technique**
+- [Cahier des Charges](docs/CAHIER_DES_CHARGES.md) - Spécifications complètes du projet
 - [Architecture](docs/ARCHITECTURE.md) - Architecture détaillée du système
 - [API Documentation](docs/API_DOCS.md) - Endpoints et utilisation
 - [Schéma BDD](docs/DB_SCHEMA.md) - Structure de la base de données
