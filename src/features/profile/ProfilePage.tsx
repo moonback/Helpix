@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Edit, Plus, MapPin, Star, Settings, LogOut, Camera, Navigation, Globe, Award, Activity, Users, Heart } from 'lucide-react';
+import { Edit, Plus, MapPin, Star, Settings, LogOut, Camera, Navigation, Award, Activity, Users, Heart } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
@@ -35,34 +35,20 @@ const ProfilePage: React.FC = () => {
     }
   }, [latitude, longitude, user?.id]);
 
-  // État local: compétences et objets prêtables (MVP, à persister plus tard via Supabase)
+  // État local: compétences (MVP, à persister plus tard via Supabase)
   interface SkillEntry { id: number; name: string; level: 'Débutant' | 'Intermédiaire' | 'Avancé' | 'Expert'; }
-  interface LendableItem { id: number; name: string; description: string; available: boolean; }
-  interface RentableFields { is_rentable?: boolean; daily_price?: number | null; deposit?: number | null; }
 
   const [skills, setSkills] = useState<SkillEntry[]>([
     { id: 1, name: 'Jardinage', level: 'Expert' },
     { id: 2, name: 'Cuisine', level: 'Intermédiaire' },
   ]);
 
-  const [items, setItems] = useState<(LendableItem & RentableFields)[]>([
-    { id: 1, name: 'Perceuse', description: 'Perceuse sans fil Bosch', available: true, is_rentable: false, daily_price: null, deposit: 0 },
-    { id: 2, name: 'Vélo', description: 'Vélo de ville en bon état', available: false, is_rentable: true, daily_price: 10, deposit: 50 },
-  ]);
-
-  // Modals d’ajout
+  // Modal d'ajout
   const [isAddSkillOpen, setIsAddSkillOpen] = useState(false);
-  const [isAddItemOpen, setIsAddItemOpen] = useState(false);
 
   // Formulaires
   const [newSkillName, setNewSkillName] = useState('');
   const [newSkillLevel, setNewSkillLevel] = useState<SkillEntry['level']>('Débutant');
-  const [newItemName, setNewItemName] = useState('');
-  const [newItemDesc, setNewItemDesc] = useState('');
-  const [newItemAvailable, setNewItemAvailable] = useState(true);
-  const [newItemIsRentable, setNewItemIsRentable] = useState(false);
-  const [newItemDailyPrice, setNewItemDailyPrice] = useState<number | ''>('');
-  const [newItemDeposit, setNewItemDeposit] = useState<number | ''>('');
 
   const addSkill = () => {
     const name = newSkillName.trim();
@@ -106,81 +92,7 @@ const ProfilePage: React.FC = () => {
     })();
   };
 
-  const addItem = () => {
-    const name = newItemName.trim();
-    const description = newItemDesc.trim();
-    if (!name) return;
-    const currentUserId = user?.id;
-    if (!currentUserId) return;
-    (async () => {
-      const { data, error } = await supabase
-        .from('items')
-        .insert({
-          user_id: currentUserId,
-          name,
-          item_name: name,
-          description: description || null,
-          available: newItemAvailable,
-          is_rentable: newItemIsRentable,
-          daily_price: newItemIsRentable ? (typeof newItemDailyPrice === 'number' ? newItemDailyPrice : null) : null,
-          deposit: newItemIsRentable ? (typeof newItemDeposit === 'number' ? newItemDeposit : 0) : 0,
-        })
-        .select('*')
-        .single();
-      if (error) {
-        console.error('Erreur ajout objet:', error);
-        return;
-      }
-      setItems(prev => [
-        ...prev,
-        { id: data.id, name, description, available: newItemAvailable }
-      ]);
-      setNewItemName('');
-      setNewItemDesc('');
-      setNewItemAvailable(true);
-      setNewItemIsRentable(false);
-      setNewItemDailyPrice('');
-      setNewItemDeposit('');
-      setIsAddItemOpen(false);
-    })();
-  };
 
-  const toggleItemAvailability = (id: number) => {
-    const current = items.find(it => it.id === id);
-    if (!current) return;
-    const currentUserId = user?.id;
-    if (!currentUserId) return;
-    const next = !current.available;
-    (async () => {
-      const { error } = await supabase
-        .from('items')
-        .update({ available: next })
-        .eq('id', id)
-        .eq('user_id', currentUserId);
-      if (error) {
-        console.error('Erreur mise à jour disponibilité:', error);
-        return;
-      }
-      setItems(prev => prev.map(it => it.id === id ? { ...it, available: next } : it));
-    })();
-  };
-
-  const removeItem = (id: number) => {
-    const currentUserId = user?.id;
-    if (!currentUserId) return;
-    (async () => {
-      const { error } = await supabase
-        .from('items')
-        .delete()
-        .eq('id', id)
-        .eq('user_id', currentUserId);
-      if (error) {
-        console.error('Erreur suppression objet:', error);
-        return;
-      }
-      setItems(prev => prev.filter(it => it.id !== id));
-    })();
-  };
 
   // Chargement initial depuis Supabase
   useEffect(() => {
@@ -204,25 +116,7 @@ const ProfilePage: React.FC = () => {
         }));
       }
 
-      const { data: itemRows, error: itemsError } = await supabase
-        .from('items')
-        .select('*')
-        .eq('user_id', currentUserId)
-        .order('id', { ascending: true });
-      if (itemsError) {
-        console.error('Erreur chargement objets:', itemsError);
-      } else if (itemRows) {
-        const mapped = itemRows.map((row: any) => ({
-          id: row.id,
-          name: row.name ?? row.item_name,
-          description: row.description || '',
-          available: !!row.available,
-          is_rentable: !!row.is_rentable,
-          daily_price: row.daily_price ?? null,
-          deposit: row.deposit ?? 0,
-        })) as LendableItem[];
-        setItems(mapped);
-      }
+
     })();
   }, [user?.id]);
 
@@ -634,224 +528,14 @@ const ProfilePage: React.FC = () => {
         </motion.div>
       </div>
 
-      {/* Objets prêtables améliorés */}
-      <div className="px-6 mb-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-        >
-          <Card className="bg-white/90 backdrop-blur-sm shadow-xl border-0 rounded-3xl overflow-hidden">
-            <div className="bg-gradient-to-r from-orange-50 to-red-50 p-6 border-b border-slate-200">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-red-600 rounded-2xl flex items-center justify-center">
-                    <Globe className="w-5 h-5 text-white" />
-                  </div>
-                  <h3 className="text-lg font-bold text-slate-800">
-                    Objets prêtables
-                  </h3>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="border-slate-300 hover:border-orange-500 hover:text-orange-600 px-4 py-2 rounded-xl"
-                  onClick={() => setIsAddItemOpen(true)}
-                >
-                  <Plus size={16} className="mr-2" />
-                  Ajouter
-                </Button>
-              </div>
-            </div>
 
-            <div className="p-6">
-              {isAddItemOpen && (
-                <div className="mb-6 rounded-2xl border border-orange-200 bg-orange-50 p-4">
-                  <div className="grid grid-cols-1 md:grid-cols-6 gap-3">
-                    <Input
-                      label="Nom de l'objet"
-                      value={newItemName}
-                      onChange={(e) => setNewItemName(e.target.value)}
-                      placeholder="Ex: Perceuse"
-                    />
-                    <Input
-                      label="Description"
-                      value={newItemDesc}
-                      onChange={(e) => setNewItemDesc(e.target.value)}
-                      placeholder="Détails..."
-                    />
-                    <div>
-                      <label className="block text-xs font-medium text-slate-700 mb-1">Louable</label>
-                      <div className="flex items-center h-[42px] px-3 rounded-xl border border-slate-300 bg-white">
-                        <input
-                          type="checkbox"
-                          checked={newItemIsRentable}
-                          onChange={(e) => setNewItemIsRentable(e.target.checked)}
-                          className="mr-2"
-                        />
-                        <span className="text-xs">Permettre la location</span>
-                      </div>
-                    </div>
-                    <Input
-                      label="Prix/jour (crédits)"
-                      type="number"
-                      value={newItemDailyPrice}
-                      onChange={(e) => setNewItemDailyPrice(e.target.value === '' ? '' : Number(e.target.value))}
-                      placeholder="ex: 10"
-                      disabled={!newItemIsRentable}
-                    />
-                    <Input
-                      label="Dépôt (crédits)"
-                      type="number"
-                      value={newItemDeposit}
-                      onChange={(e) => setNewItemDeposit(e.target.value === '' ? '' : Number(e.target.value))}
-                      placeholder="ex: 50"
-                      disabled={!newItemIsRentable}
-                    />
-                    <div>
-                      <label className="block text-xs font-medium text-slate-700 mb-1">Disponibilité</label>
-                      <select
-                        value={newItemAvailable ? 'oui' : 'non'}
-                        onChange={(e) => setNewItemAvailable(e.target.value === 'oui')}
-                        className="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-orange-400"
-                      >
-                        <option value="oui">Disponible</option>
-                        <option value="non">Indisponible</option>
-                      </select>
-                    </div>
-                    <div className="flex gap-2 items-end">
-                      <Button onClick={addItem} className="flex-1 bg-orange-600 hover:bg-orange-700 text-white rounded-xl">Ajouter</Button>
-                      <Button variant="outline" onClick={() => setIsAddItemOpen(false)} className="flex-1 rounded-xl">Annuler</Button>
-                    </div>
-                  </div>
-                </div>
-              )}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {items.map((item) => (
-                  <div
-                    key={item.id}
-                    className="group bg-gradient-to-r from-slate-50 to-orange-50 rounded-2xl p-4 border border-slate-200 hover:border-orange-300 hover:shadow-lg transition-all duration-300"
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="font-semibold text-sm text-slate-800 mb-2">{item.name}</div>
-                        <div className="text-xs text-slate-600 mb-3">{item.description}</div>
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span className={`px-3 py-1 text-[10px] rounded-full font-medium ${
-                            item.available 
-                              ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' 
-                              : 'bg-red-100 text-red-800 border border-red-200'
-                          }`}>
-                            {item.available ? '✅ Disponible' : '❌ Indisponible'}
-                          </span>
-                          {item.is_rentable ? (
-                            <span className="px-3 py-1 text-[10px] rounded-full font-medium bg-blue-100 text-blue-800 border border-blue-200">
-                              Louable · {item.daily_price ?? '?'} /j · dépôt {item.deposit ?? 0}
-                            </span>
-                          ) : (
-                            <span className="px-3 py-1 text-[10px] rounded-full font-medium bg-slate-100 text-slate-700 border border-slate-200">
-                              Non louable
-                            </span>
-                          )}
-                          <button
-                            onClick={() => toggleItemAvailability(item.id)}
-                            className="text-[10px] px-2 py-1 rounded-full border border-slate-300 hover:bg-slate-100"
-                          >
-                            {item.available ? 'Rendre indisponible' : 'Rendre disponible'}
-                          </button>
-                        </div>
-                        <div className="mt-3 grid grid-cols-3 gap-2">
-                          <button
-                            onClick={async () => {
-                              if (!user?.id) return;
-                              const next = !item.is_rentable;
-                              const { error } = await supabase
-                                .from('items')
-                                .update({ is_rentable: next })
-                                .eq('id', item.id)
-                                .eq('user_id', user.id);
-                              if (error) return console.error(error);
-                              setItems(prev => prev.map(it => it.id === item.id ? { ...it, is_rentable: next } : it));
-                            }}
-                            className="text-[10px] px-2 py-2 rounded-xl border border-slate-300 hover:bg-white"
-                          >
-                            {item.is_rentable ? 'Désactiver location' : 'Activer location'}
-                          </button>
-                          <button
-                            onClick={async () => {
-                              const price = prompt('Prix par jour (crédits):', String(item.daily_price ?? ''));
-                              if (price === null) return;
-                              const value = Number(price);
-                              if (Number.isNaN(value)) return;
-                              if (!user?.id) return;
-                              const { error } = await supabase
-                                .from('items')
-                                .update({ daily_price: value })
-                                .eq('id', item.id)
-                                .eq('user_id', user.id);
-                              if (error) return console.error(error);
-                              setItems(prev => prev.map(it => it.id === item.id ? { ...it, daily_price: value } : it));
-                            }}
-                            className="text-[10px] px-2 py-2 rounded-xl border border-slate-300 hover:bg-white"
-                          >
-                            Prix/jour
-                          </button>
-                          <button
-                            onClick={async () => {
-                              const dep = prompt('Dépôt (crédits):', String(item.deposit ?? '0'));
-                              if (dep === null) return;
-                              const value = Number(dep);
-                              if (Number.isNaN(value)) return;
-                              if (!user?.id) return;
-                              const { error } = await supabase
-                                .from('items')
-                                .update({ deposit: value })
-                                .eq('id', item.id)
-                                .eq('user_id', user.id);
-                              if (error) return console.error(error);
-                              setItems(prev => prev.map(it => it.id === item.id ? { ...it, deposit: value } : it));
-                            }}
-                            className="text-[10px] px-2 py-2 rounded-xl border border-slate-300 hover:bg-white"
-                          >
-                            Dépôt
-                          </button>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                          className="p-2 hover:bg-orange-100 hover:text-orange-600 rounded-xl text-xs"
-                          onClick={() => removeItem(item.id)}
-                      >
-                          Supprimer
-                      </Button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              
-              {items.length === 0 && (
-                <div className="text-center py-8">
-                  <div className="w-16 h-16 bg-gradient-to-r from-slate-100 to-slate-200 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Globe className="w-8 h-8 text-slate-400" />
-                  </div>
-                  <p className="text-slate-500 font-medium text-sm">Aucun objet prêté</p>
-                  <p className="text-slate-400 text-xs">Partagez vos objets avec la communauté</p>
-                </div>
-              )}
-            </div>
-          </Card>
-        </motion.div>
-      </div>
 
       {/* Paramètres et déconnexion améliorés */}
       <div className="px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
+          transition={{ delay: 0.4 }}
         >
           <Card className="bg-white/90 backdrop-blur-sm shadow-xl border-0 rounded-3xl overflow-hidden">
             <div className="bg-gradient-to-r from-slate-50 to-gray-50 p-6 border-b border-slate-200">
