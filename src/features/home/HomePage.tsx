@@ -7,6 +7,7 @@ import { useMessageStore } from '@/stores/messageStore';
 import { useWalletStore } from '@/features/wallet/stores/walletStore';
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { useReverseGeocoding } from '@/hooks/useReverseGeocoding';
+import { HomeRecommendations } from '@/features/matching';
 
 
 // Components
@@ -491,6 +492,21 @@ const HomePage: React.FC = () => {
             </motion.section>
           )}
         </AnimatePresence>
+
+        {/* Recommandations Intelligentes */}
+        {user && (
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="mb-8"
+          >
+            <HomeRecommendations 
+              maxRecommendations={3}
+              showHeader={true}
+            />
+          </motion.section>
+        )}
 
         {/* Search and Filters */}
         <section className="mb-8">

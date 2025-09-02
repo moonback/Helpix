@@ -23,6 +23,7 @@ const CreateItemPage = React.lazy(() => import('@/features/marketplace/CreateIte
 const TaskDetailPage = React.lazy(() => import('@/features/task-detail/TaskDetailPage'));
 const EditTaskPage = React.lazy(() => import('@/features/edit/EditTaskPage'));
 const HelpOffersPage = React.lazy(() => import('@/features/help-offers/HelpOffersPage'));
+const MatchingPage = React.lazy(() => import('@/features/matching/MatchingPage'));
 const Auth = React.lazy(() => import('@/features/auth/Auth'));
 const Onboarding = React.lazy(() => import('@/features/auth/Onboarding'));
 
@@ -219,6 +220,11 @@ const App: React.FC = () => {
                 <div className="pb-16">
                   <HelpOffersPage />
                 </div>
+              </ProtectedRoute>
+            } />
+            <Route path="/matching" element={
+              <ProtectedRoute>
+                <MatchingPage />
               </ProtectedRoute>
             } />
 
