@@ -12,6 +12,7 @@ import { Task } from '@/types';
 import { calculateDistance, formatDistance } from '@/lib/utils';
 import { supabase } from '@/lib/supabase';
 import { requestRental } from '@/lib/rentals';
+import { usePaymentNotifications } from '@/hooks/usePaymentNotifications';
 
 // Fix pour les icônes Leaflet
 import L from 'leaflet';
@@ -88,6 +89,11 @@ const MapPage: React.FC = () => {
   const [minPrice, setMinPrice] = useState<number>(0);
   const [maxPrice, setMaxPrice] = useState<number>(100);
   const [maxDeposit, setMaxDeposit] = useState<number>(1000);
+  const { addNotification } = usePaymentNotifications();
+  const [isRentModalOpen, setIsRentModalOpen] = useState(false);
+  const [rentItem, setRentItem] = useState<RentableItemMarker | null>(null);
+  const [rentStart, setRentStart] = useState<string>('');
+  const [rentEnd, setRentEnd] = useState<string>('');
 
   useEffect(() => {
     fetchTasks();
@@ -512,26 +518,7 @@ const MapPage: React.FC = () => {
                            </div>
                          </div>
                          <div className="flex gap-2">
-                           <Button size="sm" className="flex-1" onClick={async () => {
-                             if (!user) { navigate('/login'); return; }
-                             const start = (it as any)._start; const end = (it as any)._end;
-                             if (!start || !end || !it.daily_price) { alert('Sélectionnez des dates valides.'); return; }
-                             try {
-                               await requestRental({
-                                 itemId: it.id,
-                                 ownerId: it.owner_id,
-                                 renterId: user.id,
-                                 startDate: start,
-                                 endDate: end,
-                                 dailyPrice: it.daily_price,
-                                 depositCredits: it.deposit ?? 0,
-                               });
-                               alert('Demande envoyée');
-                             } catch (e) {
-                               console.error(e);
-                               alert('Erreur lors de la demande');
-                             }
-                           }}>Demander la location</Button>
+                           <Button size="sm" className="flex-1" onClick={() => { setRentItem(it); setRentStart(''); setRentEnd(''); setIsRentModalOpen(true); }}>Demander la location</Button>
                            <a className="text-xs px-2 py-1 border rounded-md hover:bg-gray-50" href={`https://www.google.com/maps/dir/?api=1&destination=${it.location!.lat},${it.location!.lng}`} target="_blank" rel="noopener noreferrer">Itinéraire</a>
                          </div>
                        </div>
@@ -893,6 +880,69 @@ const MapPage: React.FC = () => {
            </motion.div>
          </motion.div>
        )}
+
+      {/* Modal de demande de location */}
+      {isRentModalOpen && rentItem && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setIsRentModalOpen(false)} />
+          <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl p-6 z-[10000]">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <div className="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center"><ShoppingBag size={16} /></div>
+                <div>
+                  <div className="font-semibold text-gray-900">{rentItem.name}</div>
+                  <div className="text-xs text-gray-500">{rentItem.daily_price ?? '?'} crédits/jour • Dépôt {rentItem.deposit ?? 0}</div>
+                </div>
+              </div>
+              <button className="p-2 text-gray-400 hover:text-gray-600" onClick={() => setIsRentModalOpen(false)}>
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm text-gray-700 mb-1">Début</label>
+                  <input type="date" value={rentStart} onChange={(e)=>setRentStart(e.target.value)} className="w-full border rounded-md px-3 py-2 text-sm" />
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-700 mb-1">Fin</label>
+                  <input type="date" value={rentEnd} onChange={(e)=>setRentEnd(e.target.value)} className="w-full border rounded-md px-3 py-2 text-sm" />
+                </div>
+              </div>
+              <div className="text-sm text-gray-700">
+                Total estimé: {(() => {
+                  if (!rentStart || !rentEnd || !rentItem.daily_price) return '—';
+                  const days = Math.max(1, Math.ceil((new Date(rentEnd).getTime() - new Date(rentStart).getTime())/(1000*60*60*24)));
+                  return `${days * rentItem.daily_price} crédits`;
+                })()}
+              </div>
+            </div>
+            <div className="mt-5 flex gap-2 justify-end">
+              <Button variant="outline" onClick={() => setIsRentModalOpen(false)}>Annuler</Button>
+              <Button onClick={async () => {
+                if (!user) { navigate('/login'); return; }
+                if (!rentStart || !rentEnd || !rentItem.daily_price) { addNotification('warning','Dates manquantes','Sélectionnez des dates valides.'); return; }
+                try {
+                  await requestRental({
+                    itemId: rentItem.id,
+                    ownerId: rentItem.owner_id,
+                    renterId: user.id,
+                    startDate: rentStart,
+                    endDate: rentEnd,
+                    dailyPrice: rentItem.daily_price,
+                    depositCredits: rentItem.deposit ?? 0,
+                  });
+                  addNotification('success','Demande envoyée','Votre demande de location a été envoyée.');
+                  setIsRentModalOpen(false);
+                } catch (e) {
+                  console.error(e);
+                  addNotification('error','Erreur','Impossible de créer la demande.');
+                }
+              }}>Confirmer</Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
