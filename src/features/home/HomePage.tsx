@@ -8,6 +8,7 @@ import { useWalletStore } from '@/features/wallet/stores/walletStore';
 
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { useReverseGeocoding } from '@/hooks/useReverseGeocoding';
+import { useRentableItems } from '@/features/map/hooks/useRentableItems';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
@@ -18,6 +19,8 @@ import FilterButton from '@/components/ui/FilterButton';
 import FilterBadge from '@/components/ui/FilterBadge';
 import TaskCard from './components/TaskCard';
 import TaskCardSkeleton from './components/TaskCardSkeleton';
+import RentableItemCard from './components/RentableItemCard';
+import RentableItemCardSkeleton from './components/RentableItemCardSkeleton';
 
 
 // Retiré: import CreditSystemInfo from '@/components/ui/CreditSystemInfo';
@@ -37,7 +40,8 @@ import {
   SortAsc,
   SortDesc,
   Lightbulb,
-  Hand
+  Hand,
+  Package
 } from 'lucide-react';
 
 interface QuickAction {
@@ -77,6 +81,7 @@ const HomePage: React.FC = () => {
   const { fetchWallet } = useWalletStore();
   const { latitude, longitude, error: locationError, isLoading: locationLoading, requestLocation } = useGeolocation();
   const { address, getAddressFromCoords, retry } = useReverseGeocoding();
+  const { items: rentableItems, loading: rentableItemsLoading, error: rentableItemsError } = useRentableItems();
 
   
   const [searchTerm, setSearchTerm] = useState('');
@@ -87,6 +92,7 @@ const HomePage: React.FC = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [showQuickActions, setShowQuickActions] = useState(true);
+  const [showRentableItems, setShowRentableItems] = useState(true);
   const deferredSearchTerm = useDeferredValue(searchTerm);
   const prefersReducedMotion = useReducedMotion();
 
@@ -105,7 +111,7 @@ const HomePage: React.FC = () => {
   };
 
   const doesTaskMatchFilters = useCallback((task: Task) => {
-    if (!validateTask(task)) return false;
+      if (!validateTask(task)) return false;
     if (task.assigned_to || task.status === 'completed') return false;
 
     const term = deferredSearchTerm.trim().toLowerCase();
@@ -116,11 +122,11 @@ const HomePage: React.FC = () => {
       task.tags.some(t => t.toLowerCase().includes(term)) ||
       task.required_skills.some(s => s.toLowerCase().includes(term))
     );
-
-    const matchesCategory = selectedCategory === 'all' || task.category === selectedCategory;
-    const matchesPriority = selectedPriority === 'all' || task.priority === selectedPriority;
-
-    return matchesSearch && matchesCategory && matchesPriority;
+      
+      const matchesCategory = selectedCategory === 'all' || task.category === selectedCategory;
+      const matchesPriority = selectedPriority === 'all' || task.priority === selectedPriority;
+      
+      return matchesSearch && matchesCategory && matchesPriority;
   }, [deferredSearchTerm, selectedCategory, selectedPriority]);
 
   const sortTasks = useCallback((baseTasks: Task[]) => {
@@ -194,6 +200,13 @@ const HomePage: React.FC = () => {
       description: 'Suivre votre activité',
       color: 'from-orange-500 to-red-600',
       action: () => navigate('/dashboard')
+    },
+    {
+      icon: <Package className="w-6 h-6" />,
+      title: 'Objets à louer',
+      description: 'Découvrez les objets disponibles à la location',
+      color: 'from-emerald-500 to-green-600',
+      action: () => navigate('/rentals')
     }
   ]), [navigate]);
 
@@ -258,6 +271,27 @@ const HomePage: React.FC = () => {
   const handleViewTask = useCallback((taskId: number) => {
     navigate(`/task/${taskId}`);
   }, [navigate]);
+
+  const handleViewItem = useCallback((itemId: number) => {
+    navigate(`/rentals/${itemId}`);
+  }, [navigate]);
+
+  const handleRentItem = useCallback((itemId: number) => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    navigate(`/rentals/${itemId}/rent`);
+  }, [user, navigate]);
+
+  const handleContactItem = useCallback((itemId: number) => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    // TODO: Implémenter la création de conversation pour les objets louables
+    console.log('Contacter le propriétaire de l\'objet:', itemId);
+  }, [user, navigate]);
 
   const toggleSortOrder = useCallback(() => {
     setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
@@ -414,8 +448,8 @@ const HomePage: React.FC = () => {
           {/* Respecte prefers-reduced-motion: pas d'éléments animés si activé */}
           {!prefersReducedMotion && (
             <>
-              <div className="absolute -top-40 -right-40 w-80 h-80 bg-white/5 rounded-full blur-3xl animate-pulse"></div>
-              <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-white/5 rounded-full blur-3xl animate-pulse" style={{animationDelay: '2s'}}></div>
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-white/5 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-white/5 rounded-full blur-3xl animate-pulse" style={{animationDelay: '2s'}}></div>
             </>
           )}
         </div>
@@ -456,30 +490,7 @@ const HomePage: React.FC = () => {
                 <span className="block mt-2 text-lg">Connectez-vous localement, agissez globalement.</span>
               </motion.p>
               
-              {/* Enhanced Stats Cards */}
-              {/* <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-6xl mx-auto mb-10">
-                {statsCards.map((stat, index) => (
-                  <motion.div
-                    key={stat.title}
-                    initial={{ opacity: 0, y: 20, scale: 0.9 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    transition={{ delay: 0.8 + index * 0.1, duration: 0.6 }}
-                    className="bg-white/10 backdrop-blur-md rounded-3xl p-6 border border-white/20 hover:bg-white/15 transition-all duration-300"
-                  >
-                    <div className={`inline-flex items-center justify-center w-12 h-12 bg-gradient-to-r ${stat.color} rounded-2xl mb-4`}>
-                      {stat.icon}
-                    </div>
-                    <div className="text-3xl font-bold mb-2">{stat.value}</div>
-                    <div className="text-blue-100 text-sm font-medium">{stat.title}</div>
-                    {stat.trend && (
-                      <div className="text-green-300 text-xs mt-1 flex items-center">
-                        <TrendingUp className="w-3 h-3 mr-1" />
-                        {stat.trend}
-                      </div>
-                    )}
-                  </motion.div>
-                ))}
-              </div> */}
+              
 
               {/* CTA Buttons */}
               <motion.div
@@ -496,27 +507,13 @@ const HomePage: React.FC = () => {
                   <Plus className="w-5 h-5 mr-2" />
                   Créer ma première tâche
                 </Button>
-                {/* <Button
-                  onClick={() => setShowQuickActions(true)}
-                  variant="outline"
-                  className="border-2 border-white/30 text-white hover:bg-white/10 px-8 py-4 rounded-2xl font-semibold text-lg backdrop-blur-sm"
-                >
-                  <Compass className="w-5 h-5 mr-2" />
-                  Explorer les opportunités
-                </Button> */}
+                
               </motion.div>
             </motion.div>
           </div>
         </div>
         
-        {/* Enhanced Wave Separator */}
-        {/* <div className="absolute bottom-0 left-0 right-0">
-          <svg className="w-full h-20 text-slate-50" viewBox="0 0 1200 120" preserveAspectRatio="none">
-            <path d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z" opacity=".25" fill="currentColor"></path>
-            <path d="M0,0V15.81C13,36.92,27.64,56.86,47.69,72.05,99.41,111.27,165,111,224.58,91.58c31.15-10.15,60.09-26.07,89.67-39.8,40.92-19,84.73-46,130.83-49.67,36.26-2.85,70.9,9.42,98.6,31.56,31.77,25.39,62.32,62,103.63,73,40.44,10.71,81.35-6.69,119.13-24.28s75.16-39,116.92-43.05c59.73-5.85,113.28,22.88,168.9,38.84,30.2,8.66,59,6.17,87.09-7.5,22.43-10.89,48-26.93,60.65-49.24V0Z" opacity=".5" fill="currentColor"></path>
-            <path d="M0,0V5.63C149.93,59,314.09,71.32,475.83,42.57c43-7.64,84.23-20.12,127.61-26.46,59-8.63,112.48,12.24,165.56,35.4C827.93,77.22,886,95.24,951.2,90c86.53-7,172.46-45.71,248.8-84.81V0Z" fill="currentColor"></path>
-          </svg>
-        </div> */}
+        
       </div>
 
       {/* Main Content */}
@@ -524,7 +521,6 @@ const HomePage: React.FC = () => {
         <div className="max-w-12xl mx-auto">
 
 
-          {/* Information sur le système de crédits - Retiré */}
 
           {/* Quick Actions Section */}
           <AnimatePresence>
@@ -856,7 +852,7 @@ const HomePage: React.FC = () => {
                     index={index}
                   />
                 ))}
-              </div>
+                            </div>
             )}
           </motion.div>
 
@@ -868,16 +864,143 @@ const HomePage: React.FC = () => {
               transition={{ delay: prefersReducedMotion ? 0 : 1, duration: prefersReducedMotion ? 0 : 0.5 }}
               className="text-center mt-12"
             >
-              <Button
+                            <Button
                 variant="outline"
                 className="px-8 py-4 rounded-2xl border-slate-300 hover:border-blue-500 hover:text-blue-600 text-lg"
                 aria-label="Voir plus de tâches"
               >
                 <Eye className="w-5 h-5 mr-2" />
                 Voir plus de tâches
+                            </Button>
+            </motion.div>
+                          )}
+                        </div>
+                      </div>
+
+      {/* Rentable Items Section */}
+      <div className="relative z-10 px-6 py-8">
+        <div className="max-w-12xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8, duration: 0.6 }}
+          >
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h2 className="text-3xl font-bold text-slate-800 mb-2">
+                  Objets à louer
+                </h2>
+                <p className="text-slate-600 text-lg">
+                  Découvrez les objets disponibles à la location près de chez vous
+                </p>
+                            </div>
+              <Button
+                variant="outline"
+                onClick={() => setShowRentableItems(!showRentableItems)}
+                className="px-6 py-3 rounded-2xl border-slate-300 hover:border-emerald-500 hover:text-emerald-600"
+                aria-label={showRentableItems ? "Masquer les objets louables" : "Afficher les objets louables"}
+              >
+                {showRentableItems ? 'Masquer' : 'Afficher'}
+              </Button>
+                      </div>
+
+            <AnimatePresence>
+              {showRentableItems && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  {rentableItemsLoading ? (
+                    <div className={`grid gap-4 ${
+                      viewMode === 'grid' 
+                        ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
+                        : 'grid-cols-1'
+                    }`}>
+                      {Array.from({ length: 4 }).map((_, i) => (
+                        <RentableItemCardSkeleton key={i} viewMode={viewMode} />
+                      ))}
+                          </div>
+                  ) : rentableItemsError ? (
+                    <Card className="text-center py-12 bg-red-50 border border-red-200 rounded-3xl">
+                      <div className="text-red-600 mb-4">
+                        <AlertCircle className="w-12 h-12 mx-auto mb-4" />
+                        <h3 className="text-xl font-semibold mb-2">Erreur de chargement</h3>
+                        <p className="text-red-500">{rentableItemsError}</p>
+                        </div>
+                    </Card>
+                  ) : rentableItems.length === 0 ? (
+                    <Card className="text-center py-20 bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-white/50">
+                      <motion.div
+                        initial={prefersReducedMotion ? false : { opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: prefersReducedMotion ? 0 : 0.6 }}
+                      >
+                        <div className="text-9xl mb-8">📦</div>
+                        <h3 className="text-3xl font-bold text-slate-800 mb-4">
+                          Aucun objet à louer
+                        </h3>
+                        <p className="text-slate-600 text-xl mb-8 max-w-2xl mx-auto leading-relaxed">
+                          Aucun objet n'est actuellement disponible à la location. Soyez le premier à proposer un objet !
+                        </p>
+                        
+                              <Button
+                          onClick={() => navigate('/rentals/create')}
+                          className="bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white px-8 py-4 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+                              >
+                          <Plus className="w-5 h-5 mr-2" />
+                          Proposer un objet
+                              </Button>
+                  </motion.div>
+                    </Card>
+                  ) : (
+                    <div className={`grid gap-4 ${
+                      viewMode === 'grid' 
+                        ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
+                        : 'grid-cols-1'
+                    }`}>
+                      {rentableItems.slice(0, 8).map((item, index) => (
+                        <RentableItemCard
+                          key={item.id}
+                          item={item}
+                          user={user}
+                          viewMode={viewMode}
+                          latitude={latitude || undefined}
+                          longitude={longitude || undefined}
+                          onViewItem={handleViewItem}
+                          onRent={handleRentItem}
+                          onContact={handleContactItem}
+                          onNavigate={navigate}
+                          prefersReducedMotion={prefersReducedMotion || false}
+                          index={index}
+                        />
+                ))}
+              </div>
+            )}
+
+                  {rentableItems.length > 8 && (
+            <motion.div
+                      initial={prefersReducedMotion ? false : { opacity: 0 }}
+              animate={{ opacity: 1 }}
+                      transition={{ delay: prefersReducedMotion ? 0 : 1, duration: prefersReducedMotion ? 0 : 0.5 }}
+              className="text-center mt-12"
+            >
+              <Button
+                variant="outline"
+                        onClick={() => navigate('/rentals')}
+                        className="px-8 py-4 rounded-2xl border-slate-300 hover:border-emerald-500 hover:text-emerald-600 text-lg"
+                        aria-label="Voir tous les objets louables"
+              >
+                <Eye className="w-5 h-5 mr-2" />
+                        Voir tous les objets ({rentableItems.length})
               </Button>
             </motion.div>
           )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
         </div>
       </div>
 
