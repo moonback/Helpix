@@ -1,74 +1,61 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 
-export interface ProgressBarProps {
-  value: number;
-  max?: number;
-  size?: 'sm' | 'md' | 'lg';
-  variant?: 'default' | 'primary' | 'success' | 'warning' | 'error';
-  showLabel?: boolean;
-  label?: string;
+interface ProgressBarProps {
+  progress: number; // 0-100
   className?: string;
+  barClassName?: string;
+  height?: string; // e.g., 'h-2', 'h-4'
+  color?: 'primary' | 'success' | 'warning' | 'error' | 'info' | 'default';
+  showPercentage?: boolean;
+  animated?: boolean;
 }
 
 const ProgressBar: React.FC<ProgressBarProps> = ({
-  value,
-  max = 100,
-  size = 'md',
-  variant = 'default',
-  showLabel = false,
-  label,
-  className = ''
+  progress,
+  className = '',
+  barClassName = '',
+  height = 'h-2',
+  color = 'primary',
+  showPercentage = false,
+  animated = true
 }) => {
-  const percentage = Math.min(Math.max((value / max) * 100, 0), 100);
-  
-  const sizeClasses = {
-    sm: 'h-2',
-    md: 'h-3',
-    lg: 'h-4'
-  };
-  
-  const variantClasses = {
-    default: 'bg-gray-200',
-    primary: 'bg-blue-200',
-    success: 'bg-green-200',
-    warning: 'bg-yellow-200',
-    error: 'bg-red-200'
-  };
-  
-  const progressVariantClasses = {
-    default: 'bg-gray-600',
-    primary: 'bg-blue-600',
-    success: 'bg-green-600',
-    warning: 'bg-yellow-600',
-    error: 'bg-red-600'
+  const clampedProgress = Math.max(0, Math.min(100, progress));
+
+  const colorClasses = {
+    primary: 'bg-blue-500',
+    success: 'bg-green-500',
+    warning: 'bg-yellow-500',
+    error: 'bg-red-500',
+    info: 'bg-blue-400',
+    default: 'bg-gray-500',
   };
 
+  const animationClass = animated ? 'transition-all duration-500 ease-out' : '';
+
   return (
-    <div className={cn('w-full', className)}>
-      {showLabel && (
-        <div className="flex justify-between items-center mb-1">
-          <span className="text-sm font-medium text-gray-700">
-            {label || `${Math.round(percentage)}%`}
-          </span>
-          <span className="text-sm text-gray-500">
-            {value}/{max}
-          </span>
-        </div>
-      )}
-      <div className={cn(
-        'w-full rounded-full overflow-hidden',
-        sizeClasses[size],
-        variantClasses[variant]
-      )}>
+    <div className={cn("w-full", className)}>
+      <div className={cn("w-full bg-gray-200 rounded-full overflow-hidden", height)}>
         <div
           className={cn(
-            'h-full transition-all duration-300 ease-in-out rounded-full',
-            progressVariantClasses[variant]
+            "h-full rounded-full",
+            colorClasses[color],
+            animationClass,
+            barClassName
           )}
-          style={{ width: `${percentage}%` }}
+          style={{ width: `${clampedProgress}%` }}
+          role="progressbar"
+          aria-valuenow={clampedProgress}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-label={`Progress: ${clampedProgress}%`}
         />
       </div>
+      {showPercentage && (
+        <div className="text-xs text-gray-600 mt-1 text-center">
+          {Math.round(clampedProgress)}%
+        </div>
+      )}
     </div>
   );
 };

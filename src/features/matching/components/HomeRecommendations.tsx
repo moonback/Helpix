@@ -208,9 +208,8 @@ const HomeRecommendations: React.FC<HomeRecommendationsProps> = ({
                             <span>{Math.round(recommendation.score)}%</span>
                           </div>
                           <ProgressBar 
-                            value={recommendation.score} 
-                            max={100} 
-                            className="h-2"
+                            progress={recommendation.score} 
+                            height="h-2"
                           />
                         </div>
                         
