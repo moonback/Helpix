@@ -140,7 +140,7 @@ const MapPageOptimized: React.FC = () => {
   }, [fetchTasks]);
 
   // Géolocalisation via hook
-  const { latitude, longitude, isLoading: geoLoading, error: geoError, requestLocation } = useGeolocation();
+  const { latitude, longitude, error: geoError, requestLocation } = useGeolocation();
 
   useEffect(() => {
     if (typeof latitude === 'number' && typeof longitude === 'number') {
