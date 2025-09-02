@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Plan - Helpix</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: #2c3e50;
+            background: #ffffff;
+        }
+        
+        .container {
+            max-width: 210mm;
+            margin: 0 auto;
+            padding: 20mm;
+            background: white;
+        }
+        
+        /* Page breaks for PDF */
+        .page-break {
+            page-break-before: always;
+        }
+        
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #3498db;
+        }
+        
+        .logo {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: #3498db;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.2em;
+            color: #7f8c8d;
+            font-weight: 300;
+        }
+        
+        /* Titles */
+        h1 {
+            font-size: 2em;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            border-left: 4px solid #3498db;
+            padding-left: 15px;
+        }
+        
+        h2 {
+            font-size: 1.5em;
+            color: #34495e;
+            margin: 30px 0 15px 0;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 5px;
+        }
+        
+        h3 {
+            font-size: 1.2em;
+            color: #2c3e50;
+            margin: 20px 0 10px 0;
+            font-weight: 600;
+        }
+        
+        /* Text */
+        p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+        
+        /* Lists */
+        ul, ol {
+            margin: 15px 0 15px 30px;
+        }
+        
+        li {
+            margin-bottom: 8px;
+        }
+        
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 0.9em;
+        }
+        
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        th {
+            background-color: #3498db;
+            color: white;
+            font-weight: 600;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        
+        /* Status badges */
+        .status {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: 500;
+        }
+        
+        .completed {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .in-progress {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .planned {
+            background-color: #e2e3e5;
+            color: #383d41;
+        }
+        
+        .vision {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        /* Highlight boxes */
+        .highlight {
+            background-color: #f8f9fa;
+            border-left: 4px solid #3498db;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .key-metrics {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .key-metrics h3 {
+            color: white;
+            margin-top: 0;
+        }
+        
+        /* Canvas grid */
+        .canvas-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .canvas-item {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-top: 3px solid #3498db;
+        }
+        
+        .canvas-item h4 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1em;
+            font-weight: 600;
+        }
+        
+        /* Footer */
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ecf0f1;
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+        
+        /* Print styles */
+        @media print {
+            body {
+                font-size: 12pt;
+            }
+            
+            .container {
+                margin: 0;
+                padding: 15mm;
+            }
+            
+            .page-break {
+                page-break-before: always;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Page de couverture -->
+        <div class="header">
+            <div class="logo">HELPIX</div>
+            <div class="subtitle">Entraide Universelle</div>
+            <h1 style="border: none; text-align: center; margin-top: 30px;">BUSINESS PLAN</h1>
+            <p style="text-align: center; font-size: 1.1em; margin-top: 20px;">Plateforme d'entraide géolocalisée</p>
+        </div>
+
+        <!-- Résumé Exécutif -->
+        <h1>Résumé Exécutif</h1>
+        
+        <div class="highlight">
+            <p><strong>Helpix</strong>, également connue sous le nom d'<strong>Entraide Universelle</strong>, est une plateforme d'entraide géolocalisée qui vise à créer un écosystème de solidarité et d'échange de services au sein des communautés locales. Elle connecte les voisins pour qu'ils puissent facilement proposer ou demander de l'aide dans leur quartier.</p>
+        </div>
+
+        <p>L'objectif principal de Helpix est de devenir la plateforme de référence mondiale pour l'entraide locale et la solidarité communautaire d'ici 2026, en connectant des millions d'utilisateurs et en favorisant un écosystème d'aide mutuelle durable et éthique.</p>
+
+        <h3>Proposition de Valeur Unique</h3>
+        <ul>
+            <li><strong>Système de crédits équitable</strong> qui incite à l'aide mutuelle</li>
+            <li><strong>Géolocalisation intelligente</strong> pour trouver de l'aide à proximité</li>
+            <li><strong>Interface mobile-first</strong> moderne et sécurisée</li>
+        </ul>
+
+        <p>Helpix a déjà finalisé sa phase MVP et est actuellement en phase V1.0, intégrant notamment un système de crédits payant via Stripe, une messagerie avancée et des notifications push. Le modèle économique évoluera d'un système freemium avec achat de crédits vers des abonnements premium et des commissions sur les transactions, avec une vision à long terme d'intégration de la blockchain et du Web3.</p>
+
+        <!-- Page break -->
+        <div class="page-break"></div>
+
+        <!-- Analyse de Marché -->
+        <h1>Analyse de Marché</h1>
+
+        <h2>Taille et Évolution du Marché de l'Économie Collaborative</h2>
+        <p>Le marché de l'économie collaborative est en croissance constante, alimenté par le désir de connexion locale, d'optimisation des ressources et de flexibilité. Helpix s'inscrit dans cette tendance en facilitant l'échange de services au niveau communautaire.</p>
+
+        <h2>Segments Cibles</h2>
+        <p>Helpix cible principalement les communautés locales et les voisins souhaitant s'entraider :</p>
+        <ul>
+            <li><strong>Jeunes actifs</strong> recherchant des services ponctuels ou offrant leur aide</li>
+            <li><strong>Familles</strong> nécessitant des coups de main (déménagement, bricolage, aide ménagère, garde d'enfants)</li>
+            <li><strong>Étudiants</strong> cherchant à monétiser leurs compétences ou à trouver de l'aide à coût réduit</li>
+            <li><strong>Seniors actifs</strong> désirant rester connectés, partager leur savoir-faire ou obtenir de l'aide</li>
+        </ul>
+
+        <h2>Différenciation de Helpix</h2>
+        <ul>
+            <li><strong>Système équitable de crédits :</strong> Les utilisateurs gagnent des crédits en rendant service, favorisant une économie d'échange vertueuse</li>
+            <li><strong>Géolocalisation intelligente :</strong> Permet de trouver rapidement de l'aide avec des filtres avancés par distance et catégorie</li>
+            <li><strong>Concentration sur la solidarité locale :</strong> Renforcement des liens communautaires</li>
+            <li><strong>Transactions sécurisées :</strong> Portefeuille virtuel avec historique complet</li>
+            <li><strong>Technologie moderne :</strong> Stack robuste (React 18, TypeScript, Supabase) et roadmap incluant blockchain et IA</li>
+        </ul>
+
+        <!-- Proposition de Valeur -->
+        <div class="page-break"></div>
+        <h1>Proposition de Valeur</h1>
+
+        <h2>Bénéfices pour les Parties Prenantes</h2>
+
+        <h3>Pour les Utilisateurs (Demandeurs)</h3>
+        <ul>
+            <li><strong>Accès facile à l'aide locale :</strong> Services variés grâce à la géolocalisation</li>
+            <li><strong>Simplicité :</strong> Création et gestion de tâches d'entraide</li>
+            <li><strong>Fiabilité :</strong> Système de notation et avis communautaires</li>
+            <li><strong>Communication fluide :</strong> Messagerie temps réel</li>
+        </ul>
+
+        <h3>Pour les Prestataires (Aidants)</h3>
+        <ul>
+            <li><strong>Gains de crédits :</strong> Rémunération automatique pour les services rendus</li>
+            <li><strong>Flexibilité :</strong> Choix des tâches selon compétences et disponibilités</li>
+            <li><strong>Reconnaissance :</strong> Accumulation d'avis positifs et réputation communautaire</li>
+        </ul>
+
+        <h3>Pour les Collectivités et la Société</h3>
+        <ul>
+            <li><strong>Renforcement du lien social :</strong> Écosystème de solidarité et d'échange</li>
+            <li><strong>Économie collaborative durable :</strong> Utilisation efficace des compétences locales</li>
+            <li><strong>Contribution à un monde plus solidaire</strong></li>
+        </ul>
+
+        <!-- Business Model Canvas -->
+        <div class="page-break"></div>
+        <h1>Business Model Canvas</h1>
+
+        <div class="canvas-grid">
+            <div class="canvas-item">
+                <h4>Partenaires Clés</h4>
+                <ul>
+                    <li>Supabase (Backend)</li>
+                    <li>Stripe (Paiements)</li>
+                    <li>APIs Géolocalisation</li>
+                    <li>Vercel (Hébergement)</li>
+                    <li>Associations locales</li>
+                </ul>
+            </div>
+            <div class="canvas-item">
+                <h4>Activités Clés</h4>
+                <ul>
+                    <li>Développement plateforme</li>
+                    <li>Acquisition utilisateurs</li>
+                    <li>Gestion transactions</li>
+                    <li>Sécurité données</li>
+                    <li>Support client</li>
+                </ul>
+            </div>
+            <div class="canvas-item">
+                <h4>Ressources Clés</h4>
+                <ul>
+                    <li>Technologie</li>
+                    <li>Équipe développement</li>
+                    <li>Capital</li>
+                    <li>Propriété intellectuelle</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="canvas-grid">
+            <div class="canvas-item">
+                <h4>Proposition de Valeur</h4>
+                <ul>
+                    <li>Solidarité locale</li>
+                    <li>Géolocalisation intelligente</li>
+                    <li>Sécurité & fiabilité</li>
+                    <li>Simplicité d'usage</li>
+                </ul>
+            </div>
+            <div class="canvas-item">
+                <h4>Relations Clients</h4>
+                <ul>
+                    <li>Support communautaire</li>
+                    <li>Onboarding interactif</li>
+                    <li>Notifications push</li>
+                    <li>Système de notation</li>
+                </ul>
+            </div>
+            <div class="canvas-item">
+                <h4>Canaux Distribution</h4>
+                <ul>
+                    <li>Application Web</li>
+                    <li>Apps mobiles natives</li>
+                    <li>Réseaux sociaux</li>
+                    <li>Marketing contenu</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="canvas-grid">
+            <div class="canvas-item">
+                <h4>Segments Clients</h4>
+                <ul>
+                    <li>Individus/Ménages</li>
+                    <li>Prestataires services</li>
+                    <li>Communautés locales</li>
+                </ul>
+            </div>
+            <div class="canvas-item">
+                <h4>Structure Coûts</h4>
+                <ul>
+                    <li>Développement logiciel</li>
+                    <li>Infrastructure IT</li>
+                    <li>Marketing</li>
+                    <li>Support client</li>
+                </ul>
+            </div>
+            <div class="canvas-item">
+                <h4>Sources Revenus</h4>
+                <ul>
+                    <li>Packs de crédits</li>
+                    <li>Abonnements premium</li>
+                    <li>Commissions</li>
+                    <li>Partenariats</li>
+                    <li>Publicité ciblée</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Stratégie de Déploiement -->
+        <div class="page-break"></div>
+        <h1>Stratégie de Déploiement</h1>
+
+        <h2>Phases de Déploiement</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Phase</th>
+                    <th>Statut</th>
+                    <th>Fonctionnalités Clés</th>
+                    <th>Objectifs</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>MVP</strong></td>
+                    <td><span class="status completed">✅ Terminé</span></td>
+                    <td>Authentification, CRUD tâches, crédits basiques, géolocalisation, messagerie simple</td>
+                    <td>100 utilisateurs actifs</td>
+                </tr>
+                <tr>
+                    <td><strong>V1.0</strong></td>
+                    <td><span class="status in-progress">🚧 En Cours</span></td>
+                    <td>Crédits payants (Stripe), messagerie avancée, notifications push, système notation</td>
+                    <td>1 000 utilisateurs, 5 000 tâches (2024)</td>
+                </tr>
+                <tr>
+                    <td><strong>V2.0</strong></td>
+                    <td><span class="status planned">📋 Planifié</span></td>
+                    <td>Apps natives iOS/Android, IA, internationalisation, paiements complets</td>
+                    <td>10 000 utilisateurs, 50 000 tâches (2025)</td>
+                </tr>
+                <tr>
+                    <td><strong>V3.0</strong></td>
+                    <td><span class="status vision">🔮 Vision</span></td>
+                    <td>Blockchain & Web3, Réalité Augmentée, IA avancée, expansion mondiale</td>
+                    <td>100 000 utilisateurs, 500 000 tâches (2026)</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Prévisions Financières -->
+        <div class="page-break"></div>
+        <h1>Prévisions Financières (3 ans)</h1>
+
+        <h2>Objectifs Utilisateurs</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Année</th>
+                    <th>Phase</th>
+                    <th>Utilisateurs Actifs Mensuels</th>
+                    <th>Tâches Créées</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>2024</td>
+                    <td>V1.0</td>
+                    <td>1 000</td>
+                    <td>5 000</td>
+                </tr>
+                <tr>
+                    <td>2025</td>
+                    <td>V2.0</td>
+                    <td>10 000</td>
+                    <td>50 000</td>
+                </tr>
+                <tr>
+                    <td>2026</td>
+                    <td>V3.0</td>
+                    <td>100 000</td>
+                    <td>500 000</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>Sources de Revenus par Phase</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Source de Revenu</th>
+                    <th>2024 (V1.0)</th>
+                    <th>2025 (V2.0)</th>
+                    <th>2026 (V3.0)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Packs de Crédits</td>
+                    <td>Début monétisation</td>
+                    <td>Croissance forte</td>
+                    <td>Croissance soutenue</td>
+                </tr>
+                <tr>
+                    <td>Abonnements Premium</td>
+                    <td>Introduction</td>
+                    <td>Croissance</td>
+                    <td>Croissance</td>
+                </tr>
+                <tr>
+                    <td>Commissions</td>
+                    <td>Non applicable</td>
+                    <td>Introduction</td>
+                    <td>Croissance forte</td>
+                </tr>
+                <tr>
+                    <td>Partenariats</td>
+                    <td>Base</td>
+                    <td>Croissance</td>
+                    <td>Croissance</td>
+                </tr>
+                <tr>
+                    <td>Publicité Ciblée</td>
+                    <td>Non applicable</td>
+                    <td>Introduction</td>
+                    <td>Croissance</td>
+                </tr>
+                <tr>
+                    <td>Tokens d'Entraide</td>
+                    <td>Non applicable</td>
+                    <td>Non applicable</td>
+                    <td>Introduction</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="highlight">
+            <h3>Hypothèses de Croissance</h3>
+            <ul>
+                <li><strong>Taux de conversion gratuit → payant :</strong> 50% (2024) → 70% (2025) → 85% (2026)</li>
+                <li><strong>Expansion géographique :</strong> France → Europe → Mondial</li>
+                <li><strong>Stratégie d'acquisition :</strong> Marketing multicanal (contenu, réseaux sociaux, SEO, partenariats)</li>
+            </ul>
+        </div>
+
+        <!-- KPIs Clés -->
+        <div class="page-break"></div>
+        <h1>KPIs Clés</h1>
+
+        <div class="key-metrics">
+            <h3>Métriques Utilisateur</h3>
+            <ul>
+                <li><strong>Utilisateurs Actifs Mensuels (MAU) :</strong> 1 000 (2024) → 10 000 (2025) → 100 000 (2026)</li>
+                <li><strong>Satisfaction Utilisateur (NPS) :</strong> 90% (2024) → 95% (2025) → 98% (2026)</li>
+                <li><strong>Tâches Créées :</strong> 5 000 (2024) → 50 000 (2025) → 500 000 (2026)</li>
+            </ul>
+        </div>
+
+        <h2>Métriques Business</h2>
+        <ul>
+            <li>Revenus Récurrents Mensuels (MRR)</li>
+            <li>Coût d'Acquisition Client (CAC)</li>
+            <li>Valeur Vie Client (LTV)</li>
+            <li>Taux de Conversion Freemium → Payant</li>
+            <li>Taux de Churn</li>
+        </ul>
+
+        <h2>Métriques Techniques</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Métrique</th>
+                    <th>2024</th>
+                    <th>2025</th>
+                    <th>2026</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Temps de Réponse API</td>
+                    <td>&lt; 1s</td>
+                    <td>&lt; 500ms</td>
+                    <td>&lt; 200ms</td>
+                </tr>
+                <tr>
+                    <td>Uptime (Disponibilité)</td>
+                    <td>99.9%</td>
+                    <td>99.99%</td>
+                    <td>99.999%</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Besoin de Financement -->
+        <div class="page-break"></div>
+        <h1>Besoin de Financement</h1>
+
+        <p>Afin de soutenir les phases de développement V1.0, V2.0 et V3.0, l'expansion géographique, l'intégration des technologies avancées (IA, blockchain), et les efforts marketing pour l'acquisition d'utilisateurs, Helpix recherche un financement stratégique.</p>
+
+        <h2>Utilisation des Fonds</h2>
+        <div class="canvas-grid">
+            <div class="canvas-item">
+                <h4>Développement Produit</h4>
+                <p>Poursuite du développement des fonctionnalités avancées (messagerie, IA, applications natives, Web3)</p>
+            </div>
+            <div class="canvas-item">
+                <h4>Marketing & Acquisition</h4>
+                <p>Campagnes ciblées pour atteindre les objectifs de MAU</p>
+            </div>
+            <div class="canvas-item">
+                <h4>Infrastructure</h4>
+                <p>Architecture backend et cloud pour des millions d'utilisateurs</p>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p><strong>Helpix - Entraide Universelle</strong><br>
+            Plateforme d'entraide géolocalisée pour un monde plus solidaire<br>
+            Document confidentiel - Business Plan 2024-2026</p>
+        </div>
+    </div>
+</body>
+</html>
