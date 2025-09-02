@@ -1,5 +1,6 @@
 // Types utilisateur
 export interface User {
+  display_name: string;
   id: string;
   name: string;
   email: string;

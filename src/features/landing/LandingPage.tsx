@@ -12,14 +12,10 @@ import {
   Shield,
   Zap,
   Clock,
-  Award,
   MessageCircle,
   Sparkles,
-  Target,
   ChevronRight,
   UserCheck,
-  Gift,
-  Laptop,
   Camera,
   BookOpen,
   Car,
@@ -81,8 +77,8 @@ const Button = ({
 // Données pour les animations et exemples
 const statsData = [
   { value: '10,000+', label: 'Membres actifs', icon: <Users className="w-6 h-6" /> },
-  { value: '25,000+', label: 'Tâches réalisées', icon: <CheckCircle className="w-6 h-6" /> },
-  { value: '98%', label: 'Satisfaction', icon: <Star className="w-6 h-6" /> },
+  { value: '25,000+', label: 'Tâches accomplies', icon: <CheckCircle className="w-6 h-6" /> },
+  { value: '50+', label: 'Villes', icon: <MapPin className="w-6 h-6" /> },
   { value: '24/7', label: 'Disponibilité', icon: <Clock className="w-6 h-6" /> }
 ];
 
@@ -90,72 +86,58 @@ const featuresData = [
   {
     icon: <MapPin className="w-8 h-8" />,
     title: 'Géolocalisation intelligente',
-    description: 'Trouvez de l\'aide près de chez vous ou offrez vos services à votre communauté locale.',
+    description: 'Trouvez de l\'aide à moins de 5km de chez vous',
     color: 'from-emerald-500 to-teal-600'
   },
   {
+    icon: <Zap className="w-8 h-8" />,
+    title: 'Système de crédits équitable',
+    description: 'Gagnez des crédits en aidant, dépensez-les pour vous faire aider',
+    color: 'from-orange-500 to-red-600'
+  },
+  {
     icon: <MessageCircle className="w-8 h-8" />,
-    title: 'Communication sécurisée',
-    description: 'Échangez directement avec les membres via notre système de messagerie intégré.',
+    title: 'Messagerie instantanée',
+    description: 'Communiquez en temps réel avec vos voisins',
     color: 'from-blue-500 to-indigo-600'
   },
   {
     icon: <Shield className="w-8 h-8" />,
-    title: 'Profils vérifiés',
-    description: 'Tous les membres sont vérifiés pour garantir votre sécurité et votre confiance.',
+    title: 'Sécurisé et fiable',
+    description: 'Profils vérifiés et paiements sécurisés',
     color: 'from-purple-500 to-violet-600'
-  },
-  {
-    icon: <Zap className="w-8 h-8" />,
-    title: 'Système de crédits',
-    description: 'Gagnez des crédits en aidant et utilisez-les pour obtenir de l\'aide en retour.',
-    color: 'from-orange-500 to-red-600'
-  },
-  {
-    icon: <Target className="w-8 h-8" />,
-    title: 'Matching intelligent',
-    description: 'Notre algorithme vous connecte avec les bonnes personnes selon vos compétences.',
-    color: 'from-pink-500 to-rose-600'
-  },
-  {
-    icon: <Award className="w-8 h-8" />,
-    title: 'Système de réputation',
-    description: 'Construisez votre réputation grâce aux avis et évaluations de la communauté.',
-    color: 'from-cyan-500 to-blue-600'
   }
 ];
 
 const categoriesData = [
-  { icon: <Wrench className="w-6 h-6" />, name: 'Bricolage', count: '2,450+ tâches' },
-  { icon: <Car className="w-6 h-6" />, name: 'Transport', count: '1,820+ tâches' },
-  { icon: <Home className="w-6 h-6" />, name: 'Ménage', count: '3,100+ tâches' },
-  { icon: <BookOpen className="w-6 h-6" />, name: 'Cours & Formation', count: '1,650+ tâches' },
-  { icon: <Camera className="w-6 h-6" />, name: 'Multimédia', count: '980+ tâches' },
-  { icon: <Paintbrush className="w-6 h-6" />, name: 'Art & Design', count: '750+ tâches' },
-  { icon: <Laptop className="w-6 h-6" />, name: 'Informatique', count: '2,200+ tâches' },
-  { icon: <Gift className="w-6 h-6" />, name: 'Événements', count: '890+ tâches' }
+  { icon: <Wrench className="w-6 h-6" />, name: 'Bricolage', count: '2,500+ tâches' },
+  { icon: <Car className="w-6 h-6" />, name: 'Transport', count: '1,800+ tâches' },
+  { icon: <Home className="w-6 h-6" />, name: 'Ménage', count: '3,200+ tâches' },
+  { icon: <BookOpen className="w-6 h-6" />, name: 'Jardinage', count: '1,100+ tâches' },
+  { icon: <Camera className="w-6 h-6" />, name: 'Garde d\'animaux', count: '900+ tâches' },
+  { icon: <Paintbrush className="w-6 h-6" />, name: 'Déménagement', count: '600+ tâches' }
 ];
 
 const testimonialsData = [
   {
-    name: 'Marie Dubois',
-    role: 'Utilisatrice depuis 6 mois',
+    name: 'Marie, 34 ans',
+    role: 'Lyon',
     avatar: '👩‍🦰',
-    text: 'Grâce à Helpix, j\'ai trouvé de l\'aide pour mon déménagement en 2 heures ! La communauté est vraiment bienveillante.',
+    text: 'Grâce à Helpix, j\'ai trouvé quelqu\'un pour réparer ma clôture en 2h !',
     rating: 5
   },
   {
-    name: 'Pierre Martin',
-    role: 'Membre actif',
+    name: 'Thomas, 28 ans',
+    role: 'Marseille',
     avatar: '👨‍💼',
-    text: 'J\'ai pu aider plus de 50 personnes tout en développant mes compétences. Le système de crédits est génial !',
+    text: 'Je gagne 50€ par semaine en aidant mes voisins. C\'est génial !',
     rating: 5
   },
   {
-    name: 'Sophie Laurent',
-    role: 'Nouvelle utilisatrice',
+    name: 'Sophie, 41 ans',
+    role: 'Toulouse',
     avatar: '👩‍🎓',
-    text: 'Interface très intuitive et personnes de confiance. Je recommande vivement cette plateforme !',
+    text: 'L\'interface est super intuitive. J\'ai posté ma première tâche en 3 minutes.',
     rating: 5
   }
 ];
@@ -300,9 +282,9 @@ const LandingPage = () => {
               transition={{ delay: 0.4, duration: 0.8 }}
               className="text-4xl sm:text-5xl lg:text-7xl font-bold text-slate-800 mb-6 leading-tight"
             >
-              L'entraide à portée de{' '}
+              Connectez-vous à votre{' '}
               <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
-                clic
+                communauté locale
               </span>
             </motion.h1>
 
@@ -313,8 +295,7 @@ const LandingPage = () => {
               transition={{ delay: 0.6, duration: 0.8 }}
               className="text-lg sm:text-xl text-slate-600 mb-10 max-w-4xl mx-auto leading-relaxed"
             >
-              Connectez-vous avec votre communauté locale pour donner et recevoir de l'aide. 
-              Ensemble, créons un monde plus solidaire.
+              Demandez ou proposez de l'aide en quelques clics. Gagnez des crédits en rendant service à vos voisins.
             </motion.p>
 
             {/* CTA Buttons */}
@@ -326,11 +307,11 @@ const LandingPage = () => {
             >
               <Button onClick={() => navigate('/register')} className="px-8 py-4 text-lg">
                 <UserCheck className="w-5 h-5 mr-2" />
-                Commencer gratuitement
+                Commencer maintenant
               </Button>
               <Button onClick={() => setIsVideoPlaying(true)} variant="outline" className="px-8 py-4 text-lg">
                 <Play className="w-5 h-5 mr-2" />
-                Voir la démo
+                Voir comment ça marche
               </Button>
             </motion.div>
 
@@ -392,14 +373,14 @@ const LandingPage = () => {
             className="text-center mb-12 sm:mb-16"
           >
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-800 mb-4 sm:mb-6">
-              Fonctionnalités <span className="text-blue-600">innovantes</span>
+              Pourquoi choisir <span className="text-blue-600">Helpix</span> ?
             </h2>
             <p className="text-lg sm:text-xl text-slate-600 max-w-3xl mx-auto">
               Des outils modernes pour faciliter l'entraide et créer des liens durables dans votre communauté.
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
             {featuresData.map((feature, index) => (
               <motion.div
                 key={feature.title}
@@ -444,7 +425,7 @@ const LandingPage = () => {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
             {categoriesData.map((category, index) => (
               <motion.div
                 key={category.name}
