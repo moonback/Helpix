@@ -37,10 +37,10 @@ const BalanceCard: React.FC<BalanceCardProps> = ({ wallet }) => {
         <div className="relative z-10">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <p className="text-green-100 text-sm font-medium mb-1">
+              <p className="text-green-100 text-xs font-medium mb-1">
                 Solde disponible
               </p>
-              <p className="text-4xl font-bold">
+              <p className="text-3xl font-bold">
                 {wallet.balance.toLocaleString()} crédits
               </p>
             </div>
@@ -59,8 +59,8 @@ const BalanceCard: React.FC<BalanceCardProps> = ({ wallet }) => {
                 <TrendingUp className="w-5 h-5" />
               </div>
               <div>
-                <p className="text-green-100 text-sm">Total gagné</p>
-                <p className="text-lg font-semibold">
+                <p className="text-green-100 text-xs">Total gagné</p>
+                <p className="text-base font-semibold">
                   {wallet.total_earned.toLocaleString()}
                 </p>
               </div>
@@ -71,8 +71,8 @@ const BalanceCard: React.FC<BalanceCardProps> = ({ wallet }) => {
                 <TrendingDown className="w-5 h-5" />
               </div>
               <div>
-                <p className="text-green-100 text-sm">Total dépensé</p>
-                <p className="text-lg font-semibold">
+                <p className="text-green-100 text-xs">Total dépensé</p>
+                <p className="text-base font-semibold">
                   {wallet.total_spent.toLocaleString()}
                 </p>
               </div>
@@ -83,11 +83,11 @@ const BalanceCard: React.FC<BalanceCardProps> = ({ wallet }) => {
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 <CreditCard className="w-4 h-4" />
-                <span className="text-sm text-green-100">
+                <span className="text-xs text-green-100">
                   Dernière mise à jour: {new Date(wallet.updated_at).toLocaleDateString()}
                 </span>
               </div>
-              <div className="text-sm text-green-100">
+              <div className="text-xs text-green-100">
                 ID: {wallet.id.slice(0, 8)}...
               </div>
             </div>

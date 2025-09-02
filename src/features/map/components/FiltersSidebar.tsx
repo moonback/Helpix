@@ -103,14 +103,14 @@ const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
         <div className="p-4 sm:p-6">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-semibold text-slate-800">Filtres</h2>
+            <h2 className="text-base font-semibold text-slate-800">Filtres</h2>
             <div className="flex items-center space-x-2">
               {getActiveFiltersCount() > 0 && (
                 <Button
                   onClick={resetFilters}
                   variant="ghost"
                   size="sm"
-                  className="text-xs text-slate-500 hover:text-slate-700"
+                  className="text-[10px] text-slate-500 hover:text-slate-700"
                 >
                   Réinitialiser
                 </Button>
@@ -129,14 +129,14 @@ const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
           {/* Tâches Section */}
           <div className="space-y-6">
             <div>
-              <h3 className="text-sm font-medium text-slate-700 mb-3 flex items-center">
+              <h3 className="text-xs font-medium text-slate-700 mb-3 flex items-center">
                 <MapPin className="w-4 h-4 mr-2" />
                 Tâches
               </h3>
               
               {/* Catégorie */}
               <Card className="p-4 mb-4">
-                <h4 className="text-sm font-medium text-slate-600 mb-3">Type de tâche</h4>
+                <h4 className="text-xs font-medium text-slate-600 mb-3">Type de tâche</h4>
                 <div className="space-y-2">
                   {[
                     { value: 'all', label: 'Toutes', icon: '📍' },
@@ -152,7 +152,7 @@ const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
                         onChange={(e) => onCategoryChange(e.target.value as any)}
                         className="w-4 h-4 text-blue-600 border-slate-300 focus:ring-blue-500"
                       />
-                      <span className="text-sm text-slate-700">
+                      <span className="text-xs text-slate-700">
                         {icon} {label}
                       </span>
                     </label>
@@ -162,7 +162,7 @@ const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
 
               {/* Priorité */}
               <Card className="p-4 mb-4">
-                <h4 className="text-sm font-medium text-slate-600 mb-3">Priorité</h4>
+                <h4 className="text-xs font-medium text-slate-600 mb-3">Priorité</h4>
                 <div className="space-y-2">
                   {[
                     { value: 'all', label: 'Toutes', color: 'text-slate-500' },
@@ -180,7 +180,7 @@ const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
                         onChange={(e) => onPriorityChange(e.target.value as any)}
                         className="w-4 h-4 text-blue-600 border-slate-300 focus:ring-blue-500"
                       />
-                      <span className={`text-sm ${color}`}>
+                      <span className={`text-xs ${color}`}>
                         {label}
                       </span>
                     </label>
@@ -190,10 +190,10 @@ const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
 
               {/* Distance */}
               <Card className="p-4 mb-4">
-                <h4 className="text-sm font-medium text-slate-600 mb-3">Distance</h4>
+                <h4 className="text-xs font-medium text-slate-600 mb-3">Distance</h4>
                 <div className="space-y-3">
                   <div>
-                    <label className="block text-xs text-slate-500 mb-2">
+                    <label className="block text-[10px] text-slate-500 mb-2">
                       Rayon: {radiusKm === 0 ? 'Illimité' : `${radiusKm} km`}
                     </label>
                     <input
@@ -205,7 +205,7 @@ const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
                       onChange={(e) => onRadiusChange(Number(e.target.value))}
                       className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer slider"
                     />
-                    <div className="flex justify-between text-xs text-slate-400 mt-1">
+                    <div className="flex justify-between text-[10px] text-slate-400 mt-1">
                       <span>0 km</span>
                       <span>50 km</span>
                     </div>
@@ -218,7 +218,7 @@ const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
                       onChange={(e) => onSortByDistanceChange(e.target.checked)}
                       className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500"
                     />
-                    <span className="text-sm text-slate-700">
+                    <span className="text-xs text-slate-700">
                       Trier par distance
                     </span>
                   </label>
@@ -229,7 +229,7 @@ const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
             {/* Items Louables Section */}
             <div>
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-medium text-slate-700 flex items-center">
+                <h3 className="text-xs font-medium text-slate-700 flex items-center">
                   <Users className="w-4 h-4 mr-2" />
                   Items Louables
                 </h3>
@@ -237,7 +237,7 @@ const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
                   onClick={onItemsSidebarToggle}
                   variant="outline"
                   size="sm"
-                  className="text-xs"
+                  className="text-[10px]"
                 >
                   {isItemsSidebarOpen ? 'Masquer' : 'Afficher'}
                 </Button>
@@ -252,19 +252,19 @@ const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
                 >
                   {/* Recherche d'items */}
                   <Card className="p-4">
-                    <h4 className="text-sm font-medium text-slate-600 mb-3">Recherche</h4>
+                    <h4 className="text-xs font-medium text-slate-600 mb-3">Recherche</h4>
                     <input
                       type="text"
                       placeholder="Nom de l'item..."
                       value={itemSearch}
                       onChange={(e) => onItemSearchChange(e.target.value)}
-                      className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </Card>
 
                   {/* Disponibilité */}
                   <Card className="p-4">
-                    <h4 className="text-sm font-medium text-slate-600 mb-3">Disponibilité</h4>
+                    <h4 className="text-xs font-medium text-slate-600 mb-3">Disponibilité</h4>
                     <label className="flex items-center space-x-3 cursor-pointer">
                       <input
                         type="checkbox"
@@ -272,7 +272,7 @@ const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
                         onChange={(e) => onOnlyAvailableItemsChange(e.target.checked)}
                         className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500"
                       />
-                      <span className="text-sm text-slate-700">
+                      <span className="text-xs text-slate-700">
                         Seulement les items disponibles
                       </span>
                     </label>
@@ -280,28 +280,28 @@ const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
 
                   {/* Prix */}
                   <Card className="p-4">
-                    <h4 className="text-sm font-medium text-slate-600 mb-3">Prix (crédits/jour)</h4>
+                    <h4 className="text-xs font-medium text-slate-600 mb-3">Prix (crédits/jour)</h4>
                     <div className="space-y-3">
                       <div>
-                        <label className="block text-xs text-slate-500 mb-1">Prix minimum</label>
+                        <label className="block text-[10px] text-slate-500 mb-1">Prix minimum</label>
                         <input
                           type="number"
                           min="0"
                           max="1000"
                           value={minPrice}
                           onChange={(e) => onMinPriceChange(Number(e.target.value))}
-                          className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                       </div>
                       <div>
-                        <label className="block text-xs text-slate-500 mb-1">Prix maximum</label>
+                        <label className="block text-[10px] text-slate-500 mb-1">Prix maximum</label>
                         <input
                           type="number"
                           min="0"
                           max="1000"
                           value={maxPrice}
                           onChange={(e) => onMaxPriceChange(Number(e.target.value))}
-                          className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                       </div>
                     </div>

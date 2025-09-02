@@ -59,7 +59,7 @@ const MapLoadingFallback: React.FC = () => (
       </div>
       <div className="flex items-center space-x-2">
         <Loader2 className="w-5 h-5 text-blue-600 animate-spin" />
-        <span className="text-slate-600 font-medium">Chargement de la carte...</span>
+        <span className="text-slate-600 font-medium text-sm">Chargement de la carte...</span>
       </div>
     </motion.div>
   </div>

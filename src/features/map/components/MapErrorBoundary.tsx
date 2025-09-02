@@ -49,16 +49,16 @@ class MapErrorBoundary extends Component<Props, State> {
             </div>
             
             <div className="max-w-md">
-              <h3 className="text-lg font-semibold text-slate-800 mb-2">
+              <h3 className="text-base font-semibold text-slate-800 mb-2">
                 Erreur de chargement de la carte
               </h3>
-              <p className="text-sm text-slate-600 mb-4">
+              <p className="text-xs text-slate-600 mb-4">
                 Une erreur s'est produite lors du chargement de la carte. 
                 Cela peut être dû à un problème de connexion ou de configuration.
               </p>
               
               {this.state.error && (
-                <details className="text-xs text-slate-500 mb-4">
+                <details className="text-[10px] text-slate-500 mb-4">
                   <summary className="cursor-pointer hover:text-slate-700">
                     Détails de l'erreur
                   </summary>
