@@ -205,22 +205,7 @@ const App: React.FC = () => {
         {/* Navigation bottom */}
         {isAuthenticated && <BottomNavigation />}
 
-        {/* Bouton flottant d'achat de crédits - accessible sur toutes les pages */}
-        {isAuthenticated && (
-          <div className="fixed left-6 top-1/2 transform -translate-y-1/2 z-[100]">
-            <motion.div
-              initial={{ opacity: 0, scale: 0 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 1.0, duration: 0.5, type: "spring", stiffness: 200 }}
-            >
-              <CreditsDisplayWithPurchase 
-                showPurchaseButton={true}
-                variant="floating"
-                className=""
-              />
-            </motion.div>
-          </div>
-        )}
+        {/* Retiré: bouton flottant d'achat de crédits */}
 
         {/* Notifications de paiement */}
         {isAuthenticated && <PaymentNotificationContainer />}
