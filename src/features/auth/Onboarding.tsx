@@ -8,21 +8,27 @@ import { OnboardingSlide } from '@/types';
 const onboardingSlides: OnboardingSlide[] = [
   {
     id: 1,
-    title: 'Bienvenue dans l\'Helpix',
-    description: 'Une économie de proximité mondiale où vous pouvez échanger du temps, des compétences et des objets avec votre communauté.',
-    icon: '🌍',
+    title: 'Bienvenue sur Helpix',
+    description: 'La plateforme qui connecte votre quartier pour l\'entraide locale',
+    icon: '👋',
   },
   {
     id: 2,
-    title: 'Échangez vos compétences',
-    description: 'Offrez vos talents et recevez de l\'aide en retour. Créez des connexions authentiques dans votre quartier.',
-    icon: '🤝',
+    title: 'Trouvez de l\'aide près de chez vous',
+    description: 'Activez votre localisation pour découvrir les tâches dans votre quartier',
+    icon: '📍',
   },
   {
     id: 3,
-    title: 'Construisez ensemble',
-    description: 'Rejoignez une communauté qui valorise la coopération et l\'entraide. Chaque geste compte !',
-    icon: '❤️',
+    title: 'Gagnez en aidant',
+    description: 'Proposez votre aide et gagnez des crédits. Utilisez-les pour vous faire aider !',
+    icon: '💰',
+  },
+  {
+    id: 4,
+    title: 'Vous êtes prêt !',
+    description: 'Explorez les tâches près de chez vous ou créez votre première demande d\'aide',
+    icon: '🎉',
   },
 ];
 
@@ -125,7 +131,7 @@ const Onboarding: React.FC = () => {
               onClick={goToAuth}
               icon={<Heart size={20} />}
             >
-              Commencer
+              Explorer
             </Button>
           ) : (
             <Button

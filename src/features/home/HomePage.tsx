@@ -22,6 +22,9 @@ import LocationPermissionBanner from '@/components/ui/LocationPermissionBanner';
 import FilterModal from '@/components/ui/FilterModal';
 import FilterButton from '@/components/ui/FilterButton';
 import FilterBadge from '@/components/ui/FilterBadge';
+import EmptyState from '@/components/ui/EmptyState';
+import EncouragementBanner from '@/components/ui/EncouragementBanner';
+import SuccessMessage from '@/components/ui/SuccessMessage';
 
 // Icons
 import { 
