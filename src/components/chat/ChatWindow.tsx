@@ -246,8 +246,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   const imageInputRef = useRef<HTMLInputElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout>();
 
-  // Emojis populaires
-  const popularEmojis = ['😀', '😂', '😍', '🥰', '😘', '😊', '👍', '❤️', '🔥', '💯', '🎉', '👏'];
+  
 
   useEffect(() => {
     scrollToBottom();
@@ -663,7 +662,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
       {/* Messages */}
         <div 
           ref={messagesContainerRef}
-          className="relative flex-1 overflow-visible p-4 md:p-6 pb-24 md:pb-6 space-y-5 md:space-y-6 bg-gradient-to-b from-transparent to-gray-50/30 dark:to-slate-800/30 h-full"
+          className="relative flex-1 overflow-visible p-4 md:p-6 pb-28 md:pb-44 space-y-5 md:space-y-6 bg-gradient-to-b from-transparent to-gray-50/30 dark:to-slate-800/30 h-full"
         >
         {isLoading ? (
           <div className="flex items-center justify-center h-32">
@@ -929,7 +928,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
       )}
 
         {/* Zone de saisie améliorée */}
-        <div className="sticky bottom-16 md:bottom-0 p-4 md:p-5 border-t border-gray-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
+        <div className="sticky bottom-16 md:bottom-20 lg:bottom-16 z-[60] p-4 md:p-5 border-t border-gray-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm pb-[env(safe-area-inset-bottom)]">
           <div className="input-container glass-effect rounded-xl p-3 md:p-4">
             <div className="flex items-end space-x-2 md:space-x-3">
               {/* Boutons d'actions rapides */}
@@ -972,7 +971,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                         Emojis populaires
                       </p>
                       <div className="grid grid-cols-6 gap-2">
-                        {popularEmojis.map((emoji, index) => (
+                        {['😀','😂','😍','🥰','😘','😊','👍','❤️','🔥','💯','🎉','👏'].map((emoji, index) => (
                           <button
                             key={index}
                             onClick={() => addEmoji(emoji)}

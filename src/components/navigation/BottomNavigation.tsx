@@ -56,12 +56,12 @@ const BottomNavigation: React.FC = () => {
   }
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50">
+    <nav className="fixed bottom-0 left-0 right-0 z-40">
       {/* Gradient backdrop for depth */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent pointer-events-none" />
       
       {/* Main navigation bar with glassmorphism effect */}
-      <div className="relative bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border-t border-gray-200/50 dark:border-gray-700/50 pb-[env(safe-area-inset-bottom)]">
+      <div className="relative bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border-t border-gray-200/50 dark:border-gray-700/50 pb-[env(safe-area-inset-bottom)] z-40">
         {/* Subtle inner glow */}
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-blue-500/20 to-transparent" />
         
