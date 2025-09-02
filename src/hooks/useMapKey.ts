@@ -15,8 +15,8 @@ export const useMapKey = (): string => {
     // Écouter les événements de hot reload de Vite
     if (typeof window !== 'undefined') {
       // Vérifier si nous sommes en mode développement
-      if (import.meta.hot) {
-        import.meta.hot.on('vite:beforeUpdate', handleHotReload);
+      if ((import.meta as any).hot) {
+        (import.meta as any).hot.on('vite:beforeUpdate', handleHotReload);
       }
       
       // Fallback: écouter les indicateurs de hot reload
@@ -26,8 +26,8 @@ export const useMapKey = (): string => {
     }
 
     return () => {
-      if (typeof window !== 'undefined' && import.meta.hot) {
-        import.meta.hot.off('vite:beforeUpdate', handleHotReload);
+      if (typeof window !== 'undefined' && (import.meta as any).hot) {
+        (import.meta as any).hot.off('vite:beforeUpdate', handleHotReload);
       }
     };
   }, []);
