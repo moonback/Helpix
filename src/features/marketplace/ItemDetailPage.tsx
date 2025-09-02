@@ -76,7 +76,7 @@ const ItemDetailPage: React.FC = () => {
         await fetchRentals();
         // Les rentals sont maintenant dans le store, on les récupère
         const { rentals } = useMarketplaceStore.getState();
-        const itemRentals = rentals.filter(rental => rental.item_id === parseInt(itemId));
+        // const itemRentals = rentals.filter(rental => rental.item_id === parseInt(itemId));
         // setRentals(itemRentals); // Variable supprimée
       };
       loadRentals();
