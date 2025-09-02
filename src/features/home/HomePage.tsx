@@ -418,9 +418,9 @@ const HomePage: React.FC = () => {
             >
               <Button
                 onClick={() => navigate('/create-task')}
-                className="group bg-white text-indigo-600 hover:bg-blue-50 px-8 py-4 rounded-2xl font-semibold text-lg shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 min-w-[240px] relative overflow-hidden"
+                className="group  text-indigo-600 hover:bg-blue-50 px-8 py-4 rounded-2xl font-semibold text-lg shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 min-w-[240px] relative overflow-hidden"
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-50 to-indigo-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div className="absolute inset-0  opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <span className="relative flex items-center justify-center">
                   <Plus className="w-5 h-5 mr-2 group-hover:rotate-90 transition-transform duration-300" />
                   {user ? "Créer une nouvelle tâche" : "Créer ma première tâche"}
