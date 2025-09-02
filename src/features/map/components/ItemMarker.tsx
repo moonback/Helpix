@@ -38,20 +38,20 @@ const ItemMarker: React.FC<ItemMarkerProps> = ({ item, userLocation, onOpenModal
           <div className="flex items-center gap-2 mb-2">
             <div className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center"><ShoppingBag size={16} /></div>
             <div>
-              <div className="font-semibold text-gray-900">{item.name}</div>
-              <div className="text-xs text-gray-500">Objet louable</div>
+              <div className="font-semibold text-sm text-gray-900">{item.name}</div>
+              <div className="text-[10px] text-gray-500">Objet louable</div>
             </div>
           </div>
-          <p className="text-sm text-gray-700 mb-2">{item.description}</p>
-          <div className="text-sm text-gray-800 mb-2">{item.daily_price ?? '?'} crédits/jour • Dépôt {item.deposit ?? 0}</div>
+          <p className="text-xs text-gray-700 mb-2">{item.description}</p>
+          <div className="text-xs text-gray-800 mb-2">{item.daily_price ?? '?'} crédits/jour • Dépôt {item.deposit ?? 0}</div>
           {userLocation && item.location && (
-            <div className="text-xs text-primary-600 font-medium mb-2">
+            <div className="text-[10px] text-primary-600 font-medium mb-2">
               {formatDistance(calculateDistance(userLocation.lat, userLocation.lng, item.location.lat, item.location.lng))}
             </div>
           )}
           <div className="flex gap-2">
             <Button size="sm" className="flex-1" onClick={() => onOpenModal(item)}>Demander la location</Button>
-            <a className="text-xs px-2 py-1 border rounded-md hover:bg-gray-50" href={`https://www.google.com/maps/dir/?api=1&destination=${item.location.lat},${item.location.lng}`} target="_blank" rel="noopener noreferrer">Itinéraire</a>
+            <a className="text-[10px] px-2 py-1 border rounded-md hover:bg-gray-50" href={`https://www.google.com/maps/dir/?api=1&destination=${item.location.lat},${item.location.lng}`} target="_blank" rel="noopener noreferrer">Itinéraire</a>
           </div>
         </div>
       </Popup>

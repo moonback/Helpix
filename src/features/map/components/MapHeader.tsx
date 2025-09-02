@@ -43,8 +43,8 @@ const MapHeader: React.FC<MapHeaderProps> = ({
               <MapPin className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-slate-800">Carte des Tâches</h1>
-              <p className="text-sm text-slate-500">
+              <h1 className="text-lg font-bold text-slate-800">Carte des Tâches</h1>
+              <p className="text-xs text-slate-500">
                 Découvrez les opportunités près de chez vous
               </p>
             </div>
@@ -64,7 +64,7 @@ const MapHeader: React.FC<MapHeaderProps> = ({
                 placeholder="Rechercher des tâches..."
                 value={searchQuery}
                 onChange={(e) => onSearchChange(e.target.value)}
-                className="w-64 px-4 py-2 pl-10 pr-4 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                className="w-64 px-4 py-2 pl-10 pr-4 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
               />
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <svg className="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -83,7 +83,7 @@ const MapHeader: React.FC<MapHeaderProps> = ({
               <Filter className="w-4 h-4 mr-2" />
               Filtres
               {activeFiltersCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] rounded-full h-5 w-5 flex items-center justify-center">
                   {activeFiltersCount}
                 </span>
               )}
@@ -95,7 +95,7 @@ const MapHeader: React.FC<MapHeaderProps> = ({
                 onClick={() => onViewChange('map')}
                 variant={mapView === 'map' ? 'primary' : 'ghost'}
                 size="sm"
-                className={`px-3 py-1 text-sm transition-all duration-200 ${
+                className={`px-3 py-1 text-xs transition-all duration-200 ${
                   mapView === 'map' 
                     ? 'bg-blue-600 text-white shadow-sm' 
                     : 'text-slate-600 hover:text-slate-800'
@@ -108,7 +108,7 @@ const MapHeader: React.FC<MapHeaderProps> = ({
                 onClick={() => onViewChange('list')}
                 variant={mapView === 'list' ? 'primary' : 'ghost'}
                 size="sm"
-                className={`px-3 py-1 text-sm transition-all duration-200 ${
+                className={`px-3 py-1 text-xs transition-all duration-200 ${
                   mapView === 'list' 
                     ? 'bg-blue-600 text-white shadow-sm' 
                     : 'text-slate-600 hover:text-slate-800'
@@ -136,10 +136,10 @@ const MapHeader: React.FC<MapHeaderProps> = ({
                 <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
               </div>
               <div>
-                <h1 className="text-base sm:text-lg font-bold text-slate-800 leading-tight">
+                <h1 className="text-sm sm:text-base font-bold text-slate-800 leading-tight">
                   Carte des Tâches
                 </h1>
-                <p className="text-xs sm:text-sm text-slate-500 hidden xs:block">
+                <p className="text-[10px] sm:text-xs text-slate-500 hidden xs:block">
                   Opportunités près de chez vous
                 </p>
               </div>
@@ -151,7 +151,7 @@ const MapHeader: React.FC<MapHeaderProps> = ({
                 onClick={() => onViewChange('map')}
                 variant={mapView === 'map' ? 'primary' : 'ghost'}
                 size="sm"
-                className={`px-2 py-1 text-xs transition-all duration-200 ${
+                className={`px-2 py-1 text-[10px] transition-all duration-200 ${
                   mapView === 'map' 
                     ? 'bg-blue-600 text-white shadow-sm' 
                     : 'text-slate-600 hover:text-slate-800'
@@ -164,7 +164,7 @@ const MapHeader: React.FC<MapHeaderProps> = ({
                 onClick={() => onViewChange('list')}
                 variant={mapView === 'list' ? 'primary' : 'ghost'}
                 size="sm"
-                className={`px-2 py-1 text-xs transition-all duration-200 ${
+                className={`px-2 py-1 text-[10px] transition-all duration-200 ${
                   mapView === 'list' 
                     ? 'bg-blue-600 text-white shadow-sm' 
                     : 'text-slate-600 hover:text-slate-800'
@@ -190,7 +190,7 @@ const MapHeader: React.FC<MapHeaderProps> = ({
                 placeholder="Rechercher..."
                 value={searchQuery}
                 onChange={(e) => onSearchChange(e.target.value)}
-                className="w-full px-3 py-2 pl-9 pr-3 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                className="w-full px-3 py-2 pl-9 pr-3 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
               />
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <svg className="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -208,7 +208,7 @@ const MapHeader: React.FC<MapHeaderProps> = ({
             >
               <Filter className="w-4 h-4" />
               {activeFiltersCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] rounded-full h-4 w-4 flex items-center justify-center">
                   {activeFiltersCount}
                 </span>
               )}

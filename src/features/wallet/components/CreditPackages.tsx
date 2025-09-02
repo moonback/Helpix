@@ -73,10 +73,10 @@ const CreditPackages: React.FC = () => {
       <div className="space-y-6">
         {/* Header */}
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+          <h2 className="text-xl font-bold text-gray-900 mb-2">
             Packages de crédits
           </h2>
-          <p className="text-gray-600">
+          <p className="text-sm text-gray-600">
             Choisissez le package qui correspond à vos besoins
           </p>
         </div>
@@ -88,12 +88,12 @@ const CreditPackages: React.FC = () => {
               <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
                 <TrendingUp className="w-4 h-4 text-white" />
               </div>
-              <span className="text-sm font-medium text-gray-700">Solde actuel</span>
+              <span className="text-xs font-medium text-gray-700">Solde actuel</span>
             </div>
-            <div className="text-3xl font-bold text-blue-600 mb-1">
+            <div className="text-2xl font-bold text-blue-600 mb-1">
               {wallet?.balance || 0} crédits
             </div>
-            <p className="text-sm text-gray-600">
+            <p className="text-xs text-gray-600">
               Total gagné: {wallet?.total_earned || 0} crédits
             </p>
           </div>
@@ -116,7 +116,7 @@ const CreditPackages: React.FC = () => {
               }`}>
                 {pkg.popular && (
                   <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                    <span className="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-semibold px-3 py-1 rounded-full">
+                    <span className="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-[10px] font-semibold px-3 py-1 rounded-full">
                       Populaire
                     </span>
                   </div>
@@ -129,27 +129,27 @@ const CreditPackages: React.FC = () => {
                   </div>
 
                   {/* Nom et description */}
-                  <h3 className="font-bold text-gray-900 mb-2">{pkg.name}</h3>
-                  <p className="text-sm text-gray-600 mb-4">{pkg.description}</p>
+                  <h3 className="font-bold text-sm text-gray-900 mb-2">{pkg.name}</h3>
+                  <p className="text-xs text-gray-600 mb-4">{pkg.description}</p>
 
                   {/* Crédits */}
                   <div className="space-y-2 mb-4">
-                    <div className="text-2xl font-bold text-gray-900">
+                    <div className="text-xl font-bold text-gray-900">
                       {getTotalCredits(pkg)} crédits
                     </div>
                     {pkg.bonus > 0 && (
-                      <div className="text-sm text-green-600 font-medium">
+                      <div className="text-xs text-green-600 font-medium">
                         +{pkg.bonus} bonus
                       </div>
                     )}
-                                         <div className="text-lg font-semibold text-blue-600">
+                                         <div className="text-base font-semibold text-blue-600">
                        {formatEuros(pkg.price)}
                      </div>
-                     <div className="text-xs text-gray-500">
+                     <div className="text-[10px] text-gray-500">
                        {getPricePerCredit(pkg)}/crédit
                      </div>
                     {pkg.savings && pkg.savings !== '0%' && (
-                      <div className="text-xs text-green-600 font-medium">
+                      <div className="text-[10px] text-green-600 font-medium">
                         Économie: {pkg.savings}
                       </div>
                     )}
@@ -176,25 +176,25 @@ const CreditPackages: React.FC = () => {
         {/* Informations supplémentaires */}
         <Card className="bg-gradient-to-r from-gray-50 to-blue-50 border-gray-200">
           <div className="text-center space-y-3">
-            <h4 className="font-semibold text-gray-900">
+            <h4 className="font-semibold text-sm text-gray-900">
               Comment utiliser vos crédits ?
             </h4>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-gray-600">
               <div className="flex items-center justify-center gap-2">
                 <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
-                  <span className="text-blue-600 font-bold text-xs">1</span>
+                  <span className="text-blue-600 font-bold text-[10px]">1</span>
                 </div>
                 <span>Créer des tâches</span>
               </div>
               <div className="flex items-center justify-center gap-2">
                 <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
-                  <span className="text-green-600 font-bold text-xs">2</span>
+                  <span className="text-green-600 font-bold text-[10px]">2</span>
                 </div>
                 <span>Aider les autres</span>
               </div>
               <div className="flex items-center justify-center gap-2">
                 <div className="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center">
-                  <span className="text-purple-600 font-bold text-xs">3</span>
+                  <span className="text-purple-600 font-bold text-[10px]">3</span>
                 </div>
                 <span>Gagner des crédits</span>
               </div>

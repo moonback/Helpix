@@ -69,11 +69,11 @@ const TaskCard: React.FC<TaskCardProps> = ({
               {isCompleted && (
                 <div className="flex items-center space-x-2 text-green-600 bg-green-50 px-3 py-1 rounded-full">
                   <CheckCircle className="w-4 h-4" />
-                  <span className="text-sm font-medium">Terminée</span>
+                  <span className="text-xs font-medium">Terminée</span>
                 </div>
               )}
               
-              <h3 className={`text-xl font-bold ${
+              <h3 className={`text-lg font-bold ${
                 isCompleted ? 'text-gray-500' : 'text-gray-900'
               }`}>
                 {task.title}
@@ -82,19 +82,19 @@ const TaskCard: React.FC<TaskCardProps> = ({
 
             {/* Badges */}
             <div className="flex items-center space-x-2 mb-4">
-              <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(task.status)}`}>
+              <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium border ${getStatusColor(task.status)}`}>
                 {STATUS_LABELS[task.status as keyof typeof STATUS_LABELS] || task.status}
               </span>
-              <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getPriorityColor(task.priority)}`}>
+              <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium border ${getPriorityColor(task.priority)}`}>
                 {PRIORITY_LABELS[task.priority as keyof typeof PRIORITY_LABELS] || task.priority}
               </span>
-              <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getComplexityColor(task.complexity)}`}>
+              <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium border ${getComplexityColor(task.complexity)}`}>
                 {COMPLEXITY_LABELS[task.complexity as keyof typeof COMPLEXITY_LABELS] || task.complexity}
               </span>
             </div>
             
             {/* Description */}
-            <p className={`mb-4 line-clamp-2 ${
+            <p className={`mb-4 line-clamp-2 text-sm ${
               isCompleted ? 'text-gray-400' : 'text-gray-600'
             }`}>
               {truncateText(task.description, 120)}

@@ -280,7 +280,7 @@ const LandingPage = () => {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4, duration: 0.8 }}
-              className="text-4xl sm:text-5xl lg:text-7xl font-bold text-slate-800 mb-6 leading-tight"
+              className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-800 mb-6 leading-tight"
             >
               Connectez-vous à votre{' '}
               <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
@@ -293,7 +293,7 @@ const LandingPage = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6, duration: 0.8 }}
-              className="text-lg sm:text-xl text-slate-600 mb-10 max-w-4xl mx-auto leading-relaxed"
+              className="text-base sm:text-lg text-slate-600 mb-10 max-w-4xl mx-auto leading-relaxed"
             >
               Demandez ou proposez de l'aide en quelques clics. Gagnez des crédits en rendant service à vos voisins.
             </motion.p>
@@ -305,12 +305,12 @@ const LandingPage = () => {
               transition={{ delay: 0.8, duration: 0.6 }}
               className="flex flex-col sm:flex-row gap-4 justify-center mb-16"
             >
-              <Button onClick={() => navigate('/register')} className="px-8 py-4 text-lg">
-                <UserCheck className="w-5 h-5 mr-2" />
+              <Button onClick={() => navigate('/register')} className="px-6 py-3 text-base">
+                <UserCheck className="w-4 h-4 mr-2" />
                 Commencer maintenant
               </Button>
-              <Button onClick={() => setIsVideoPlaying(true)} variant="outline" className="px-8 py-4 text-lg">
-                <Play className="w-5 h-5 mr-2" />
+              <Button onClick={() => setIsVideoPlaying(true)} variant="outline" className="px-6 py-3 text-base">
+                <Play className="w-4 h-4 mr-2" />
                 Voir comment ça marche
               </Button>
             </motion.div>
@@ -333,8 +333,8 @@ const LandingPage = () => {
                   <div className="text-blue-600 mb-2 sm:mb-3 flex justify-center">
                     {stat.icon}
                   </div>
-                  <div className="text-xl sm:text-3xl font-bold text-slate-800 mb-1 sm:mb-2">{stat.value}</div>
-                  <div className="text-slate-600 text-xs sm:text-sm font-medium">{stat.label}</div>
+                  <div className="text-lg sm:text-2xl font-bold text-slate-800 mb-1 sm:mb-2">{stat.value}</div>
+                  <div className="text-slate-600 text-[10px] sm:text-xs font-medium">{stat.label}</div>
                 </motion.div>
               ))}
             </motion.div>
@@ -372,10 +372,10 @@ const LandingPage = () => {
             viewport={{ once: true }}
             className="text-center mb-12 sm:mb-16"
           >
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-800 mb-4 sm:mb-6">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-800 mb-4 sm:mb-6">
               Pourquoi choisir <span className="text-blue-600">Helpix</span> ?
             </h2>
-            <p className="text-lg sm:text-xl text-slate-600 max-w-3xl mx-auto">
+            <p className="text-base sm:text-lg text-slate-600 max-w-3xl mx-auto">
               Des outils modernes pour faciliter l'entraide et créer des liens durables dans votre communauté.
             </p>
           </motion.div>
@@ -394,10 +394,10 @@ const LandingPage = () => {
                   <div className={`w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-r ${feature.color} rounded-2xl flex items-center justify-center mb-4 sm:mb-6 text-white group-hover:scale-110 transition-transform duration-300`}>
                     {feature.icon}
                   </div>
-                  <h3 className="text-lg sm:text-xl font-bold text-slate-800 mb-2 sm:mb-4 group-hover:text-blue-600 transition-colors">
+                  <h3 className="text-base sm:text-lg font-bold text-slate-800 mb-2 sm:mb-4 group-hover:text-blue-600 transition-colors">
                     {feature.title}
                   </h3>
-                  <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
+                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
                     {feature.description}
                   </p>
                 </Card>
@@ -417,10 +417,10 @@ const LandingPage = () => {
             viewport={{ once: true }}
             className="text-center mb-12 sm:mb-16"
           >
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-800 mb-4 sm:mb-6">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-800 mb-4 sm:mb-6">
               Catégories <span className="text-blue-600">populaires</span>
             </h2>
-            <p className="text-lg sm:text-xl text-slate-600 max-w-3xl mx-auto">
+            <p className="text-base sm:text-lg text-slate-600 max-w-3xl mx-auto">
               Découvrez les domaines où vous pouvez aider ou recevoir de l'aide de la communauté.
             </p>
           </motion.div>
@@ -439,10 +439,10 @@ const LandingPage = () => {
                   <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-2 sm:mb-4 text-white group-hover:scale-110 transition-transform duration-300">
                     {category.icon}
                   </div>
-                  <h3 className="text-base sm:text-lg font-semibold text-slate-800 mb-1 sm:mb-2 group-hover:text-blue-600 transition-colors">
+                  <h3 className="text-sm sm:text-base font-semibold text-slate-800 mb-1 sm:mb-2 group-hover:text-blue-600 transition-colors">
                     {category.name}
                   </h3>
-                  <p className="text-xs sm:text-sm text-slate-500">{category.count}</p>
+                  <p className="text-[10px] sm:text-xs text-slate-500">{category.count}</p>
                 </Card>
               </motion.div>
             ))}
@@ -455,7 +455,7 @@ const LandingPage = () => {
             viewport={{ once: true }}
             className="text-center mt-8 sm:mt-12"
           >
-            <Button onClick={() => navigate('/register')} className="px-6 py-3">
+            <Button onClick={() => navigate('/register')} className="px-4 py-2 text-sm">
               Explorer toutes les catégories
               <ChevronRight className="w-5 h-5 ml-2" />
             </Button>
