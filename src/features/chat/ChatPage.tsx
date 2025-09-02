@@ -4,7 +4,8 @@ import { useMessageStore } from '@/stores/messageStore';
 import { Conversation } from '@/types';
 import ConversationList from '@/components/chat/ConversationList';
 import ChatWindow from '@/components/chat/ChatWindow';
-import { Search, MessageCircle } from 'lucide-react';
+import { Search, MessageCircle, RefreshCw, Filter, Clock } from 'lucide-react';
+import Button from '@/components/ui/Button';
 
 // Enhanced CSS styles with more modern animations
 const customStyles = `
@@ -113,6 +114,11 @@ const ChatPage: React.FC = () => {
   const [isDeletingMultiple, setIsDeletingMultiple] = useState(false);
   const [notifications, setNotifications] = useState<NotificationState[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
+  const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
+  const [filterOption, setFilterOption] = useState<'all' | 'unread' | 'favorites' | 'archived'>('all');
+  const [sortOption, setSortOption] = useState<'recent' | 'alphabetical' | 'unread'>('recent');
 
   // Enhanced notification system
   const addNotification = useCallback((message: string, type: NotificationState['type'] = 'info') => {
@@ -130,6 +136,12 @@ const ChatPage: React.FC = () => {
   const removeNotification = useCallback((id: string) => {
     setNotifications(prev => prev.filter(n => n.id !== id));
   }, []);
+
+  const handleRefresh = useCallback(() => {
+    // Logique de rafraîchissement
+    setLastUpdate(new Date());
+    addNotification('Conversations actualisées', 'success');
+  }, [addNotification]);
 
 
 
@@ -224,7 +236,7 @@ const ChatPage: React.FC = () => {
                   </svg>
                 )}
               </div>
-              <span className="font-medium flex-1">{notification.message}</span>
+              <span className="font-medium flex-1 text-sm">{notification.message}</span>
               <button
                 onClick={() => removeNotification(notification.id)}
                 className="w-5 h-5 hover:bg-white/20 rounded-full flex items-center justify-center transition-colors"
@@ -255,23 +267,115 @@ const ChatPage: React.FC = () => {
                 <MessageCircle className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-white">Messages</h1>
-                <p className="text-blue-100 text-xs">{conversations.length} conversations</p>
+                <h1 className="text-lg font-bold text-white">Messages</h1>
+                <p className="text-blue-100 text-[10px]">{conversations.length} conversations</p>
               </div>
             </div>
+            
+            {/* Actions du header */}
             <div className="flex items-center space-x-2">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <input
-                  type="text"
-                  placeholder="Rechercher..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 pr-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-blue-100 text-sm focus:outline-none focus:ring-2 focus:ring-white/30 w-40"
-                />
+              <Button
+                onClick={() => setShowSearch(!showSearch)}
+                variant="ghost"
+                size="sm"
+                className={`p-2 hover:bg-white/20 rounded-xl transition-all duration-200 hover:scale-105 ${
+                  showSearch ? 'bg-white/20' : ''
+                }`}
+                title="Rechercher des conversations"
+              >
+                <Search className="w-4 h-4 text-white" />
+              </Button>
+              
+              <Button
+                onClick={handleRefresh}
+                variant="ghost"
+                size="sm"
+                className="p-2 hover:bg-white/20 rounded-xl transition-all duration-200 hover:scale-105"
+                title="Actualiser les conversations"
+              >
+                <RefreshCw className="w-4 h-4 text-white" />
+              </Button>
+              
+              <Button
+                onClick={() => setShowFilters(!showFilters)}
+                variant="ghost"
+                size="sm"
+                className={`p-2 hover:bg-white/20 rounded-xl transition-all duration-200 hover:scale-105 ${
+                  showFilters ? 'bg-white/20' : ''
+                }`}
+                title="Filtres et tri"
+              >
+                <Filter className="w-4 h-4 text-white" />
+              </Button>
+              
+              {/* Indicateur de dernière mise à jour */}
+              <div className="hidden sm:flex items-center space-x-1 text-[10px] text-blue-100 ml-2">
+                <Clock className="w-3 h-3" />
+                <span>{lastUpdate.toLocaleTimeString('fr-FR', { timeStyle: 'short' })}</span>
               </div>
             </div>
           </div>
+          
+          {/* Barre de recherche */}
+          {showSearch && (
+            <div className="p-4 border-b border-gray-200 dark:border-slate-700 animate-fadeIn">
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <input
+                  type="text"
+                  placeholder="Rechercher des conversations..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-12 pr-4 py-3 bg-white/50 dark:bg-slate-800/50 border border-white/30 dark:border-slate-600/30 rounded-xl backdrop-blur-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                    title="Effacer la recherche"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+          
+          {/* Filtres et tri */}
+          {showFilters && (
+            <div className="p-4 bg-white/30 dark:bg-slate-800/30 border-b border-gray-200 dark:border-slate-700 animate-fadeIn">
+              <div className="flex flex-wrap gap-4">
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Filtrer :</span>
+                  <select 
+                    value={filterOption}
+                    onChange={(e) => setFilterOption(e.target.value as any)}
+                    className="text-sm bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg px-2 py-1"
+                  >
+                    <option value="all">Toutes</option>
+                    <option value="unread">Non lues</option>
+                    <option value="favorites">Favorites</option>
+                    <option value="archived">Archivées</option>
+                  </select>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Trier par :</span>
+                  <select 
+                    value={sortOption}
+                    onChange={(e) => setSortOption(e.target.value as any)}
+                    className="text-sm bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg px-2 py-1"
+                  >
+                    <option value="recent">Plus récent</option>
+                    <option value="alphabetical">Alphabétique</option>
+                    <option value="unread">Non lues</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          )}
           
           <div className={`flex-1 transition-all duration-500 ease-in-out overflow-hidden`}>
             <ConversationList
@@ -283,6 +387,9 @@ const ChatPage: React.FC = () => {
               onSelectAll={handleSelectAll}
               onDeleteSelected={handleDeleteSelected}
               isDeletingMultiple={isDeletingMultiple}
+              searchQuery={searchQuery}
+              filterOption={filterOption}
+              sortOption={sortOption}
             />
           </div>
         </div>
@@ -301,10 +408,10 @@ const ChatPage: React.FC = () => {
                   <MessageCircle className="w-16 h-16 text-white" />
                 </div>
                 <div>
-                  <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
                     Bienvenue dans la messagerie
                   </h2>
-                  <p className="text-gray-500 dark:text-gray-400 text-lg leading-relaxed">
+                  <p className="text-gray-500 dark:text-gray-400 text-base leading-relaxed">
                     Sélectionnez une conversation pour commencer à discuter
                   </p>
                 </div>

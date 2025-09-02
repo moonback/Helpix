@@ -3,14 +3,12 @@ import { useMessageStore } from '@/stores/messageStore';
 import { useAuthStore } from '@/stores/authStore';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
-import Input from '@/components/ui/Input';
 import { supabase } from '@/lib/supabase';
 import { 
   Trash2, 
   AlertTriangle, 
   CheckSquare, 
   Square, 
-  Search,
   MessageSquare,
   Users,
   Pin,
@@ -19,10 +17,7 @@ import {
   Star,
   Volume2,
   VolumeX,
-  Filter,
-  Wifi,
   WifiOff,
-  RefreshCw,
   Eye
 } from 'lucide-react';
 
@@ -35,10 +30,12 @@ interface ConversationListProps {
   onSelectAll?: () => void;
   onDeleteSelected?: () => void;
   isDeletingMultiple?: boolean;
+  searchQuery?: string;
+  filterOption?: 'all' | 'unread' | 'favorites' | 'archived';
+  sortOption?: 'recent' | 'alphabetical' | 'unread';
 }
 
-type SortOption = 'recent' | 'alphabetical' | 'unread';
-type FilterOption = 'all' | 'unread' | 'favorites' | 'archived';
+
 
 const ConversationList: React.FC<ConversationListProps> = ({ 
   onConversationSelect,
@@ -48,7 +45,10 @@ const ConversationList: React.FC<ConversationListProps> = ({
   onToggleMultiSelect,
   onSelectAll,
   onDeleteSelected,
-  isDeletingMultiple = false
+  isDeletingMultiple = false,
+  searchQuery = '',
+  filterOption = 'all',
+  sortOption = 'recent'
 }) => {
   const { 
     conversations, 
@@ -62,60 +62,16 @@ const ConversationList: React.FC<ConversationListProps> = ({
   } = useMessageStore();
   const { user } = useAuthStore();
   
-  const [searchTerm, setSearchTerm] = useState('');
   const [conversationToDelete, setConversationToDelete] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showContextMenu, setShowContextMenu] = useState<string | null>(null);
-  const [sortOption, setSortOption] = useState<SortOption>('recent');
-  const [filterOption, setFilterOption] = useState<FilterOption>('all');
-  const [showFilters, setShowFilters] = useState(false);
-  const [isOnline, setIsOnline] = useState(navigator.onLine);
-  const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
   const [userNamesMap, setUserNamesMap] = useState<Record<string, string>>({});
 
 
-  // Gestion de l'état de connexion
-  useEffect(() => {
-    const handleOnline = () => {
-      setIsOnline(true);
-      fetchConversations();
-    };
-    const handleOffline = () => setIsOnline(false);
-
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-    
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
-  }, [fetchConversations]);
-
-  // Chargement et rafraîchissement des conversations
+  // Chargement des conversations
   useEffect(() => {
     fetchConversations();
-    
-    const interval = setInterval(() => {
-      if (!document.hidden && isOnline) {
-        fetchConversations();
-        setLastUpdate(new Date());
-      }
-    }, 60000); // Rafraîchir toutes les minutes
-    
-    const handleVisibilityChange = () => {
-      if (!document.hidden && isOnline) {
-        fetchConversations();
-        setLastUpdate(new Date());
-      }
-    };
-    
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    
-    return () => {
-      clearInterval(interval);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, [fetchConversations, isOnline]);
+  }, [fetchConversations]);
 
   // Récupérer les noms des utilisateurs participants pour affichage
   useEffect(() => {
@@ -182,16 +138,14 @@ const ConversationList: React.FC<ConversationListProps> = ({
   const filteredAndSortedConversations = useMemo(() => {
     let filtered = conversations.filter(conv => {
       // Recherche textuelle
-      if (searchTerm) {
-        const searchLower = searchTerm.toLowerCase();
+      if (searchQuery) {
+        const searchLower = searchQuery.toLowerCase();
         const matchesParticipants = conv.participants?.some(p => 
           p.toLowerCase().includes(searchLower)
         );
         const matchesLastMessage = (conv.lastMessage?.content || '')
           .toLowerCase()
           .includes(searchLower);
-        // Le modèle de conversation n'a pas de propriété `name` typée, laissons
-        // la recherche se baser sur participants et dernier message uniquement.
         if (!matchesParticipants && !matchesLastMessage) return false;
       }
 
@@ -223,7 +177,7 @@ const ConversationList: React.FC<ConversationListProps> = ({
           return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
       }
     });
-  }, [conversations, searchTerm, sortOption, filterOption]);
+  }, [conversations, searchQuery, sortOption, filterOption]);
 
   const handleDeleteConversation = useCallback(async (conversationId: string) => {
     setIsDeleting(true);
@@ -260,10 +214,7 @@ const ConversationList: React.FC<ConversationListProps> = ({
     }
   }, [markConversationAsRead, toggleConversationFavorite, archiveConversation]);
 
-  const handleRefresh = useCallback(() => {
-    fetchConversations();
-    setLastUpdate(new Date());
-  }, [fetchConversations]);
+
 
   const getConversationName = (conversation: any) => {
     if (conversation.name) return conversation.name;
@@ -495,10 +446,12 @@ const ConversationList: React.FC<ConversationListProps> = ({
             </h3>
             <p className="text-red-600 dark:text-red-400 text-sm mb-4">{error}</p>
             <Button 
-              onClick={handleRefresh}
+              onClick={() => window.location.reload()}
               className="bg-red-600 hover:bg-red-700 text-white"
             >
-              <RefreshCw className="w-4 h-4 mr-2" />
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
               Réessayer
             </Button>
           </div>
@@ -514,103 +467,7 @@ const ConversationList: React.FC<ConversationListProps> = ({
       
       <div className="h-full w-full flex flex-col bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 overflow-hidden">
         
-        {/* Header avec état de connexion */}
-        <div className="glass-effect border-b border-white/20 dark:border-slate-700/50 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center space-x-3">
-              <h2 className="text-2xl font-bold gradient-text">Messages</h2>
-              <div className="flex items-center space-x-2">
-                {isOnline ? (
-                  <div className="flex items-center space-x-1">
-                    <div className="w-2 h-2 bg-green-500 rounded-full status-dot"></div>
-                    <Wifi className="w-4 h-4 text-green-500" />
-                  </div>
-                ) : (
-                  <div className="flex items-center space-x-1">
-                    <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                    <WifiOff className="w-4 h-4 text-red-500" />
-                  </div>
-                )}
-              </div>
-            </div>
-            
-      <div className="flex items-center space-x-2">
-              <Button
-                onClick={handleRefresh}
-                variant="ghost"
-                size="sm"
-                className="p-2 hover:bg-white/20 dark:hover:bg-slate-700/50 rounded-xl"
-                disabled={isLoading}
-                title="Actualiser"
-              >
-                <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
-              </Button>
-              
-              <Button
-                onClick={() => setShowFilters(!showFilters)}
-                variant="ghost"
-                size="sm"
-                className="p-2 hover:bg-white/20 dark:hover:bg-slate-700/50 rounded-xl"
-                title="Filtres et tri"
-              >
-                <Filter className="w-5 h-5" />
-              </Button>
-              
-            </div>
-          </div>
-          
-          {/* Barre de recherche */}
-          <div className="relative">
-            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-        <Input
-          type="text"
-          placeholder="Rechercher des conversations..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-12 bg-white/50 dark:bg-slate-800/50 border-white/30 dark:border-slate-600/30 rounded-xl backdrop-blur-sm focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          
-          {/* Filtres et tri */}
-          {showFilters && (
-            <div className="mt-4 p-4 bg-white/30 dark:bg-slate-800/30 rounded-xl backdrop-blur-sm animate-fadeIn">
-              <div className="flex flex-wrap gap-4">
-                <div className="flex items-center space-x-2">
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Filtrer :</span>
-                  <select
-                    value={filterOption}
-                    onChange={(e) => setFilterOption(e.target.value as FilterOption)}
-                    className="text-sm bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg px-2 py-1"
-                  >
-                    <option value="all">Toutes</option>
-                    <option value="unread">Non lues</option>
-                    <option value="favorites">Favorites</option>
-                    <option value="archived">Archivées</option>
-                  </select>
-                </div>
-                
-            <div className="flex items-center space-x-2">
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Trier par :</span>
-                  <select
-                    value={sortOption}
-                    onChange={(e) => setSortOption(e.target.value as SortOption)}
-                    className="text-sm bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg px-2 py-1"
-                  >
-                    <option value="recent">Plus récent</option>
-                    <option value="alphabetical">Alphabétique</option>
-                    <option value="unread">Non lues</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-          )}
-          
-          {/* Dernière mise à jour */}
-          <div className="mt-3 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-            <span>{filteredAndSortedConversations.length} conversation(s)</span>
-            <span>Mise à jour : {lastUpdate.toLocaleTimeString('fr-FR', { timeStyle: 'short' })}</span>
-          </div>
-        </div>
+        
 
         {/* Barre d'outils multi-sélection */}
         {isMultiSelectMode && (
@@ -626,7 +483,7 @@ const ConversationList: React.FC<ConversationListProps> = ({
                   ) : (
                     <Square className="w-5 h-5" />
                   )}
-                  <span className="text-sm">
+                  <span className="text-xs">
                     {selectedConversations.size === filteredAndSortedConversations.length 
                       ? 'Tout désélectionner' 
                       : 'Tout sélectionner'
@@ -634,7 +491,7 @@ const ConversationList: React.FC<ConversationListProps> = ({
                   </span>
                 </button>
                 <div className="h-4 w-px bg-blue-300"></div>
-                <span className="text-sm text-blue-600 dark:text-blue-400 font-medium">
+                <span className="text-xs text-blue-600 dark:text-blue-400 font-medium">
                   {selectedConversations.size} sélectionnée(s)
                       </span>
                     </div>
@@ -736,7 +593,7 @@ const ConversationList: React.FC<ConversationListProps> = ({
                     {/* Contenu de la conversation */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-1">
-                        <h3 className="font-semibold text-gray-900 dark:text-white truncate">
+                        <h3 className="font-semibold text-gray-900 dark:text-white truncate text-sm">
                           {getConversationName(conversation)}
                         </h3>
                         <div className="flex items-center space-x-2 flex-shrink-0">
@@ -746,23 +603,23 @@ const ConversationList: React.FC<ConversationListProps> = ({
                           {conversation.isPinned && (
                             <Pin className="w-4 h-4 text-blue-500" />
                           )}
-                          <span className="text-xs text-gray-500 dark:text-gray-400">
+                          <span className="text-[10px] text-gray-500 dark:text-gray-400">
                             {formatLastSeen(conversation.updatedAt)}
                           </span>
         </div>
       </div>
 
           <div className="flex items-center justify-between">
-                        <p className="text-sm text-gray-600 dark:text-gray-300 truncate pr-2">
+                        <p className="text-xs text-gray-600 dark:text-gray-300 truncate pr-2">
                           {conversation.lastMessage ? (
                             <span className="flex items-center space-x-1">
                               {conversation.lastMessage.sender_id === user?.id && (
-                                <span className="text-blue-500">Vous:</span>
+                                <span className="text-blue-500 text-[10px]">Vous:</span>
                               )}
                               <span>{conversation.lastMessage.content}</span>
                             </span>
                           ) : (
-                            <span className="italic text-gray-400">Aucun message</span>
+                            <span className="italic text-gray-400 text-[10px]">Aucun message</span>
                           )}
                         </p>
                         
@@ -884,47 +741,27 @@ const ConversationList: React.FC<ConversationListProps> = ({
             /* État vide */
             <div className="h-full flex items-center justify-center p-8">
               <div className="text-center space-y-6 max-w-md">
-                <div className="w-24 h-24 mx-auto bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center animate-pulse-slow">
+                <div className="w-24 h-24 mx-auto bg-gradient-to-br from-blue-400 to-blue-500 rounded-full flex items-center justify-center animate-pulse-slow">
                   <MessageSquare className="w-12 h-12 text-white" />
                 </div>
                 
                 <div className="space-y-2">
-                  <h3 className="text-2xl font-bold gradient-text">
-                    {searchTerm ? 'Aucun résultat' : 'Pas encore de conversations'}
+                  <h3 className="text-xl font-bold ">
+                    {searchQuery ? 'Aucun résultat' : 'Pas encore de conversations'}
                   </h3>
-                  <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-                    {searchTerm 
-                      ? `Aucune conversation ne correspond à "${searchTerm}"`
+                  <p className="text-gray-600 dark:text-gray-400 leading-relaxed text-sm">
+                    {searchQuery 
+                      ? `Aucune conversation ne correspond à "${searchQuery}"`
                       : 'Les nouvelles conversations se créent depuis les tâches'
                     }
                   </p>
                 </div>
-                
-                {/* CTA création retiré */}
-                
-                {searchTerm && (
-                  <Button
-                    onClick={() => setSearchTerm('')}
-                    variant="outline"
-                    className="px-6 py-2 rounded-xl"
-                  >
-                    Effacer la recherche
-                  </Button>
-                )}
               </div>
             </div>
           )}
         </div>
         
-        {/* Indicateur de chargement en bas */}
-        {isLoading && conversations.length > 0 && (
-          <div className="p-4 border-t border-gray-200 dark:border-slate-700 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm">
-            <div className="flex items-center justify-center space-x-2">
-              <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-500 border-t-transparent"></div>
-              <span className="text-sm text-gray-600 dark:text-gray-400">Actualisation...</span>
-            </div>
-          </div>
-      )}
+
     </div>
     </>
   );
