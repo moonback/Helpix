@@ -43,6 +43,13 @@
 
 ### ✅ **MVP Disponible**
 
+### 🆕 **Nouvelles Fonctionnalités (Décembre 2024)**
+- **Marketplace complet** : Système de location d'objets entièrement refondu
+- **Gestion des cautions** : Système escrow pour sécuriser les transactions
+- **Interface de locations** : Tableau de bord dédié aux propriétaires et locataires
+- **Filtrage intelligent** : Les tâches terminées n'apparaissent plus sur la carte
+- **Optimisations performance** : Amélioration du temps de chargement et de la réactivité
+
 #### **🔐 Authentification & Profil**
 - Inscription/connexion sécurisée avec Supabase Auth
 - Profil utilisateur complet avec géolocalisation
@@ -56,12 +63,14 @@
 - Statuts de progression : ouvert → en cours → terminé
 - Système d'offres d'aide et assignation
 
-#### **💰 Système de Crédits**
+#### **💰 Système de Crédits & Wallet**
 - Portefeuille virtuel avec transactions sécurisées
 - Achat de crédits via Stripe (packages optimisés)
 - Gains automatiques pour services rendus
 - Système de retrait vers comptes bancaires
+- Gestion des cautions et dépôts (escrow)
 - Historique complet des transactions
+- Système de crédits réservés pour les locations
 
 #### **💬 Messagerie Temps Réel**
 - Chat instantané entre utilisateurs
@@ -70,10 +79,11 @@
 - Historique des messages synchronisé
 
 #### **🗺️ Géolocalisation Avancée**
-- Carte interactive avec tâches et objets à louer
+- Carte interactive avec tâches géolocalisées
 - Recherche par proximité (rayon personnalisable)
 - Géocodage automatique d'adresses
 - Affichage d'informations de localisation détaillées
+- Filtrage des tâches terminées (non affichées sur la carte)
 
 #### **📱 Interface Responsive**
 - Design mobile-first avec Tailwind CSS
@@ -87,11 +97,16 @@
 - Métriques d'activité en temps réel
 - Suggestions basées sur la localisation
 
-#### **🏪 Système de Location**
-- Marketplace d'objets à louer
-- Intégration carte pour visualisation
-- Système de réservation et paiement
-- Gestion des dépôts et retours
+#### **🏪 Marketplace & Location**
+- **Catalogue d'objets** : Gestion complète d'objets à louer avec catégories
+- **Filtres avancés** : Par catégorie, condition, prix, distance, note
+- **Système de réservation** : Calendrier intégré avec gestion des disponibilités
+- **Gestion des dépôts** : Système de cautions sécurisées (escrow)
+- **Avis et notation** : Système de reviews pour les objets et propriétaires
+- **Recherche géolocalisée** : Trouvez des objets disponibles près de vous
+- **Interface de gestion** : Tableau de bord pour propriétaires et locataires
+- **Statuts de location** : Demande → Acceptée → Active → Terminée
+- **Paiements automatiques** : Gestion des transactions et remboursements
 
 ## 🛠️ Stack Technique
 
@@ -122,6 +137,8 @@
 - **Jest + Testing Library** - Tests unitaires et d'intégration
 - **TypeScript strict** - Vérification de types
 - **Supabase CLI** - Développement local
+- **React-Leaflet** - Cartes interactives
+- **Framer Motion** - Animations et transitions
 
 ## 🚀 Installation et Configuration
 
@@ -220,7 +237,8 @@ helpix/
 │   │   ├── edit/            # Modification de tâches
 │   │   ├── task-detail/     # Détail des tâches
 │   │   ├── help-offers/     # Offres d'aide
-│   │   ├── rentals/         # Système de location
+│   │   ├── marketplace/     # Marketplace et location d'objets
+│   │   ├── rentals/         # Gestion des locations
 │   │   └── landing/         # Page d'atterrissage
 │   ├── hooks/               # Hooks personnalisés
 │   │   ├── useAuth.ts       # Authentification
@@ -231,7 +249,8 @@ helpix/
 │   │   ├── authStore.ts     # État authentification
 │   │   ├── taskStore.ts     # État des tâches
 │   │   ├── messageStore.ts  # État des messages
-│   │   └── helpOfferStore.ts # État des offres
+│   │   ├── helpOfferStore.ts # État des offres
+│   │   └── marketplaceStore.ts # État du marketplace
 │   ├── lib/                 # Utilitaires et configurations
 │   │   ├── supabase.ts      # Client Supabase
 │   │   ├── utils.ts         # Fonctions utilitaires
@@ -380,9 +399,12 @@ Nous utilisons [Conventional Commits](https://www.conventionalcommits.org/):
 - ✅ Interface responsive
 
 ### **🔥 Phase 2 : V1.0 (En Cours)**
+- ✅ Marketplace complet avec location d'objets
+- ✅ Système de cautions et dépôts (escrow)
+- ✅ Interface de gestion des locations
+- ✅ Système d'avis et de notation des objets
 - 🚧 Messagerie temps réel avancée
 - 🚧 Notifications push
-- 🚧 Système de notation complet
 - 🚧 Paiements Stripe intégrés
 - 🚧 Optimisations performance
 
@@ -422,6 +444,8 @@ Nous utilisons [Conventional Commits](https://www.conventionalcommits.org/):
 - **Chiffrement** des données sensibles
 - **HTTPS** obligatoire en production
 - **CORS** configuré strictement
+- **Système escrow** pour sécuriser les transactions de location
+- **Gestion des cautions** avec blocage automatique des crédits
 
 ### **Conformité**
 - **RGPD** compliant (données européennes)
@@ -497,4 +521,4 @@ Ce projet s'inspire des valeurs de solidarité, d'entraide et de communauté. No
 
 ---
 
-*Dernière mise à jour : Janvier 2024*
+*Dernière mise à jour : 02/09/2025*
