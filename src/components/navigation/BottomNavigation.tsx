@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
 import { useMessageStore } from '@/stores/messageStore';
-import { Home, Map, Plus, Wallet, User, MessageCircle, BarChart3, MoreHorizontal } from 'lucide-react';
+import { Home, Map, Plus, Wallet, User, MessageCircle, BarChart3, MoreHorizontal, Calendar } from 'lucide-react';
 
 // Centralize the tab configuration for better readability and reusability
 // Primary tabs shown in the bar
@@ -16,8 +16,8 @@ const primaryTabs = [
 const overflowTabs = [
   { path: '/dashboard', icon: BarChart3, label: 'Tableau de bord' },
   { path: '/profile', icon: User, label: 'Profil' },
-
   { path: '/wallet', icon: Wallet, label: 'Portefeuille' },
+  { path: '/rentals', icon: Calendar, label: 'Locations' },
 ];
 
 const BottomNavigation: React.FC = () => {
