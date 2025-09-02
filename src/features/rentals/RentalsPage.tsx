@@ -179,17 +179,33 @@ const RentalsPage: React.FC = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.1 }}
-                    className="bg-white rounded-2xl border border-slate-200 p-6 hover:shadow-lg transition-all duration-300"
+                    className={`rounded-2xl border p-6 transition-all duration-300 ${
+                      rental.status === 'completed' || rental.status === 'cancelled'
+                        ? 'bg-slate-50 border-slate-200 opacity-75'
+                        : 'bg-white border-slate-200 hover:shadow-lg'
+                    }`}
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         {/* Header */}
                         <div className="flex items-center gap-3 mb-4">
-                          <div className="w-12 h-12 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-xl flex items-center justify-center">
-                            <Package className="w-6 h-6 text-blue-600" />
+                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                            rental.status === 'completed' || rental.status === 'cancelled'
+                              ? 'bg-slate-100'
+                              : 'bg-gradient-to-r from-blue-100 to-indigo-100'
+                          }`}>
+                            <Package className={`w-6 h-6 ${
+                              rental.status === 'completed' || rental.status === 'cancelled'
+                                ? 'text-slate-400'
+                                : 'text-blue-600'
+                            }`} />
                           </div>
                           <div>
-                            <h3 className="text-lg font-semibold text-slate-800">
+                            <h3 className={`text-lg font-semibold ${
+                              rental.status === 'completed' || rental.status === 'cancelled'
+                                ? 'text-slate-500'
+                                : 'text-slate-800'
+                            }`}>
                               {rental.item?.name || `Objet #${rental.item_id}`}
                             </h3>
                             <div className="flex items-center gap-2 mt-1">
@@ -205,38 +221,86 @@ const RentalsPage: React.FC = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                           <div className="space-y-3">
                             <div className="flex items-center gap-2">
-                              <Calendar className="w-4 h-4 text-slate-400" />
+                              <Calendar className={`w-4 h-4 ${
+                                rental.status === 'completed' || rental.status === 'cancelled'
+                                  ? 'text-slate-300'
+                                  : 'text-slate-400'
+                              }`} />
                               <div>
-                                <p className="text-xs text-slate-500">Période de location</p>
-                                <p className="text-sm font-medium text-slate-800">
+                                <p className={`text-xs ${
+                                  rental.status === 'completed' || rental.status === 'cancelled'
+                                    ? 'text-slate-400'
+                                    : 'text-slate-500'
+                                }`}>Période de location</p>
+                                <p className={`text-sm font-medium ${
+                                  rental.status === 'completed' || rental.status === 'cancelled'
+                                    ? 'text-slate-500'
+                                    : 'text-slate-800'
+                                }`}>
                                   {formatDate(rental.start_date)} → {formatDate(rental.end_date)}
                                 </p>
                               </div>
                             </div>
                             
                             <div className="flex items-center gap-2">
-                              <DollarSign className="w-4 h-4 text-slate-400" />
+                              <DollarSign className={`w-4 h-4 ${
+                                rental.status === 'completed' || rental.status === 'cancelled'
+                                  ? 'text-slate-300'
+                                  : 'text-slate-400'
+                              }`} />
                               <div>
-                                <p className="text-xs text-slate-500">Prix par jour</p>
-                                <p className="text-sm font-medium text-slate-800">{rental.daily_price} crédits</p>
+                                <p className={`text-xs ${
+                                  rental.status === 'completed' || rental.status === 'cancelled'
+                                    ? 'text-slate-400'
+                                    : 'text-slate-500'
+                                }`}>Prix par jour</p>
+                                <p className={`text-sm font-medium ${
+                                  rental.status === 'completed' || rental.status === 'cancelled'
+                                    ? 'text-slate-500'
+                                    : 'text-slate-800'
+                                }`}>{rental.daily_price} crédits</p>
                               </div>
                             </div>
                           </div>
 
                           <div className="space-y-3">
                             <div className="flex items-center gap-2">
-                              <User className="w-4 h-4 text-slate-400" />
+                              <User className={`w-4 h-4 ${
+                                rental.status === 'completed' || rental.status === 'cancelled'
+                                  ? 'text-slate-300'
+                                  : 'text-slate-400'
+                              }`} />
                               <div>
-                                <p className="text-xs text-slate-500">Total</p>
-                                <p className="text-sm font-medium text-slate-800">{rental.total_credits} crédits</p>
+                                <p className={`text-xs ${
+                                  rental.status === 'completed' || rental.status === 'cancelled'
+                                    ? 'text-slate-400'
+                                    : 'text-slate-500'
+                                }`}>Total</p>
+                                <p className={`text-sm font-medium ${
+                                  rental.status === 'completed' || rental.status === 'cancelled'
+                                    ? 'text-slate-500'
+                                    : 'text-slate-800'
+                                }`}>{rental.total_credits} crédits</p>
                               </div>
                             </div>
                             
                             <div className="flex items-center gap-2">
-                              <MapPin className="w-4 h-4 text-slate-400" />
+                              <MapPin className={`w-4 h-4 ${
+                                rental.status === 'completed' || rental.status === 'cancelled'
+                                  ? 'text-slate-300'
+                                  : 'text-slate-400'
+                              }`} />
                               <div>
-                                <p className="text-xs text-slate-500">Dépôt</p>
-                                <p className="text-sm font-medium text-slate-800">{rental.deposit_credits} crédits</p>
+                                <p className={`text-xs ${
+                                  rental.status === 'completed' || rental.status === 'cancelled'
+                                    ? 'text-slate-400'
+                                    : 'text-slate-500'
+                                }`}>Dépôt</p>
+                                <p className={`text-sm font-medium ${
+                                  rental.status === 'completed' || rental.status === 'cancelled'
+                                    ? 'text-slate-500'
+                                    : 'text-slate-800'
+                                }`}>{rental.deposit_credits} crédits</p>
                               </div>
                             </div>
                           </div>
@@ -246,20 +310,40 @@ const RentalsPage: React.FC = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                           <div className="space-y-3">
                             <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-100 to-indigo-100 flex items-center justify-center overflow-hidden">
+                              <div className={`w-8 h-8 rounded-full flex items-center justify-center overflow-hidden ${
+                                rental.status === 'completed' || rental.status === 'cancelled'
+                                  ? 'bg-slate-100'
+                                  : 'bg-gradient-to-r from-blue-100 to-indigo-100'
+                              }`}>
                                 {rental.owner?.avatar_url ? (
                                   <img 
                                     src={rental.owner.avatar_url} 
                                     alt={rental.owner.name}
-                                    className="w-full h-full object-cover"
+                                    className={`w-full h-full object-cover ${
+                                      rental.status === 'completed' || rental.status === 'cancelled'
+                                        ? 'opacity-50'
+                                        : ''
+                                    }`}
                                   />
                                 ) : (
-                                  <User className="w-4 h-4 text-blue-600" />
+                                  <User className={`w-4 h-4 ${
+                                    rental.status === 'completed' || rental.status === 'cancelled'
+                                      ? 'text-slate-400'
+                                      : 'text-blue-600'
+                                  }`} />
                                 )}
                               </div>
                               <div>
-                                <p className="text-xs text-slate-500">Propriétaire</p>
-                                <p className="text-sm font-medium text-slate-800">
+                                <p className={`text-xs ${
+                                  rental.status === 'completed' || rental.status === 'cancelled'
+                                    ? 'text-slate-400'
+                                    : 'text-slate-500'
+                                }`}>Propriétaire</p>
+                                <p className={`text-sm font-medium ${
+                                  rental.status === 'completed' || rental.status === 'cancelled'
+                                    ? 'text-slate-500'
+                                    : 'text-slate-800'
+                                }`}>
                                   {rental.owner?.name || 'Propriétaire'}
                                 </p>
                               </div>
@@ -268,20 +352,40 @@ const RentalsPage: React.FC = () => {
 
                           <div className="space-y-3">
                             <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-full bg-gradient-to-r from-green-100 to-emerald-100 flex items-center justify-center overflow-hidden">
+                              <div className={`w-8 h-8 rounded-full flex items-center justify-center overflow-hidden ${
+                                rental.status === 'completed' || rental.status === 'cancelled'
+                                  ? 'bg-slate-100'
+                                  : 'bg-gradient-to-r from-green-100 to-emerald-100'
+                              }`}>
                                 {rental.renter?.avatar_url ? (
                                   <img 
                                     src={rental.renter.avatar_url} 
                                     alt={rental.renter.name}
-                                    className="w-full h-full object-cover"
+                                    className={`w-full h-full object-cover ${
+                                      rental.status === 'completed' || rental.status === 'cancelled'
+                                        ? 'opacity-50'
+                                        : ''
+                                    }`}
                                   />
                                 ) : (
-                                  <User className="w-4 h-4 text-green-600" />
+                                  <User className={`w-4 h-4 ${
+                                    rental.status === 'completed' || rental.status === 'cancelled'
+                                      ? 'text-slate-400'
+                                      : 'text-green-600'
+                                  }`} />
                                 )}
                               </div>
                               <div>
-                                <p className="text-xs text-slate-500">Locataire</p>
-                                <p className="text-sm font-medium text-slate-800">
+                                <p className={`text-xs ${
+                                  rental.status === 'completed' || rental.status === 'cancelled'
+                                    ? 'text-slate-400'
+                                    : 'text-slate-500'
+                                }`}>Locataire</p>
+                                <p className={`text-sm font-medium ${
+                                  rental.status === 'completed' || rental.status === 'cancelled'
+                                    ? 'text-slate-500'
+                                    : 'text-slate-800'
+                                }`}>
                                   {rental.renter?.name || 'Locataire'}
                                 </p>
                               </div>
@@ -292,16 +396,25 @@ const RentalsPage: React.FC = () => {
                         {/* Description */}
                         {rental.item?.description && (
                           <div className="mb-4">
-                            <p className="text-xs text-slate-500 mb-1">Description</p>
-                            <p className="text-sm text-slate-700">{rental.item.description}</p>
+                            <p className={`text-xs mb-1 ${
+                              rental.status === 'completed' || rental.status === 'cancelled'
+                                ? 'text-slate-400'
+                                : 'text-slate-500'
+                            }`}>Description</p>
+                            <p className={`text-sm ${
+                              rental.status === 'completed' || rental.status === 'cancelled'
+                                ? 'text-slate-500'
+                                : 'text-slate-700'
+                            }`}>{rental.item.description}</p>
                           </div>
                         )}
                       </div>
 
                       {/* Actions */}
-                      <div className="flex flex-col gap-2 ml-4">
-                        {/* Actions pour le propriétaire */}
-                        {user?.id === rental.owner_id && (
+                      {(rental.status !== 'completed' && rental.status !== 'cancelled') && (
+                        <div className="flex flex-col gap-2 ml-4">
+                          {/* Actions pour le propriétaire */}
+                          {user?.id === rental.owner_id && (
                           <>
                             {rental.status === 'requested' && (
                               <>
@@ -385,7 +498,8 @@ const RentalsPage: React.FC = () => {
                             )}
                           </>
                         )}
-                      </div>
+                        </div>
+                      )}
                     </div>
                   </motion.div>
                 ))}
