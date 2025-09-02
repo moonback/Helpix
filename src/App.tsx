@@ -1,10 +1,8 @@
 import React, { Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { useAuth } from '@/hooks/useAuth';
 import { useRealtimeMessages } from '@/hooks/useRealtimeMessages';
 import BottomNavigation from '@/components/navigation/BottomNavigation';
-import CreditsDisplayWithPurchase from '@/components/ui/CreditsDisplayWithPurchase';
 import PaymentNotificationContainer from '@/components/ui/PaymentNotificationContainer';
 
 // Lazy loading des pages

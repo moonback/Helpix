@@ -150,7 +150,8 @@ const ConversationList: React.FC<ConversationListProps> = ({
         const matchesLastMessage = (conv.lastMessage?.content || '')
           .toLowerCase()
           .includes(searchLower);
-        const matchesName = (conv.name || '').toLowerCase().includes(searchLower);
+        // Le modèle de conversation n'a pas de propriété `name` typée, laissons
+        // la recherche se baser sur participants et dernier message uniquement.
         if (!matchesParticipants && !matchesLastMessage) return false;
       }
 
