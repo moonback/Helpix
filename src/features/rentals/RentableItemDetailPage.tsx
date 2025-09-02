@@ -33,7 +33,7 @@ const RentableItemDetailPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const item = rentableItems.find(i => i.id === parseInt(itemId || '0'));
+  const item = null; // Objets prêtables supprimés
 
   useEffect(() => {
     const loadItem = async () => {
@@ -41,9 +41,7 @@ const RentableItemDetailPage: React.FC = () => {
         setIsLoading(true);
         setError(null);
         
-        if (!itemsLoading && !item && rentableItems.length > 0) {
-          setError('Objet non trouvé');
-        }
+        setError('Objets prêtables non disponibles');
       } catch (err) {
         setError('Erreur lors du chargement de l\'objet');
         console.error('Erreur:', err);
@@ -53,14 +51,14 @@ const RentableItemDetailPage: React.FC = () => {
     };
 
     loadItem();
-  }, [itemId, itemsLoading, item, rentableItems.length]);
+  }, [itemId]);
 
   // Charger l'adresse de l'objet
   useEffect(() => {
     if (item?.location?.lat && item?.location?.lng) {
       getAddressFromCoords(item.location.lat, item.location.lng);
     }
-  }, [item?.location, getAddressFromCoords]);
+  }, [getAddressFromCoords]);
 
   const handleRent = () => {
     if (!user) {
@@ -93,7 +91,7 @@ const RentableItemDetailPage: React.FC = () => {
     }
   };
 
-  if (isLoading || itemsLoading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-green-100 flex items-center justify-center">
         <motion.div 
@@ -109,7 +107,7 @@ const RentableItemDetailPage: React.FC = () => {
     );
   }
 
-  if (error || itemsError || !item) {
+  if (error || !item) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-green-100 flex items-center justify-center">
         <motion.div 
@@ -123,7 +121,7 @@ const RentableItemDetailPage: React.FC = () => {
             Objet non trouvé
           </h1>
           <p className="text-slate-600 mb-8">
-            {error || itemsError || 'Cet objet n\'existe pas ou a été supprimé.'}
+            {error || 'Objets prêtables non disponibles'}
           </p>
           <Button
             onClick={() => navigate('/rentals')}

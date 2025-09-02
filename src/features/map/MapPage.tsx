@@ -54,9 +54,7 @@ const MapPageLoadingFallback: React.FC = () => (
 const MapPageOptimized: React.FC = () => {
   const navigate = useNavigate();
   const { tasks, fetchTasks, isLoading } = useTaskStore();
-  const { user } = useAuthStore();
 
-  const { addNotification } = usePaymentNotifications();
 
   // État de la vue
   const [mapView, setMapView] = useState<'map' | 'list'>('map');

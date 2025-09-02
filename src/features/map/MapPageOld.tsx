@@ -22,16 +22,7 @@ export type MapTask = Pick<Task, 'id' | 'title' | 'description' | 'category' | '
 };
 
 // Définition locale pour typage interne des items louables
-interface LocalRentableItemMarker {
-  id: number;
-  name: string;
-  description: string;
-  daily_price: number | null;
-  deposit: number;
-  available: boolean;
-  owner_id: string;
-  location: { lat: number; lng: number } | null;
-}
+
 
 // Fix pour les icônes Leaflet
 import L from 'leaflet';
@@ -102,8 +93,7 @@ const MapPage: React.FC = () => {
   const [showTasks, setShowTasks] = useState(true);
   const [showLocations, setShowLocations] = useState(true);
   const { addNotification } = usePaymentNotifications();
-  const [isRentModalOpen, setIsRentModalOpen] = useState(false);
-  const [rentItem, setRentItem] = useState<LocalRentableItemMarker | null>(null);
+
   const [rentStart, setRentStart] = useState<string>('');
   const [rentEnd, setRentEnd] = useState<string>('');
 
@@ -212,33 +202,9 @@ const MapPage: React.FC = () => {
     navigate(`/task/${taskId}/offers`);
   }, [user, navigate]);
 
-  const onOpenRentModal = useCallback((item: LocalRentableItemMarker) => {
-    setRentItem(item);
-    setRentStart('');
-    setRentEnd('');
-    setIsRentModalOpen(true);
-  }, []);
 
-  const onConfirmRent = useCallback(async () => {
-    if (!user) { navigate('/login'); return; }
-    if (!rentItem || !rentStart || !rentEnd || !rentItem.daily_price) { addNotification('warning','Dates manquantes','Sélectionnez des dates valides.'); return; }
-    try {
-      await requestRental({
-        itemId: rentItem.id,
-        ownerId: rentItem.owner_id,
-        renterId: user.id,
-        startDate: rentStart,
-        endDate: rentEnd,
-        dailyPrice: rentItem.daily_price,
-        depositCredits: rentItem.deposit ?? 0,
-      });
-      addNotification('success','Demande envoyée','Votre demande de location a été envoyée.');
-      setIsRentModalOpen(false);
-    } catch (e) {
-      console.error(e);
-      addNotification('error','Erreur','Impossible de créer la demande.');
-    }
-  }, [user, rentItem, rentStart, rentEnd, navigate, addNotification]);
+
+
 
   // Filtrage, recherche et tri
   const filteredTasks: MapTask[] = ((): MapTask[] => {
@@ -275,26 +241,7 @@ const MapPage: React.FC = () => {
     return result;
   })();
 
-  const filteredRentableItems = useMemo(() => {
-    let items = [...rentableItems];
-    if (itemSearch.trim()) {
-      const q = itemSearch.toLowerCase();
-      items = items.filter(i => i.name.toLowerCase().includes(q) || i.description.toLowerCase().includes(q));
-    }
-    if (onlyAvailableItems) items = items.filter(i => i.available);
-    items = items.filter(i => (i.daily_price ?? 0) >= minPrice && (i.daily_price ?? 0) <= maxPrice);
-    items = items.filter(i => (i.deposit ?? 0) <= maxDeposit);
-    if (radiusKm > 0 && userLocation) {
-      items = items.filter(i => i.location && calculateDistance(userLocation.lat, userLocation.lng, i.location.lat, i.location.lng) <= radiusKm);
-    }
-    if (sortByDistance && userLocation) {
-      items = items.sort((a, b) =>
-        calculateDistance(userLocation.lat, userLocation.lng, a.location!.lat, a.location!.lng) -
-        calculateDistance(userLocation.lat, userLocation.lng, b.location!.lat, b.location!.lng)
-      );
-    }
-    return items;
-  }, [rentableItems, itemSearch, onlyAvailableItems, minPrice, maxPrice, maxDeposit, radiusKm, sortByDistance, userLocation]);
+
 
   const recenterToUser = () => {
     if (!mapInstance) return;
@@ -322,7 +269,7 @@ const MapPage: React.FC = () => {
     setMapView((prev) => (prev === 'map' ? 'list' : 'map'));
   }, []);
 
-  const hasNothingToShow = ((showTasks ? filteredTasks.length : 0) + (showLocations ? filteredRentableItems.length : 0)) === 0;
+  const hasNothingToShow = (showTasks ? filteredTasks.length : 0) === 0;
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
@@ -413,9 +360,7 @@ const MapPage: React.FC = () => {
                    {showTasks && filteredTasks.map((task) => (
                      <TaskMarker key={task.id} task={task} userLocation={userLocation} onTaskClick={onTaskClick} onOfferHelp={onOfferHelp} />
                    ))}
-                   {showLocations && filteredRentableItems.map((it) => (
-                     <ItemMarker key={`item-${it.id}`} item={it} userLocation={userLocation} onOpenModal={onOpenRentModal} />
-                   ))}
+
                  </>
                )}
              </MapContainer>
@@ -540,9 +485,7 @@ const MapPage: React.FC = () => {
                 Trier par distance
               </label>
 
-              <div className="mt-auto text-xs text-gray-500">
-                {itemsLoading ? 'Chargement des objets...' : `${filteredRentableItems.length} objet(s)`}
-              </div>
+
             </div>
             {/* Poignée de toggle - Améliorée pour le responsive */}
             <button 
@@ -792,8 +735,7 @@ const MapPage: React.FC = () => {
          </motion.div>
        )}
 
-      {/* Modal de demande de location */}
-      <RentModal isOpen={isRentModalOpen} item={rentItem} start={rentStart} end={rentEnd} onClose={() => setIsRentModalOpen(false)} onConfirm={onConfirmRent} onStartChange={setRentStart} onEndChange={setRentEnd} />
+
     </div>
   );
 };

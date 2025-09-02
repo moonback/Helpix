@@ -282,17 +282,10 @@ const MapPageOptimized: React.FC = () => {
                   userLocation={userLocation}
                   onTaskClick={handleTaskClick}
                   onOfferHelp={handleOfferHelp}
-                  rentableItems={rentableItems}
-                  onItemClick={handleItemClick}
                   filterCategory={filterCategory}
                   filterPriority={filterPriority}
                   radiusKm={radiusKm}
-                  itemSearch={itemSearch}
-                  onlyAvailableItems={onlyAvailableItems}
-                  minPrice={minPrice}
-                  maxPrice={maxPrice}
                   isLoading={isLoading}
-                  itemsLoading={itemsLoading}
                   onRecenter={handleRecenter}
                 />
               </div>
@@ -337,34 +330,10 @@ const MapPageOptimized: React.FC = () => {
           onRadiusChange={setRadiusKm}
           sortByDistance={sortByDistance}
           onSortByDistanceChange={setSortByDistance}
-          isItemsSidebarOpen={isItemsSidebarOpen}
-          onItemsSidebarToggle={() => setIsItemsSidebarOpen(!isItemsSidebarOpen)}
-          itemSearch={itemSearch}
-          onItemSearchChange={setItemSearch}
-          onlyAvailableItems={onlyAvailableItems}
-          onOnlyAvailableItemsChange={setOnlyAvailableItems}
-          minPrice={minPrice}
-          onMinPriceChange={setMinPrice}
-          maxPrice={maxPrice}
-          onMaxPriceChange={setMaxPrice}
+
         />
 
-        {/* Modal de location */}
-        {selectedItem && (
-          <RentModal
-            isOpen={isRentModalOpen}
-            item={selectedItem}
-            start=""
-            end=""
-            onClose={() => {
-              setIsRentModalOpen(false);
-              setSelectedItem(null);
-            }}
-            onConfirm={handleRentConfirm}
-            onStartChange={() => {}}
-            onEndChange={() => {}}
-          />
-        )}
+
       </div>
     </Suspense>
   );
