@@ -76,17 +76,14 @@ const MapPageOptimized: React.FC = () => {
   const mapTasks: MapTask[] = tasks.map(task => {
     let location = { lat: 48.8566, lng: 2.3522 }; // Fallback Paris
 
-    // 1) Champs numériques directs
     if (typeof (task as any).latitude === 'number' && typeof (task as any).longitude === 'number') {
       location = { lat: (task as any).latitude as number, lng: (task as any).longitude as number };
     } else if (typeof task.location === 'string') {
       const raw = task.location.trim();
-      // 2) Format "lat,lng"
       const match = raw.match(/(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)/);
       if (match) {
         location = { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
       } else if (raw.startsWith('{') || raw.startsWith('[') || raw.startsWith('"')) {
-        // 3) JSON string
         try {
           const parsed: any = JSON.parse(raw);
           const lat = parsed.lat ?? parsed.latitude;
@@ -95,7 +92,7 @@ const MapPageOptimized: React.FC = () => {
             location = { lat, lng };
           }
         } catch {
-          // ignore parsing errors silently
+          // ignore parsing errors
         }
       }
     }
@@ -133,6 +130,7 @@ const MapPageOptimized: React.FC = () => {
 
   // État des modales
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+
   const [selectedItem, setSelectedItem] = useState<LocalRentableItemMarker | null>(null);
   const [isRentModalOpen, setIsRentModalOpen] = useState(false);
 
@@ -141,17 +139,36 @@ const MapPageOptimized: React.FC = () => {
     fetchTasks();
   }, [fetchTasks]);
 
-  // Géolocalisation via hook centralisé
+  // Géolocalisation via hook
   const { latitude, longitude, error: geoError, requestLocation } = useGeolocation();
 
   useEffect(() => {
     if (typeof latitude === 'number' && typeof longitude === 'number') {
-          setUserLocation({ lat: latitude, lng: longitude });
+      setUserLocation({ lat: latitude, lng: longitude });
     } else if (geoError) {
-      // Fallback si indisponible
       setUserLocation({ lat: 48.8566, lng: 2.3522 });
     }
   }, [latitude, longitude, geoError]);
+
+  // Géolocalisation
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          });
+        },
+        () => {
+          // Fallback sur Paris si la géolocalisation échoue
+          setUserLocation({ lat: 48.8566, lng: 2.3522 });
+        }
+      );
+    } else {
+      setUserLocation({ lat: 48.8566, lng: 2.3522 });
+    }
+  }, []);
 
   // Handlers
   const handleTaskClick = useCallback((task: MapTask) => {
@@ -176,19 +193,11 @@ const MapPageOptimized: React.FC = () => {
 
     try {
       // Logique de location ici
-      addNotification(
-        'success',
-        'Location confirmée',
-        'Votre demande de location a été envoyée'
-      );
+      addNotification('success', 'Location confirmée', 'Votre demande de location a été envoyée');
       setIsRentModalOpen(false);
       setSelectedItem(null);
     } catch (error) {
-      addNotification(
-        'error',
-        'Erreur',
-        'Impossible de traiter votre demande'
-      );
+      addNotification('error', 'Erreur', 'Impossible de traiter votre demande');
     }
   }, [selectedItem, user, addNotification]);
 
@@ -208,7 +217,7 @@ const MapPageOptimized: React.FC = () => {
   return (
     <Suspense fallback={<MapPageLoadingFallback />}>
       <div className="min-h-screen bg-slate-50">
-      {/* Header */}
+        {/* Header */}
         <MapHeader
           mapView={mapView}
           onViewChange={setMapView}
@@ -259,32 +268,10 @@ const MapPageOptimized: React.FC = () => {
                 onRemove={() => setSortByDistance(false)}
               />
             )}
-            {itemSearch && (
-              <FilterBadge
-                icon="🔎"
-                label={`Objets: ${itemSearch}`}
-                onRemove={() => setItemSearch('')}
-              />
-            )}
-            {onlyAvailableItems && (
-              <FilterBadge
-                icon="✅"
-                label="Objets: dispo"
-                onRemove={() => setOnlyAvailableItems(false)}
-              />
-            )}
-            {(minPrice > 0 || maxPrice < 1000) && (
-              <FilterBadge
-                icon="💰"
-                label={`Prix: ${minPrice}–${maxPrice}`}
-                onRemove={() => { setMinPrice(0); setMaxPrice(1000); }}
-              />
-            )}
-
             <span className="ml-auto text-sm text-slate-500">
               {mapView === 'map' ? `${mapTasks.length} tâches` : `${mapTasks.length} résultats`}
-                 </span>
-             </div>
+            </span>
+          </div>
 
           {/* Contenu principal */}
           <div className="flex-1 mt-4">
@@ -308,7 +295,7 @@ const MapPageOptimized: React.FC = () => {
                   itemsLoading={itemsLoading}
                   onRecenter={handleRecenter}
                 />
-             </div>
+              </div>
             ) : (
               <div className="h-[calc(100vh-140px)] sm:h-[calc(100vh-180px)] lg:h-[calc(100vh-200px)] overflow-y-auto">
                 {isLoading ? (
@@ -333,9 +320,9 @@ const MapPageOptimized: React.FC = () => {
                     onOfferHelp={handleOfferHelp}
                   />
                 )}
-                     </div>
-                   )}
-                 </div>
+              </div>
+            )}
+          </div>
         </PageContainer>
 
         {/* Sidebar des filtres */}
@@ -377,8 +364,8 @@ const MapPageOptimized: React.FC = () => {
             onStartChange={() => {}}
             onEndChange={() => {}}
           />
-                   )}
-    </div>
+        )}
+      </div>
     </Suspense>
   );
 };
