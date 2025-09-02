@@ -198,9 +198,16 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
 
   createItem: async (itemData: Partial<Item>) => {
     try {
+      // Récupérer l'utilisateur actuel
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('Utilisateur non authentifié');
+      }
+
       const { data, error } = await supabase
         .from('items')
         .insert({
+          user_id: user.id,
           name: itemData.name,
           description: itemData.description,
           category: itemData.category,

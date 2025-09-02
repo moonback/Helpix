@@ -105,6 +105,24 @@ begin
     create policy items_select_own on public.items for select
       using (auth.uid() = user_id);
   end if;
+  
+  -- Permettre l'insertion d'items par l'utilisateur authentifié
+  if not exists (select 1 from pg_policies where tablename = 'items' and policyname = 'items_insert_own') then
+    create policy items_insert_own on public.items for insert
+      with check (auth.uid() = user_id);
+  end if;
+  
+  -- Permettre la mise à jour de ses propres items
+  if not exists (select 1 from pg_policies where tablename = 'items' and policyname = 'items_update_own') then
+    create policy items_update_own on public.items for update
+      using (auth.uid() = user_id);
+  end if;
+  
+  -- Permettre la suppression de ses propres items
+  if not exists (select 1 from pg_policies where tablename = 'items' and policyname = 'items_delete_own') then
+    create policy items_delete_own on public.items for delete
+      using (auth.uid() = user_id);
+  end if;
 end $$;
 
 -- 8) Index pour améliorer les performances
