@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
 import { useMessageStore } from '@/stores/messageStore';
-import { Home, Map, Plus, Wallet, User, MessageCircle, BarChart3, MoreHorizontal, Calendar, Package } from 'lucide-react';
+import { Home, Map, Plus, Wallet, User, MessageCircle, BarChart3, MoreHorizontal, Calendar, Package, LogOut } from 'lucide-react';
 
 // Centralize the tab configuration for better readability and reusability
 // Primary tabs shown in the bar
@@ -28,7 +28,7 @@ const BottomNavigation: React.FC = () => {
   const [isMoreOpen, setIsMoreOpen] = useState(false);
   const moreBtnRef = useRef<HTMLButtonElement | null>(null);
   const moreMenuRef = useRef<HTMLDivElement | null>(null);
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, signOut } = useAuthStore();
   const { unreadCount } = useMessageStore();
 
   // Close menu when clicking outside
@@ -51,6 +51,16 @@ const BottomNavigation: React.FC = () => {
 
   const handleNavigation = (path: string) => {
     navigate(path);
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      navigate('/');
+      setIsMoreOpen(false);
+    } catch (error) {
+      console.error('Erreur lors de la déconnexion:', error);
+    }
   };
 
   if (!isAuthenticated) {
@@ -221,6 +231,30 @@ const BottomNavigation: React.FC = () => {
                   </button>
                 );
               })}
+              
+              {/* Séparateur */}
+              <div className="mx-3 my-2 h-px bg-gradient-to-r from-transparent via-gray-200 dark:via-gray-700 to-transparent" />
+              
+              {/* Bouton de déconnexion */}
+              <button
+                onClick={handleSignOut}
+                className="group w-full flex items-center gap-3 px-3 py-3 rounded-xl text-xs transition-all duration-200 ease-out hover:scale-[1.02] active:scale-98 text-red-600 dark:text-red-400 hover:bg-gradient-to-r hover:from-red-50 hover:to-red-100 dark:hover:from-red-950/50 dark:hover:to-red-900/50"
+                role="menuitem"
+                style={{ 
+                  animationDelay: `${overflowTabs.length * 50}ms`,
+                  animation: 'slideInRight 0.3s ease-out both'
+                }}
+              >
+                {/* Icon with glow effect */}
+                <div className="relative">
+                  <div className="absolute inset-0 rounded-lg blur-sm transition-opacity duration-200 opacity-0 group-hover:opacity-30 group-hover:bg-red-500/20" />
+                  <LogOut className="relative h-5 w-5 transition-transform duration-200 group-hover:scale-110" />
+                </div>
+                
+                <span className="font-medium transition-all duration-200 group-hover:translate-x-0.5">
+                  Déconnexion
+                </span>
+              </button>
             </div>
           </>
         )}
