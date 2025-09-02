@@ -15,9 +15,9 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onCreateTask }) => {
     <motion.div
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white shadow-sm border-b border-gray-200"
+      className="bg-gradient-to-r from-white to-blue-50 shadow-sm border-b border-gray-200"
     >
-      <div className="flex items-center justify-between p-6">
+      <div className="flex items-center justify-between p-6 max-w-12xl mx-auto">
         <div className="flex items-center space-x-4">
           <Button
             variant="ghost"
@@ -31,9 +31,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onCreateTask }) => {
             <h1 className="text-3xl font-bold text-gray-900">
               Tableau de Bord
             </h1>
-            <p className="text-gray-600 mt-1">
-              Gérez vos tâches et suivez vos progrès
-            </p>
+            <p className="text-gray-600 mt-1">Gérez vos tâches et suivez vos progrès</p>
           </div>
         </div>
         
