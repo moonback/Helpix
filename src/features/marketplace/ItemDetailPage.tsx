@@ -45,10 +45,32 @@ const ItemDetailPage: React.FC = () => {
   // State
   const [item, setItem] = useState<Item | null>(null);
   const [owner, setOwner] = useState<any>(null);
+  const [itemAddress, setItemAddress] = useState<string>('');
 
   const [isRentalModalOpen, setIsRentalModalOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
+
+  // Fonction pour récupérer l'adresse à partir des coordonnées GPS
+  const getAddressFromCoordinates = async (lat: number, lng: number): Promise<string> => {
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`
+      );
+      const data = await response.json();
+      
+      if (data && data.display_name) {
+        // Extraire les parties importantes de l'adresse
+        const parts = data.display_name.split(', ');
+        // Prendre les 3-4 premières parties (rue, ville, région, pays)
+        return parts.slice(0, 4).join(', ');
+      }
+      return 'Adresse non disponible';
+    } catch (error) {
+      console.error('Erreur lors de la récupération de l\'adresse:', error);
+      return 'Adresse non disponible';
+    }
+  };
 
   // Charger l'objet
   useEffect(() => {
@@ -57,6 +79,15 @@ const ItemDetailPage: React.FC = () => {
         const itemData = await fetchItemById(parseInt(itemId));
         if (itemData) {
           setItem(itemData);
+          
+          // Récupérer l'adresse si on a des coordonnées GPS mais pas d'adresse textuelle
+          if (itemData.latitude && itemData.longitude && !itemData.location) {
+            const address = await getAddressFromCoordinates(itemData.latitude, itemData.longitude);
+            setItemAddress(address);
+          } else if (itemData.location) {
+            setItemAddress(itemData.location);
+          }
+          
           // Charger les informations du propriétaire
           if (itemData.user_id) {
             const ownerData = await fetchUserInfo(itemData.user_id);
@@ -301,7 +332,7 @@ const ItemDetailPage: React.FC = () => {
                 <div className="flex items-center gap-2 text-slate-600">
                   <MapPin className="w-4 h-4" />
                   <span>
-                    {item.location || 'Localisation non spécifiée'}
+                    {itemAddress || item.location || 'Localisation non spécifiée'}
                     {distance && ` • ${distance.toFixed(1)} km`}
                   </span>
                 </div>
@@ -368,6 +399,12 @@ const ItemDetailPage: React.FC = () => {
                 <div className="flex justify-between">
                   <span className="text-slate-600">État</span>
                   <span className="font-medium text-slate-800">{item.condition}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-600">Localisation</span>
+                  <span className="font-medium text-slate-800 text-right max-w-xs">
+                    {itemAddress || item.location || 'Non spécifiée'}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-600">Disponible</span>
