@@ -159,7 +159,7 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({ className = '' }) => {
             <div className="flex items-center space-x-2">
               <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center shadow-md overflow-hidden">
                 <img 
-                  src="/images/logo.png" 
+                  src="/assets/logo.png" 
                   alt="Helpix Logo" 
                   className="w-full h-full object-contain"
                 />
