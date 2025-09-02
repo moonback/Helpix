@@ -2,9 +2,7 @@ import React, { useEffect, useState, useCallback, Suspense, lazy } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useTaskStore } from '@/stores/taskStore';
-import { useAuthStore } from '@/stores/authStore';
 import { Task } from '@/types';
-import { usePaymentNotifications } from '@/hooks/usePaymentNotifications';
 
 import { useGeolocation } from '@/hooks/useGeolocation';
 import PageContainer from '@/components/ui/PageContainer';

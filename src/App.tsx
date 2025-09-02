@@ -16,7 +16,7 @@ const WalletPage = React.lazy(() => import('@/features/wallet/WalletPage'));
 const ProfilePage = React.lazy(() => import('@/features/profile/ProfilePage'));
 const DashboardPage = React.lazy(() => import('@/features/dashboard/DashboardPage'));
 const RentalsPage = React.lazy(() => import('@/features/rentals/RentalsPage'));
-const RentableItemDetailPage = React.lazy(() => import('@/features/rentals/RentableItemDetailPage'));
+
 const MarketplacePage = React.lazy(() => import('@/features/marketplace/MarketplacePage'));
 const ItemDetailPage = React.lazy(() => import('@/features/marketplace/ItemDetailPage'));
 const CreateItemPage = React.lazy(() => import('@/features/marketplace/CreateItemPage'));
@@ -165,11 +165,7 @@ const App: React.FC = () => {
                 </div>
               </ProtectedRoute>
             } />
-            <Route path="/rentals/:itemId" element={
-              <ProtectedRoute>
-                <RentableItemDetailPage />
-              </ProtectedRoute>
-            } />
+
             <Route path="/marketplace" element={
               <ProtectedRoute>
                 <div className="pb-16">

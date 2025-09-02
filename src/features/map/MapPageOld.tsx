@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, Users } from 'lucide-react';
 import { MapContainer, TileLayer, useMap, Circle } from 'react-leaflet';
@@ -10,8 +10,7 @@ import { useTaskStore } from '@/stores/taskStore';
 import { useAuthStore } from '@/stores/authStore';
 import { Task } from '@/types';
 import { calculateDistance } from '@/lib/utils';
-import { requestRental } from '@/lib/rentals';
-import { usePaymentNotifications } from '@/hooks/usePaymentNotifications';
+
 import TaskMarker from './components/TaskMarker';
 
 
@@ -92,10 +91,7 @@ const MapPage: React.FC = () => {
   const [maxDeposit, setMaxDeposit] = useState<number>(1000);
   const [showTasks, setShowTasks] = useState(true);
   const [showLocations, setShowLocations] = useState(true);
-  const { addNotification } = usePaymentNotifications();
 
-  const [rentStart, setRentStart] = useState<string>('');
-  const [rentEnd, setRentEnd] = useState<string>('');
 
   useEffect(() => {
     fetchTasks();
