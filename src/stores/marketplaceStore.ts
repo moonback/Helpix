@@ -78,7 +78,7 @@ interface MarketplaceStore {
 }
 
 const defaultFilters: MarketplaceFilter = {
-  available_only: true,
+  available_only: false,
   price_range: { min: 0, max: 1000 },
   location_radius: 50,
 };
