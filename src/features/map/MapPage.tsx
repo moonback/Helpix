@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { MapPin, Users, Filter, Navigation } from 'lucide-react';
-import { MapContainer, TileLayer, Marker, Popup, useMap, Circle } from 'react-leaflet';
+import { MapPin, Users } from 'lucide-react';
+import { MapContainer, TileLayer, useMap, Circle } from 'react-leaflet';
 import { useNavigate } from 'react-router-dom';
 import 'leaflet/dist/leaflet.css';
 import Card from '@/components/ui/Card';
@@ -9,7 +9,30 @@ import Button from '@/components/ui/Button';
 import { useTaskStore } from '@/stores/taskStore';
 import { useAuthStore } from '@/stores/authStore';
 import { Task } from '@/types';
-import { calculateDistance, formatDistance } from '@/lib/utils';
+import { calculateDistance } from '@/lib/utils';
+import { requestRental } from '@/lib/rentals';
+import { usePaymentNotifications } from '@/hooks/usePaymentNotifications';
+import TaskMarker from './components/TaskMarker';
+import ItemMarker from './components/ItemMarker';
+import RentModal from './components/RentModal';
+import { useRentableItems } from './hooks/useRentableItems';
+
+// Type partiel pour les tâches de la carte
+export type MapTask = Pick<Task, 'id' | 'title' | 'description' | 'category' | 'status' | 'created_at' | 'user_id' | 'priority' | 'estimated_duration' | 'budget_credits' | 'required_skills' | 'tags'> & {
+  location: { lat: number; lng: number };
+};
+
+// Définition locale pour typage interne des items louables
+interface LocalRentableItemMarker {
+  id: number;
+  name: string;
+  description: string;
+  daily_price: number | null;
+  deposit: number;
+  available: boolean;
+  owner_id: string;
+  location: { lat: number; lng: number } | null;
+}
 
 // Fix pour les icônes Leaflet
 import L from 'leaflet';
@@ -54,6 +77,8 @@ const MapInstanceSetter: React.FC<{ onReady: (map: L.Map) => void }> = ({ onRead
   return null;
 };
 
+// Sous-composants extraits: voir src/features/map/components/*
+
 const MapPage: React.FC = () => {
   const navigate = useNavigate();
   const { tasks, fetchTasks, isLoading } = useTaskStore();
@@ -67,10 +92,75 @@ const MapPage: React.FC = () => {
   const [filterPriority, setFilterPriority] = useState<'urgent' | 'high' | 'medium' | 'low' | 'all'>('all');
   const [radiusKm, setRadiusKm] = useState<number>(0);
   const [sortByDistance, setSortByDistance] = useState<boolean>(false);
+  // Louables
+  const { items: rentableItems, loading: itemsLoading } = useRentableItems();
+  const [isItemsSidebarOpen, setIsItemsSidebarOpen] = useState(false);
+  const [itemSearch, setItemSearch] = useState('');
+  const [onlyAvailableItems, setOnlyAvailableItems] = useState(true);
+  const [minPrice, setMinPrice] = useState<number>(0);
+  const [maxPrice, setMaxPrice] = useState<number>(100);
+  const [maxDeposit, setMaxDeposit] = useState<number>(1000);
+  const [showTasks, setShowTasks] = useState(true);
+  const [showLocations, setShowLocations] = useState(true);
+  const { addNotification } = usePaymentNotifications();
+  const [isRentModalOpen, setIsRentModalOpen] = useState(false);
+  const [rentItem, setRentItem] = useState<LocalRentableItemMarker | null>(null);
+  const [rentStart, setRentStart] = useState<string>('');
+  const [rentEnd, setRentEnd] = useState<string>('');
 
   useEffect(() => {
     fetchTasks();
   }, [fetchTasks]);
+
+  // Charger objets louables et positions propriétaires
+  useEffect(() => {
+    (async () => {
+      // setItemsLoading(true); // This line is now handled by useRentableItems
+      try {
+        // const { data: items, error } = await supabase
+        //   .from('items')
+        //   .select('*')
+        //   .eq('is_rentable', true);
+        // if (error) throw error;
+        // const ownerIds = Array.from(new Set((items || []).map((i: any) => i.user_id)));
+        // const ownersLocationMap = new Map<string, { lat: number; lng: number } | null>();
+        // if (ownerIds.length > 0) {
+        //   const { data: usersRows, error: usersErr } = await supabase
+        //   .from('users')
+        //   .select('id, location')
+        //   .in('id', ownerIds);
+        //   if (usersErr) throw usersErr;
+        //   (usersRows || []).forEach((u: any) => {
+        //     const parts = String(u.location || '').split(',');
+        //     if (parts.length === 2) {
+        //       const lat = Number(parts[0]);
+        //       const lng = Number(parts[1]);
+        //     if (!Number.isNaN(lat) && !Number.isNaN(lng)) {
+        //         ownersLocationMap.set(u.id, { lat, lng });
+        //         return;
+        //     }
+        //   }
+        //     ownersLocationMap.set(u.id, null);
+        // });
+        // }
+        // const mapped: LocalRentableItemMarker[] = (items || []).map((it: any) => ({
+        //     id: it.id,
+        //   name: it.name ?? it.item_name,
+        //     description: it.description || '',
+        //     daily_price: it.daily_price ?? null,
+        //     deposit: it.deposit ?? 0,
+        //   available: !!it.available,
+        //   owner_id: it.user_id,
+        //   location: ownersLocationMap.get(it.user_id) ?? null,
+        // }));
+        // setRentableItems(mapped.filter(m => m.location));
+      } catch (e) {
+        console.error('Erreur chargement objets louables:', e);
+      } finally {
+        // setItemsLoading(false); // This line is now handled by useRentableItems
+      }
+    })();
+  }, []);
 
   // Récupération position utilisateur (pour distance et rayon)
   useEffect(() => {
@@ -106,30 +196,50 @@ const MapPage: React.FC = () => {
       location: { lat: task.latitude!, lng: task.longitude! },
     }));
 
-  // Type partiel pour les tâches de la carte
-  type MapTask = Pick<Task, 'id' | 'title' | 'description' | 'category' | 'status' | 'created_at' | 'user_id' | 'priority' | 'estimated_duration' | 'budget_credits' | 'required_skills' | 'tags'> & {
-    location: { lat: number; lng: number };
-  };
-
-  const handleTaskClick = (task: MapTask) => {
+  // Handlers mémoïsés
+  const onTaskClick = useCallback((task: MapTask) => {
     // Récupérer la tâche complète depuis le store
-    const dbTask = tasks.find(t => t.id === task.id);
+    const dbTask = tasks.find((t: Task) => t.id === task.id);
     if (dbTask) {
       setSelectedTask(dbTask);
     }
-  };
+  }, [tasks]);
 
-  const handleMapViewToggle = () => {
-    setMapView(mapView === 'map' ? 'list' : 'map');
-  };
-
-  const handleOfferHelp = (taskId: number) => {
+  const onOfferHelp = useCallback((taskId: number) => {
     if (!user) {
       navigate('/login');
       return;
     }
     navigate(`/task/${taskId}/offers`);
-  };
+  }, [user, navigate]);
+
+  const onOpenRentModal = useCallback((item: LocalRentableItemMarker) => {
+    setRentItem(item);
+    setRentStart('');
+    setRentEnd('');
+    setIsRentModalOpen(true);
+  }, []);
+
+  const onConfirmRent = useCallback(async () => {
+    if (!user) { navigate('/login'); return; }
+    if (!rentItem || !rentStart || !rentEnd || !rentItem.daily_price) { addNotification('warning','Dates manquantes','Sélectionnez des dates valides.'); return; }
+    try {
+      await requestRental({
+        itemId: rentItem.id,
+        ownerId: rentItem.owner_id,
+        renterId: user.id,
+        startDate: rentStart,
+        endDate: rentEnd,
+        dailyPrice: rentItem.daily_price,
+        depositCredits: rentItem.deposit ?? 0,
+      });
+      addNotification('success','Demande envoyée','Votre demande de location a été envoyée.');
+      setIsRentModalOpen(false);
+    } catch (e) {
+      console.error(e);
+      addNotification('error','Erreur','Impossible de créer la demande.');
+    }
+  }, [user, rentItem, rentStart, rentEnd, navigate, addNotification]);
 
   // Filtrage, recherche et tri
   const filteredTasks: MapTask[] = ((): MapTask[] => {
@@ -166,6 +276,27 @@ const MapPage: React.FC = () => {
     return result;
   })();
 
+  const filteredRentableItems = useMemo(() => {
+    let items = [...rentableItems];
+    if (itemSearch.trim()) {
+      const q = itemSearch.toLowerCase();
+      items = items.filter(i => i.name.toLowerCase().includes(q) || i.description.toLowerCase().includes(q));
+    }
+    if (onlyAvailableItems) items = items.filter(i => i.available);
+    items = items.filter(i => (i.daily_price ?? 0) >= minPrice && (i.daily_price ?? 0) <= maxPrice);
+    items = items.filter(i => (i.deposit ?? 0) <= maxDeposit);
+    if (radiusKm > 0 && userLocation) {
+      items = items.filter(i => i.location && calculateDistance(userLocation.lat, userLocation.lng, i.location.lat, i.location.lng) <= radiusKm);
+    }
+    if (sortByDistance && userLocation) {
+      items = items.sort((a, b) =>
+        calculateDistance(userLocation.lat, userLocation.lng, a.location!.lat, a.location!.lng) -
+        calculateDistance(userLocation.lat, userLocation.lng, b.location!.lat, b.location!.lng)
+      );
+    }
+    return items;
+  }, [rentableItems, itemSearch, onlyAvailableItems, minPrice, maxPrice, maxDeposit, radiusKm, sortByDistance, userLocation]);
+
   const recenterToUser = () => {
     if (!mapInstance) return;
     if (userLocation) {
@@ -187,6 +318,13 @@ const MapPage: React.FC = () => {
     }
   };
 
+  // Supprimer setMapView non utilisé et bouton bascule si non nécessaire, sinon réintroduire handler
+  const onMapViewToggle = useCallback(() => {
+    setMapView((prev) => (prev === 'map' ? 'list' : 'map'));
+  }, []);
+
+  const hasNothingToShow = ((showTasks ? filteredTasks.length : 0) + (showLocations ? filteredRentableItems.length : 0)) === 0;
+
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
       {/* Header */}
@@ -206,7 +344,7 @@ const MapPage: React.FC = () => {
           </div>
           <Button
             variant="outline"
-            onClick={handleMapViewToggle}
+            onClick={onMapViewToggle}
             icon={mapView === 'map' ? <Users size={20} /> : <MapPin size={20} />}
           >
             {mapView === 'map' ? 'Liste' : 'Carte'}
@@ -245,176 +383,96 @@ const MapPage: React.FC = () => {
                  />
                )}
                
-               {filteredTasks.length === 0 ? (
+               {hasNothingToShow ? (
                  <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-90">
                    <div className="text-center">
                      <div className="text-6xl mb-4">🗺️</div>
-                     <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                        Aucune tâche localisée
-                      </h3>
-                     <p className="text-gray-600">
-                      Ajustez vos filtres ou créez des tâches avec localisation
-                     </p>
+                     <h3 className="text-lg font-semibold text-gray-900 mb-2">Rien à afficher</h3>
+                     <p className="text-gray-600">Ajustez vos filtres, créez une tâche ou activez la location d’un objet</p>
                    </div>
                  </div>
                ) : (
-                 filteredTasks.map((task) => (
-                                       <Marker
-                      key={task.id}
-                      position={[task.location.lat, task.location.lng]}
-                    >
-                                           <Popup className="min-w-[280px]">
-                        <div className="p-3">
-                          {/* Header avec titre et catégorie */}
-                          <div className="mb-3">
-                            <h3 className="font-semibold text-base text-gray-900 mb-1">{task.title}</h3>
-                            <div className="flex items-center gap-2">
-                              <span className={`inline-block px-2 py-1 text-xs rounded-full font-medium ${
-                                task.category === 'local' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
-                              }`}>
-                                {task.category === 'local' ? '📍 Sur place' : '💻 À distance'}
-                              </span>
-                              <span className="text-xs text-gray-500">
-                                {new Date(task.created_at).toLocaleDateString('fr-FR')}
-                              </span>
-                              {userLocation && (
-                                <span className="text-xs text-primary-600 font-medium">
-                                  {formatDistance(calculateDistance(userLocation.lat, userLocation.lng, task.location.lat, task.location.lng))}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                          
-                          {/* Description */}
-                          <p className="text-sm text-gray-700 mb-3 leading-relaxed">{task.description}</p>
-                          
-                          {/* Détails de la tâche */}
-                          <div className="space-y-2 mb-3">
-                            {/* Priorité */}
-                            <div className="flex items-center gap-2 text-xs">
-                              <span className="text-gray-500">Priorité:</span>
-                              <span className={`px-2 py-1 rounded-full font-medium ${
-                                task.priority === 'urgent' ? 'bg-red-100 text-red-800' :
-                                task.priority === 'high' ? 'bg-orange-100 text-orange-800' :
-                                task.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' :
-                                'bg-green-100 text-green-800'
-                              }`}>
-                                {task.priority === 'urgent' ? '🔴 Urgente' :
-                                 task.priority === 'high' ? '🟠 Élevée' :
-                                 task.priority === 'medium' ? '🟡 Moyenne' : '🟢 Faible'}
-                              </span>
-                            </div>
-                            
-                            {/* Durée et budget */}
-                            <div className="flex items-center gap-4 text-xs text-gray-600">
-                              <div className="flex items-center gap-1">
-                                <span>⏱️ {task.estimated_duration}h</span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <span>💰 {task.budget_credits} crédits</span>
-                              </div>
-                            </div>
-                          </div>
-                          
-                          {/* Compétences et tags */}
-                          {task.required_skills && task.required_skills.length > 0 && (
-                            <div className="mb-2">
-                              <div className="text-xs text-gray-500 mb-1">Compétences requises:</div>
-                              <div className="flex flex-wrap gap-1">
-                                {task.required_skills.slice(0, 3).map((skill, idx) => (
-                                  <span key={idx} className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
-                                    {skill}
-                                  </span>
-                                ))}
-                                {task.required_skills.length > 3 && (
-                                  <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
-                                    +{task.required_skills.length - 3}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                          )}
-                          
-                          {/* Tags */}
-                          {task.tags && task.tags.length > 0 && (
-                            <div className="mb-3">
-                              <div className="text-xs text-gray-500 mb-1">Tags:</div>
-                              <div className="flex flex-wrap gap-1">
-                                {task.tags.slice(0, 4).map((tag, idx) => (
-                                  <span key={idx} className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
-                                    #{tag}
-                                  </span>
-                                ))}
-                                {task.tags.length > 4 && (
-                                  <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
-                                    +{task.tags.length - 4}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                          )}
-                          
-                          {/* Actions */}
-                          <div className="flex gap-2 pt-2 border-t border-gray-200">
-                            <Button
-                              variant="primary"
-                              size="sm"
-                              className="flex-1 text-xs"
-                              onClick={() => handleTaskClick(task)}
-                            >
-                              Voir détails
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="text-xs"
-                              onClick={() => handleOfferHelp(task.id)}
-                            >
-                              Aider
-                            </Button>
-                            <a
-                              className="text-xs px-2 py-1 border rounded-md hover:bg-gray-50"
-                              href={`https://www.google.com/maps/dir/?api=1&destination=${task.location.lat},${task.location.lng}`}
-                              target="_blank" rel="noopener noreferrer"
-                            >
-                              Itinéraire
-                            </a>
-                          </div>
-                        </div>
-                      </Popup>
-                   </Marker>
-                 ))
+                 <>
+                   {showTasks && filteredTasks.map((task) => (
+                     <TaskMarker key={task.id} task={task} userLocation={userLocation} onTaskClick={onTaskClick} onOfferHelp={onOfferHelp} />
+                   ))}
+                   {showLocations && filteredRentableItems.map((it) => (
+                     <ItemMarker key={`item-${it.id}`} item={it} userLocation={userLocation} onOpenModal={onOpenRentModal} />
+                   ))}
+                 </>
                )}
              </MapContainer>
            )}
 
-          {/* Map Controls */}
-          <div className="absolute top-4 right-4 space-y-2 w-[320px] max-w-[90vw] z-[2000]">
-            <div className="bg-white shadow-lg rounded-lg p-3 border border-gray-200 space-y-2">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
-                  <Filter size={16} /> Filtres
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  icon={<Navigation size={14} />}
-                  onClick={recenterToUser}
-                  className="text-xs"
-                >
-                  Me recentrer
-                </Button>
+          {/* Sidebar gauche: filtres objets louables + tâches */}
+          <div className={`absolute top-4 left-0 h-[calc(100%-2rem)] z-[2100] transition-transform ${isItemsSidebarOpen ? 'translate-x-0' : '-translate-x-[calc(100%-3rem)]'} pointer-events-none`}>
+            <div className="pointer-events-auto w-72 max-w-[85vw] h-full bg-white shadow-2xl border-r border-gray-200 rounded-r-2xl p-4 flex flex-col">
+              {/* Switch couches */}
+              <div className="mb-3 grid grid-cols-1 gap-2">
+                <label className="flex items-center justify-between text-sm text-gray-700">
+                  <span>Afficher les tâches</span>
+                  <input type="checkbox" checked={showTasks} onChange={(e)=>setShowTasks(e.target.checked)} />
+                </label>
+                <label className="flex items-center justify-between text-sm text-gray-700">
+                  <span>Afficher les locations</span>
+                  <input type="checkbox" checked={showLocations} onChange={(e)=>setShowLocations(e.target.checked)} />
+                </label>
               </div>
 
+              {/* Section Objets louables */}
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                  <span className="inline-flex items-center justify-center w-4 h-4 rounded bg-blue-600 text-white text-[10px]">🛍️</span> Objets louables
+                </div>
+                <button onClick={() => setIsItemsSidebarOpen(false)} className="p-1 rounded-md hover:bg-gray-100" aria-label="Fermer les filtres">
+                  <span className="inline-block w-4 h-4">✕</span>
+                </button>
+              </div>
+              <input
+                type="text"
+                value={itemSearch}
+                onChange={(e) => setItemSearch(e.target.value)}
+                placeholder="Rechercher un objet..."
+                className="w-full rounded-md border-gray-300 focus:border-primary-500 focus:ring-primary-500 text-sm mb-3"
+              />
+              <label className="flex items-center gap-2 text-sm text-gray-700 mb-3">
+                <input type="checkbox" checked={onlyAvailableItems} onChange={(e) => setOnlyAvailableItems(e.target.checked)} />
+                Uniquement disponibles
+              </label>
+              <div className="text-xs text-gray-600 mb-1">Prix/jour (crédits)</div>
+              <div className="flex items-center gap-2 mb-2">
+                <input type="number" value={minPrice} onChange={(e)=>setMinPrice(Number(e.target.value))} className="w-20 rounded-md border-gray-300 text-sm" />
+                <span className="text-gray-400">—</span>
+                <input type="number" value={maxPrice} onChange={(e)=>setMaxPrice(Number(e.target.value))} className="w-20 rounded-md border-gray-300 text-sm" />
+              </div>
+              <div className="text-xs text-gray-600 mb-1">Dépôt max (crédits)</div>
+              <input type="number" value={maxDeposit} onChange={(e)=>setMaxDeposit(Number(e.target.value))} className="w-full rounded-md border-gray-300 text-sm mb-4" />
+
+              {/* Séparateur */}
+              <div className="border-t border-gray-200 my-3" />
+
+              {/* Section Filtres tâches */}
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                  <span className="inline-flex items-center justify-center w-4 h-4 rounded bg-gray-800 text-white text-[10px]">🗂️</span> Tâches
+                </div>
+                <button
+                  className="text-xs px-2 py-1 border rounded-md hover:bg-gray-50"
+                  onClick={recenterToUser}
+                  aria-label="Me recentrer"
+                >
+                  Me recentrer
+                </button>
+              </div>
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Rechercher titre, description, tag..."
-                className="w-full rounded-md border-gray-300 focus:border-primary-500 focus:ring-primary-500 text-sm"
+                className="w-full rounded-md border-gray-300 focus:border-primary-500 focus:ring-primary-500 text-sm mb-3"
               />
 
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-2 mb-3">
                 <select
                   className="rounded-md border-gray-300 text-sm"
                   value={filterCategory}
@@ -438,7 +496,7 @@ const MapPage: React.FC = () => {
                 </select>
               </div>
 
-              <div>
+              <div className="mb-3">
                 <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
                   <span>Rayon de proximité</span>
                   <span>{radiusKm > 0 ? `${radiusKm} km` : 'désactivé'}</span>
@@ -454,7 +512,7 @@ const MapPage: React.FC = () => {
                 />
               </div>
 
-              <label className="flex items-center gap-2 text-sm text-gray-700">
+              <label className="flex items-center gap-2 text-sm text-gray-700 mb-3">
                 <input
                   type="checkbox"
                   checked={sortByDistance}
@@ -462,8 +520,18 @@ const MapPage: React.FC = () => {
                 />
                 Trier par distance
               </label>
+
+              <div className="mt-auto text-xs text-gray-500">
+                {itemsLoading ? 'Chargement des objets...' : `${filteredRentableItems.length} objet(s)`}
+              </div>
             </div>
+            {/* Poignée de toggle */}
+            <button onClick={() => setIsItemsSidebarOpen(v => !v)} className="pointer-events-auto absolute top-1/2 -right-4 -translate-y-1/2 h-10 w-10 rounded-full bg-white shadow-lg border flex items-center justify-center" aria-label="Ouvrir/fermer filtres">
+              <span className="text-lg">🛍️</span>
+            </button>
           </div>
+
+          {/* Map Controls supprimés (désormais dans la sidebar gauche) */}
         </div>
       ) : (
         /* List View */
@@ -486,7 +554,7 @@ const MapPage: React.FC = () => {
                 transition={{ delay: index * 0.1 }}
               >
                 <Card
-                  onClick={() => handleTaskClick(task)}
+                  onClick={() => onTaskClick(task)}
                   hover
                   className="cursor-pointer"
                 >
@@ -520,7 +588,7 @@ const MapPage: React.FC = () => {
                       size="sm"
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleOfferHelp(task.id);
+                        onOfferHelp(task.id);
                       }}
                     >
                       Aider
@@ -684,7 +752,7 @@ const MapPage: React.FC = () => {
                  variant="primary"
                  className="flex-1"
                  onClick={() => {
-                   handleOfferHelp(selectedTask.id);
+                   onOfferHelp(selectedTask.id);
                    setSelectedTask(null);
                  }}
                >
@@ -700,6 +768,9 @@ const MapPage: React.FC = () => {
            </motion.div>
          </motion.div>
        )}
+
+      {/* Modal de demande de location */}
+      <RentModal isOpen={isRentModalOpen} item={rentItem} start={rentStart} end={rentEnd} onClose={() => setIsRentModalOpen(false)} onConfirm={onConfirmRent} onStartChange={setRentStart} onEndChange={setRentEnd} />
     </div>
   );
 };
