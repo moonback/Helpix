@@ -38,6 +38,11 @@ const TasksListView: React.FC<TasksListViewProps> = ({
     if (isLoading) return [];
 
     let filtered = tasks.filter(task => {
+      // Exclure les tâches terminées
+      if (task.status === 'completed' || task.status === 'cancelled') {
+        return false;
+      }
+
       // Filtre par recherche
       if (searchQuery && !task.title.toLowerCase().includes(searchQuery.toLowerCase()) &&
           !task.description.toLowerCase().includes(searchQuery.toLowerCase())) {

@@ -34,6 +34,11 @@ const MarkersLayer: React.FC<MarkersLayerProps> = ({
     if (isLoading) return [];
 
     return tasks.filter(task => {
+      // Exclure les tâches terminées
+      if (task.status === 'completed' || task.status === 'cancelled') {
+        return false;
+      }
+
       // Filtre par catégorie
       if (filterCategory !== 'all' && task.category !== filterCategory) {
         return false;

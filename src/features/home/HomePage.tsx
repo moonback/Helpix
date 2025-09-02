@@ -154,7 +154,7 @@ const HomePage: React.FC = () => {
 
   const doesTaskMatchFilters = useCallback((task: Task) => {
     if (!validateTask(task)) return false;
-    if (task.assigned_to || task.status === 'completed') return false;
+    if (task.assigned_to || task.status === 'completed' || task.status === 'cancelled') return false;
 
     const term = searchTerm.trim().toLowerCase();
     const matchesSearch = !term || (
