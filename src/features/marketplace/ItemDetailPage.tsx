@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import SafeImage from '@/components/ui/SafeImage';
 import { 
   ArrowLeft, 
   MapPin, 
@@ -217,10 +218,11 @@ const ItemDetailPage: React.FC = () => {
                 {/* Image principale */}
                 <div className="aspect-video bg-gradient-to-br from-emerald-100 to-green-100 rounded-xl overflow-hidden">
                   {item.images && item.images.length > 0 ? (
-                    <img
+                    <SafeImage
                       src={item.images[selectedImageIndex]}
                       alt={item.name}
                       className="w-full h-full object-cover"
+                      fallbackIcon={<Package className="w-16 h-16 text-emerald-600" />}
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
@@ -242,10 +244,11 @@ const ItemDetailPage: React.FC = () => {
                             : 'border-slate-200 hover:border-emerald-300'
                         }`}
                       >
-                        <img
+                        <SafeImage
                           src={image}
                           alt={`${item.name} ${index + 1}`}
                           className="w-full h-full object-cover"
+                          fallbackIcon={<Package className="w-4 h-4 text-gray-400" />}
                         />
                       </button>
                     ))}

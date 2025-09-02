@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import SafeImage from '@/components/ui/SafeImage';
 
 import { 
   MapPin, 
   Star, 
- 
+  
   DollarSign, 
   Eye, 
   MessageCircle, 
@@ -111,10 +112,11 @@ const MarketplaceItemCard: React.FC<MarketplaceItemCardProps> = ({
             <div className="flex-shrink-0">
               <div className="w-24 h-24 bg-gradient-to-br from-emerald-100 to-green-100 rounded-xl flex items-center justify-center overflow-hidden">
                 {item.images && item.images.length > 0 ? (
-                  <img 
+                  <SafeImage 
                     src={item.images[0]} 
                     alt={item.name}
                     className="w-full h-full object-cover"
+                    fallbackIcon={<Package className="w-8 h-8 text-emerald-600" />}
                   />
                 ) : (
                   <Package className="w-8 h-8 text-emerald-600" />
@@ -222,10 +224,11 @@ const MarketplaceItemCard: React.FC<MarketplaceItemCardProps> = ({
         <div className="relative mb-4">
           <div className="aspect-square bg-gradient-to-br from-emerald-100 to-green-100 rounded-xl flex items-center justify-center overflow-hidden">
             {item.images && item.images.length > 0 ? (
-              <img 
+              <SafeImage 
                 src={item.images[0]} 
                 alt={item.name}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                fallbackIcon={<Package className="w-12 h-12 text-emerald-600" />}
               />
             ) : (
               <Package className="w-12 h-12 text-emerald-600" />

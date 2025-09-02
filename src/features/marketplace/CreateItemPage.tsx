@@ -45,6 +45,7 @@ const CreateItemPage: React.FC = () => {
     deposit: '',
     tags: [] as string[],
     images: [] as string[],
+    imageFiles: [] as File[],
     location: '',
     latitude: latitude || 0,
     longitude: longitude || 0,
@@ -90,6 +91,7 @@ const CreateItemPage: React.FC = () => {
             deposit: item.deposit?.toString() || '',
             tags: item.tags || [],
             images: item.images || [],
+            imageFiles: [],
             location: item.location || '',
             latitude: item.latitude || latitude || 0,
             longitude: item.longitude || longitude || 0,
@@ -139,10 +141,11 @@ const CreateItemPage: React.FC = () => {
     const files = event.target.files;
     if (files) {
       // TODO: Implémenter l'upload d'images vers Supabase Storage
-      const newImages = Array.from(files).map(file => URL.createObjectURL(file));
+      // Pour l'instant, on stocke les fichiers directement pour éviter les URLs blob invalides
+      const newFiles = Array.from(files);
       setFormData(prev => ({
         ...prev,
-        images: [...prev.images, ...newImages]
+        imageFiles: [...(prev.imageFiles || []), ...newFiles]
       }));
     }
   };
@@ -150,7 +153,7 @@ const CreateItemPage: React.FC = () => {
   const handleRemoveImage = (index: number) => {
     setFormData(prev => ({
       ...prev,
-      images: prev.images.filter((_, i) => i !== index)
+      imageFiles: prev.imageFiles?.filter((_, i) => i !== index) || []
     }));
   };
 
@@ -377,14 +380,15 @@ const CreateItemPage: React.FC = () => {
                 </label>
               </div>
 
-              {formData.images.length > 0 && (
+              {formData.imageFiles && formData.imageFiles.length > 0 && (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {formData.images.map((image, index) => (
+                  {formData.imageFiles.map((file, index) => (
                     <div key={index} className="relative">
                       <img
-                        src={image}
+                        src={URL.createObjectURL(file)}
                         alt={`Image ${index + 1}`}
                         className="w-full h-24 object-cover rounded-lg"
+                        onLoad={(e) => URL.revokeObjectURL(e.currentTarget.src)}
                       />
                       <button
                         type="button"
