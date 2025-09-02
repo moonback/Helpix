@@ -7,7 +7,6 @@ import { useReverseGeocoding } from '@/hooks/useReverseGeocoding';
 import Button from '@/components/ui/Button';
 import DetailedAddressDisplay from '@/components/ui/DetailedAddressDisplay';
 import { 
-  Heart, 
   Plus, 
   BarChart3, 
   AlertCircle, 
@@ -42,19 +41,47 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({ className = '' }) => {
         <div className="hidden md:flex items-center justify-between">
           {/* Logo Section */}
           <motion.div 
-            className="flex items-center space-x-3"
+            className="flex items-center space-x-4"
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2, duration: 0.6 }}
           >
-            <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
-              <Heart className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-slate-800">Helpix</h1>
-              <p className="text-sm text-slate-500">
-                Bonjour {user?.email?.split('@')[0] || 'Utilisateur'} !
-              </p>
+            {/* Logo avec effet de survol amélioré */}
+            <motion.div 
+              className="relative group"
+              whileHover={{ scale: 1.05 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+            >
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600 p-0.5 shadow-xl group-hover:shadow-2xl transition-all duration-300">
+                <div className="w-full h-full rounded-2xl bg-white flex items-center justify-center overflow-hidden">
+                  <img 
+                    src="/assets/logo.png" 
+                    alt="Helpix Logo" 
+                    className="w-8 h-8 object-contain group-hover:scale-110 transition-transform duration-300"
+                  />
+                </div>
+              </div>
+              {/* Effet de brillance au survol */}
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 group-hover:animate-pulse transition-opacity duration-300"></div>
+            </motion.div>
+
+            {/* Texte du logo avec animations améliorées */}
+            <div className="flex flex-col">
+              <motion.h1 
+                className="text-xl font-bold bg-gradient-to-r from-slate-800 via-blue-700 to-indigo-700 bg-clip-text text-transparent cursor-pointer hover:from-blue-600 hover:via-indigo-600 hover:to-purple-600 transition-all duration-300"
+                whileHover={{ scale: 1.02 }}
+                onClick={() => navigate('/')}
+              >
+                Helpix
+              </motion.h1>
+              <motion.p 
+                className="text-sm text-slate-500 font-medium leading-tight"
+                initial={{ opacity: 0.7 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.4, duration: 0.4 }}
+              >
+                L'entraide près de chez vous !
+              </motion.p>
             </div>
           </motion.div>
 
@@ -130,8 +157,12 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({ className = '' }) => {
           >
             {/* Mobile Logo */}
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 sm:w-9 sm:h-9 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center shadow-md">
-                <Heart className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center shadow-md overflow-hidden">
+                <img 
+                  src="/images/logo.png" 
+                  alt="Helpix Logo" 
+                  className="w-full h-full object-contain"
+                />
               </div>
               <div>
                 <h1 className="text-base sm:text-lg font-bold text-slate-800 leading-tight">
