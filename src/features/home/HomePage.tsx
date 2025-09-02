@@ -298,7 +298,7 @@ const HomePage: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
       {/* Header */}
       <header className="bg-white/80 backdrop-blur-sm border-b border-slate-200/50 shadow-sm sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="max-w-12xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             {/* Logo */}
             <div className="flex items-center space-x-3">
@@ -420,7 +420,7 @@ const HomePage: React.FC = () => {
             >
               <Button
                 onClick={() => navigate('/create-task')}
-                className="bg-white text-indigo-600 hover:bg-gray-50 px-8 py-4 rounded-2xl font-semibold text-lg shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300"
+                className="text-indigo-600 hover:bg-gray-50 px-8 py-4 rounded-2xl font-semibold text-lg shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300"
               >
                 <Plus className="w-5 h-5 mr-2" />
                 Créer ma première tâche
