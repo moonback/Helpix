@@ -294,7 +294,19 @@ export const useMatchingStore = create<MatchingStore>((set, get) => ({
       user_profile: userProfile,
       recent_matches: [],
       pending_recommendations: [],
-      proximity_alerts: []
+      proximity_alerts: [],
+      matching_stats: {
+        total_matches: 0,
+        successful_matches: 0,
+        average_compatibility: 0,
+        response_rate: 0,
+        completion_rate: 0,
+        top_skills: [],
+        preferred_categories: [],
+        average_distance: 0
+      },
+      skill_gaps: [],
+      improvement_suggestions: []
     };
   },
 
