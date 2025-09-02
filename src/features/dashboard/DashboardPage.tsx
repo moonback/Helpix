@@ -650,12 +650,7 @@ const DashboardPage: React.FC = () => {
                                   <span>•</span>
                                   <span>Créée le {new Date(rental.created_at).toLocaleDateString()}</span>
                                 </div>
-                                <button 
-                                  onClick={() => navigate(`/rentals/${rental.id}`)}
-                                  className="text-blue-600 hover:text-blue-800 font-medium"
-                                >
-                                  Voir détails →
-                                </button>
+                                
                               </div>
                             </div>
                           </motion.div>
