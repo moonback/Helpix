@@ -21,7 +21,6 @@ import {
   Edit3,
   Copy,
   Reply,
-  Smile,
   Search,
   Info,
   ArrowDown,
@@ -189,23 +188,7 @@ const customStyles = `
     }
   }
 
-  .emoji-picker {
-    position: absolute;
-    bottom: 100%;
-    right: 0;
-    background: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 16px;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-    z-index: 50;
-    animation: slideInUp 0.2s ease-out;
-  }
-
-  .dark .emoji-picker {
-    background: #1e293b;
-    border-color: #334155;
-  }
+  
 `;
 
 // Modal générique pour les menus (portal vers body)
@@ -234,7 +217,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   const [editText, setEditText] = useState('');
   const [replyTo, setReplyTo] = useState<Message | null>(null);
   const [showScrollButton, setShowScrollButton] = useState(false);
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  
   const [isRecording, setIsRecording] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
@@ -274,9 +257,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
       if (!target.closest('.message-modal-content') && !target.closest('.menu-trigger')) {
         setShowMessageMenu(null);
       }
-      if (!target.closest('.emoji-picker') && !target.closest('.emoji-trigger')) {
-        setShowEmojiPicker(false);
-      }
+      
     };
 
     document.addEventListener('click', handleClickOutside);
@@ -444,10 +425,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
     setShowMessageMenu(showMessageMenu === messageId ? null : messageId);
   };
 
-  const addEmoji = (emoji: string) => {
-    setNewMessage(prev => prev + emoji);
-    setShowEmojiPicker(false);
-  };
+  
 
   const getFileIcon = (file: File) => {
     if (file.type.startsWith('image/')) return <ImageIcon className="h-4 w-4" />;
@@ -953,37 +931,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                   <Paperclip className="h-5 w-5 text-purple-500" />
                 </Button>
                 
-                <div className="relative emoji-trigger">
-                  <Button
-                    onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                    variant="ghost"
-                    size="sm"
-                    className="p-2 hover:bg-yellow-50 dark:hover:bg-slate-700 rounded-xl transition-all hover:scale-110"
-                    title="Ajouter un emoji"
-                  >
-                    <Smile className="h-5 w-5 text-yellow-500" />
-                  </Button>
-                  
-                  {/* Sélecteur d'emojis */}
-                  {showEmojiPicker && (
-                    <div className="emoji-picker">
-                      <p className="text-sm font-medium mb-3 text-gray-700 dark:text-gray-300">
-                        Emojis populaires
-                      </p>
-                      <div className="grid grid-cols-6 gap-2">
-                        {['😀','😂','😍','🥰','😘','😊','👍','❤️','🔥','💯','🎉','👏'].map((emoji, index) => (
-                          <button
-                            key={index}
-                            onClick={() => addEmoji(emoji)}
-                            className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors text-xl hover:scale-125 transform"
-                          >
-                            {emoji}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
+                
                 
                 <Button
                   onMouseDown={() => setIsRecording(true)}
