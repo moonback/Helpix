@@ -33,6 +33,7 @@ const ItemDetailPage: React.FC = () => {
   // Stores
   const { 
     fetchItemById, 
+    fetchUserInfo,
     fetchRentals,
     isLoading, 
     error 
@@ -42,6 +43,7 @@ const ItemDetailPage: React.FC = () => {
 
   // State
   const [item, setItem] = useState<Item | null>(null);
+  const [owner, setOwner] = useState<UserType | null>(null);
   const [rentals, setRentals] = useState<Rental[]>([]);
   const [isRentalModalOpen, setIsRentalModalOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
@@ -54,11 +56,18 @@ const ItemDetailPage: React.FC = () => {
         const itemData = await fetchItemById(parseInt(itemId));
         if (itemData) {
           setItem(itemData);
+          // Charger les informations du propriétaire
+          if (itemData.user_id) {
+            const ownerData = await fetchUserInfo(itemData.user_id);
+            if (ownerData) {
+              setOwner(ownerData);
+            }
+          }
         }
       };
       loadItem();
     }
-  }, [itemId, fetchItemById]);
+  }, [itemId, fetchItemById, fetchUserInfo]);
 
   // Charger les locations
   useEffect(() => {
@@ -298,7 +307,7 @@ const ItemDetailPage: React.FC = () => {
                     onClick={handleOwnerClick}
                     className="hover:text-emerald-600 transition-colors"
                   >
-                    {item.owner?.display_name || 'Propriétaire'}
+                    {owner?.name || 'Propriétaire'}
                   </button>
                 </div>
               </div>

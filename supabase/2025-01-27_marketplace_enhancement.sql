@@ -1,6 +1,9 @@
 -- Amélioration du système de marketplace
 -- Ajout des colonnes manquantes pour un marketplace complet
 
+-- Activer l'extension earthdistance pour les calculs de distance géographique
+CREATE EXTENSION IF NOT EXISTS earthdistance CASCADE;
+
 begin;
 
 -- 1) Ajouter les colonnes manquantes à la table items
@@ -8,8 +11,11 @@ alter table if exists public.items add column if not exists category text;
 alter table if exists public.items add column if not exists condition text;
 alter table if exists public.items add column if not exists images text[] default '{}';
 alter table if exists public.items add column if not exists tags text[] default '{}';
+alter table if exists public.items add column if not exists location text;
 alter table if exists public.items add column if not exists latitude double precision;
 alter table if exists public.items add column if not exists longitude double precision;
+alter table if exists public.items add column if not exists created_at timestamptz not null default now();
+alter table if exists public.items add column if not exists updated_at timestamptz not null default now();
 
 -- 2) Contraintes pour les nouvelles colonnes
 do $$
@@ -48,12 +54,17 @@ create table if not exists public.rental_reviews (
   updated_at timestamptz not null default now()
 );
 
--- 4) Trigger updated_at pour rental_reviews
+-- 4) Trigger updated_at pour items
+drop trigger if exists items_set_updated_at on public.items;
+create trigger items_set_updated_at before update on public.items
+for each row execute procedure public.set_updated_at();
+
+-- 5) Trigger updated_at pour rental_reviews
 drop trigger if exists rental_reviews_set_updated_at on public.rental_reviews;
 create trigger rental_reviews_set_updated_at before update on public.rental_reviews
 for each row execute procedure public.set_updated_at();
 
--- 5) RLS pour rental_reviews
+-- 6) RLS pour rental_reviews
 alter table public.rental_reviews enable row level security;
 
 -- Policies pour rental_reviews
@@ -80,7 +91,7 @@ begin
   end if;
 end $$;
 
--- 6) Mettre à jour les policies existantes pour items
+-- 7) Mettre à jour les policies existantes pour items
 do $$
 begin
   -- Permettre la lecture de tous les items rentables
@@ -96,7 +107,7 @@ begin
   end if;
 end $$;
 
--- 7) Index pour améliorer les performances
+-- 8) Index pour améliorer les performances
 create index if not exists idx_items_category on public.items(category) where is_rentable = true;
 create index if not exists idx_items_condition on public.items(condition) where is_rentable = true;
 create index if not exists idx_items_daily_price on public.items(daily_price) where is_rentable = true;
@@ -106,7 +117,7 @@ create index if not exists idx_items_location on public.items using gist(ll_to_e
 create index if not exists idx_rental_reviews_item_id on public.rental_reviews(item_id);
 create index if not exists idx_rental_reviews_rating on public.rental_reviews(rating);
 
--- 8) Fonction pour calculer la note moyenne d'un item
+-- 9) Fonction pour calculer la note moyenne d'un item
 create or replace function public.calculate_item_average_rating(item_id_param integer)
 returns numeric as $$
 declare
@@ -120,7 +131,7 @@ begin
 end;
 $$ language plpgsql;
 
--- 9) Fonction pour compter le nombre total de locations d'un item
+-- 10) Fonction pour compter le nombre total de locations d'un item
 create or replace function public.count_item_rentals(item_id_param integer)
 returns integer as $$
 declare
@@ -134,8 +145,9 @@ begin
 end;
 $$ language plpgsql;
 
--- 10) Vue pour les statistiques du marketplace
-create or replace view public.marketplace_stats as
+-- 11) Vue pour les statistiques du marketplace
+drop view if exists public.marketplace_stats;
+create view public.marketplace_stats as
 select 
   count(*) as total_items,
   count(*) filter (where available = true) as available_items,
@@ -145,19 +157,20 @@ select
 from public.items
 where is_rentable = true;
 
--- 11) Vue pour les items avec leurs statistiques
-create or replace view public.items_with_stats as
+-- 12) Vue pour les items avec leurs statistiques
+drop view if exists public.items_with_stats;
+create view public.items_with_stats as
 select 
   i.*,
   public.calculate_item_average_rating(i.id) as average_rating,
   public.count_item_rentals(i.id) as total_rentals,
-  u.display_name as owner_name,
+  u.name as owner_name,
   u.avatar_url as owner_avatar
 from public.items i
 left join public.users u on i.user_id = u.id
 where i.is_rentable = true;
 
--- 12) Données de test pour les catégories
+-- 13) Données de test pour les catégories
 insert into public.items (
   user_id, 
   name, 

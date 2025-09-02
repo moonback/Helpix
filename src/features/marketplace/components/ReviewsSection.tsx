@@ -170,12 +170,12 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({ itemId }) => {
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 bg-gradient-to-r from-emerald-500 to-green-600 rounded-full flex items-center justify-center">
                       <span className="text-white text-sm font-semibold">
-                        {(review.reviewer?.display_name || 'A')[0].toUpperCase()}
+                        {(review.reviewer?.name || 'A')[0].toUpperCase()}
                       </span>
                     </div>
                     <div>
                       <p className="font-medium text-slate-800">
-                        {review.reviewer?.display_name || 'Utilisateur anonyme'}
+                        {review.reviewer?.name || 'Utilisateur anonyme'}
                       </p>
                       <div className="flex items-center gap-2">
                         <div className="flex items-center gap-1">

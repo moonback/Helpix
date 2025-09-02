@@ -17,6 +17,7 @@ interface MarketplaceStore {
   searchQuery: string;
   
   // Actions pour les objets
+  fetchUserInfo: (userId: string) => Promise<any>;
   fetchItems: (filters?: MarketplaceFilter, sort?: MarketplaceSort, search?: string) => Promise<void>;
   fetchItemById: (id: number) => Promise<Item | null>;
   createItem: (itemData: Partial<Item>) => Promise<Item>;
@@ -91,6 +92,23 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
   sort: defaultSort,
   searchQuery: '',
 
+  // Fonction utilitaire pour récupérer les infos utilisateur
+  fetchUserInfo: async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('id, name, avatar_url')
+        .eq('id', userId)
+        .single();
+      
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Erreur lors de la récupération des infos utilisateur:', error);
+      return null;
+    }
+  },
+
   // Actions pour les objets
   fetchItems: async (filters, sort, search) => {
     set({ isLoading: true, error: null });
@@ -101,15 +119,7 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
 
       let query = supabase
         .from('items')
-        .select(`
-          *,
-          users!items_user_id_fkey (
-            id,
-            display_name,
-            avatar_url,
-            location
-          )
-        `)
+        .select('*')
         .eq('is_rentable', true);
 
       // Appliquer les filtres
@@ -148,7 +158,6 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
       // Traiter les données
       const processedItems: Item[] = (data || []).map((item: any) => ({
         ...item,
-        owner: item.users,
         tags: item.tags || [],
         images: item.images || [],
       }));
@@ -165,20 +174,7 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
     try {
       const { data, error } = await supabase
         .from('items')
-        .select(`
-          *,
-          users!items_user_id_fkey (
-            id,
-            display_name,
-            avatar_url,
-            location
-          ),
-          rentals (
-            id,
-            status,
-            rating
-          )
-        `)
+        .select('*')
         .eq('id', id)
         .single();
 
@@ -187,18 +183,9 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
       if (data) {
         const item: Item = {
           ...data,
-          owner: data.users,
           tags: data.tags || [],
           images: data.images || [],
-          rentals: data.rentals || [],
         };
-
-        // Calculer la note moyenne
-        const completedRentals = data.rentals?.filter((r: any) => r.status === 'completed' && r.rating) || [];
-        if (completedRentals.length > 0) {
-          item.average_rating = completedRentals.reduce((sum: number, r: any) => sum + r.rating, 0) / completedRentals.length;
-          item.total_rentals = completedRentals.length;
-        }
 
         return item;
       }
@@ -325,12 +312,12 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
           ),
           users!rentals_owner_id_fkey (
             id,
-            display_name,
+            name,
             avatar_url
           ),
           users!rentals_renter_id_fkey (
             id,
-            display_name,
+            name,
             avatar_url
           )
         `)
@@ -372,18 +359,18 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
             images,
             users!items_user_id_fkey (
               id,
-              display_name,
+              name,
               avatar_url
             )
           ),
           users!rentals_owner_id_fkey (
             id,
-            display_name,
+            name,
             avatar_url
           ),
           users!rentals_renter_id_fkey (
             id,
-            display_name,
+            name,
             avatar_url
           )
         `)
@@ -488,7 +475,7 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
           *,
           users!rental_reviews_reviewer_id_fkey (
             id,
-            display_name,
+            name,
             avatar_url
           )
         `)

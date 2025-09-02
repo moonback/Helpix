@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -18,6 +18,7 @@ import { Item, User as UserType } from '@/types';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import { calculateDistance } from '@/lib/utils';
+import { useMarketplaceStore } from '@/stores/marketplaceStore';
 
 interface MarketplaceItemCardProps {
   item: Item;
@@ -46,6 +47,19 @@ const MarketplaceItemCard: React.FC<MarketplaceItemCardProps> = ({
   prefersReducedMotion = false,
   index
 }) => {
+  const { fetchUserInfo } = useMarketplaceStore();
+  const [owner, setOwner] = useState<UserType | null>(null);
+
+  // Charger les informations du propriétaire
+  useEffect(() => {
+    if (item.user_id && !owner) {
+      fetchUserInfo(item.user_id).then((userData) => {
+        if (userData) {
+          setOwner(userData);
+        }
+      });
+    }
+  }, [item.user_id, owner, fetchUserInfo]);
   const navigate = useNavigate();
 
   // Calculer la distance si les coordonnées sont disponibles
@@ -156,7 +170,7 @@ const MarketplaceItemCard: React.FC<MarketplaceItemCardProps> = ({
                       onClick={handleOwnerClick}
                       className="hover:text-emerald-600 transition-colors"
                     >
-                      {item.owner?.display_name || 'Propriétaire'}
+                      {owner?.name || 'Propriétaire'}
                     </button>
                   </div>
                 </div>
@@ -268,14 +282,14 @@ const MarketplaceItemCard: React.FC<MarketplaceItemCardProps> = ({
           <div className="flex items-center gap-2 mb-4">
             <div className="w-6 h-6 bg-gradient-to-r from-emerald-500 to-green-600 rounded-full flex items-center justify-center">
               <span className="text-white text-xs font-semibold">
-                {(item.owner?.display_name || 'P')[0].toUpperCase()}
+                {(owner?.name || 'P')[0].toUpperCase()}
               </span>
             </div>
             <button
               onClick={handleOwnerClick}
               className="text-sm text-slate-600 hover:text-emerald-600 transition-colors truncate"
             >
-              {item.owner?.display_name || 'Propriétaire'}
+              {owner?.name || 'Propriétaire'}
             </button>
           </div>
 

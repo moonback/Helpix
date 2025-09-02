@@ -41,7 +41,8 @@ import {
   Hand,
   Lightbulb,
   Heart,
-  MapPin
+  MapPin,
+  Package
 } from 'lucide-react';
 
 // Types
