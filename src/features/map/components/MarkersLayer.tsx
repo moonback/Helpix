@@ -2,18 +2,8 @@ import React, { useMemo } from 'react';
 import { Circle } from 'react-leaflet';
 import { MapTask } from '../MapPage';
 import TaskMarker from './TaskMarker';
-import ItemMarker from './ItemMarker';
 
-interface RentableItemMarker {
-  id: number;
-  name: string;
-  description: string;
-  daily_price: number | null;
-  deposit: number;
-  available: boolean;
-  owner_id: string;
-  location: { lat: number; lng: number } | null;
-}
+
 
 interface MarkersLayerProps {
   // Tâches
@@ -21,20 +11,12 @@ interface MarkersLayerProps {
   userLocation: { lat: number; lng: number } | null;
   onTaskClick: (task: MapTask) => void;
   onOfferHelp: (taskId: number) => void;
-  // Items louables
-  rentableItems: RentableItemMarker[];
-  onItemClick: (item: RentableItemMarker) => void;
   // Filtres
   filterCategory: 'local' | 'remote' | 'all';
   filterPriority: 'urgent' | 'high' | 'medium' | 'low' | 'all';
   radiusKm: number;
-  itemSearch: string;
-  onlyAvailableItems: boolean;
-  minPrice: number;
-  maxPrice: number;
   // État
   isLoading: boolean;
-  itemsLoading: boolean;
 }
 
 const MarkersLayer: React.FC<MarkersLayerProps> = ({
@@ -42,17 +24,10 @@ const MarkersLayer: React.FC<MarkersLayerProps> = ({
   userLocation,
   onTaskClick,
   onOfferHelp,
-  rentableItems,
-  onItemClick,
   filterCategory,
   filterPriority,
   radiusKm,
-  itemSearch,
-  onlyAvailableItems,
-  minPrice,
-  maxPrice,
-  isLoading,
-  itemsLoading
+  isLoading
 }) => {
   // Filtrage des tâches
   const filteredTasks = useMemo(() => {
@@ -84,31 +59,7 @@ const MarkersLayer: React.FC<MarkersLayerProps> = ({
     });
   }, [tasks, filterCategory, filterPriority, radiusKm, userLocation, isLoading]);
 
-  // Filtrage des items louables
-  const filteredItems = useMemo(() => {
-    if (itemsLoading) return [];
 
-    return rentableItems.filter(item => {
-      // Filtre par disponibilité
-      if (onlyAvailableItems && !item.available) {
-        return false;
-      }
-
-      // Filtre par recherche
-      if (itemSearch && !item.name.toLowerCase().includes(itemSearch.toLowerCase())) {
-        return false;
-      }
-
-      // Filtre par prix
-      if (item.daily_price !== null) {
-        if (item.daily_price < minPrice || item.daily_price > maxPrice) {
-          return false;
-        }
-      }
-
-      return true;
-    });
-  }, [rentableItems, onlyAvailableItems, itemSearch, minPrice, maxPrice, itemsLoading]);
 
   return (
     <>
@@ -138,15 +89,7 @@ const MarkersLayer: React.FC<MarkersLayerProps> = ({
         />
       ))}
 
-      {/* Marqueurs des items louables */}
-      {filteredItems.map(item => (
-        <ItemMarker
-          key={`item-${item.id}`}
-          item={item}
-          userLocation={userLocation}
-          onOpenModal={onItemClick}
-        />
-      ))}
+
     </>
   );
 };

@@ -13,9 +13,8 @@ import { calculateDistance } from '@/lib/utils';
 import { requestRental } from '@/lib/rentals';
 import { usePaymentNotifications } from '@/hooks/usePaymentNotifications';
 import TaskMarker from './components/TaskMarker';
-import ItemMarker from './components/ItemMarker';
-import RentModal from './components/RentModal';
-import { useRentableItems } from './hooks/useRentableItems';
+
+
 
 // Type partiel pour les tâches de la carte
 export type MapTask = Pick<Task, 'id' | 'title' | 'description' | 'category' | 'status' | 'created_at' | 'user_id' | 'priority' | 'estimated_duration' | 'budget_credits' | 'required_skills' | 'tags'> & {
@@ -93,7 +92,7 @@ const MapPage: React.FC = () => {
   const [radiusKm, setRadiusKm] = useState<number>(0);
   const [sortByDistance, setSortByDistance] = useState<boolean>(false);
   // Louables
-  const { items: rentableItems, loading: itemsLoading } = useRentableItems();
+
   const [isItemsSidebarOpen, setIsItemsSidebarOpen] = useState(false);
   const [itemSearch, setItemSearch] = useState('');
   const [onlyAvailableItems, setOnlyAvailableItems] = useState(true);

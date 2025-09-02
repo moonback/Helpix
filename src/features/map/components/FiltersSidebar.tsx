@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { X, MapPin, Users } from 'lucide-react';
+import { X, MapPin } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 
@@ -19,17 +19,7 @@ interface FiltersSidebarProps {
   // Tri par distance
   sortByDistance: boolean;
   onSortByDistanceChange: (sort: boolean) => void;
-  // Filtres d'items louables
-  isItemsSidebarOpen: boolean;
-  onItemsSidebarToggle: () => void;
-  itemSearch: string;
-  onItemSearchChange: (search: string) => void;
-  onlyAvailableItems: boolean;
-  onOnlyAvailableItemsChange: (only: boolean) => void;
-  minPrice: number;
-  onMinPriceChange: (price: number) => void;
-  maxPrice: number;
-  onMaxPriceChange: (price: number) => void;
+
   className?: string;
 }
 
@@ -44,16 +34,7 @@ const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
   onRadiusChange,
   sortByDistance,
   onSortByDistanceChange,
-  isItemsSidebarOpen,
-  onItemsSidebarToggle,
-  itemSearch,
-  onItemSearchChange,
-  onlyAvailableItems,
-  onOnlyAvailableItemsChange,
-  minPrice,
-  onMinPriceChange,
-  maxPrice,
-  onMaxPriceChange,
+
   className = ''
 }) => {
   if (!isOpen) return null;
@@ -64,9 +45,7 @@ const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
     if (filterPriority !== 'all') count++;
     if (radiusKm > 0) count++;
     if (sortByDistance) count++;
-    if (itemSearch) count++;
-    if (onlyAvailableItems) count++;
-    if (minPrice > 0 || maxPrice < 1000) count++;
+
     return count;
   };
 
@@ -75,10 +54,7 @@ const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
     onPriorityChange('all');
     onRadiusChange(0);
     onSortByDistanceChange(false);
-    onItemSearchChange('');
-    onOnlyAvailableItemsChange(true);
-    onMinPriceChange(0);
-    onMaxPriceChange(1000);
+
   };
 
   return (
@@ -226,89 +202,7 @@ const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
               </Card>
             </div>
 
-            {/* Items Louables Section */}
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-xs font-medium text-slate-700 flex items-center">
-                  <Users className="w-4 h-4 mr-2" />
-                  Items Louables
-                </h3>
-                <Button
-                  onClick={onItemsSidebarToggle}
-                  variant="outline"
-                  size="sm"
-                  className="text-[10px]"
-                >
-                  {isItemsSidebarOpen ? 'Masquer' : 'Afficher'}
-                </Button>
-              </div>
 
-              {isItemsSidebarOpen && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="space-y-4"
-                >
-                  {/* Recherche d'items */}
-                  <Card className="p-4">
-                    <h4 className="text-xs font-medium text-slate-600 mb-3">Recherche</h4>
-                    <input
-                      type="text"
-                      placeholder="Nom de l'item..."
-                      value={itemSearch}
-                      onChange={(e) => onItemSearchChange(e.target.value)}
-                      className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </Card>
-
-                  {/* Disponibilité */}
-                  <Card className="p-4">
-                    <h4 className="text-xs font-medium text-slate-600 mb-3">Disponibilité</h4>
-                    <label className="flex items-center space-x-3 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={onlyAvailableItems}
-                        onChange={(e) => onOnlyAvailableItemsChange(e.target.checked)}
-                        className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500"
-                      />
-                      <span className="text-xs text-slate-700">
-                        Seulement les items disponibles
-                      </span>
-                    </label>
-                  </Card>
-
-                  {/* Prix */}
-                  <Card className="p-4">
-                    <h4 className="text-xs font-medium text-slate-600 mb-3">Prix (crédits/jour)</h4>
-                    <div className="space-y-3">
-                      <div>
-                        <label className="block text-[10px] text-slate-500 mb-1">Prix minimum</label>
-                        <input
-                          type="number"
-                          min="0"
-                          max="1000"
-                          value={minPrice}
-                          onChange={(e) => onMinPriceChange(Number(e.target.value))}
-                          className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-[10px] text-slate-500 mb-1">Prix maximum</label>
-                        <input
-                          type="number"
-                          min="0"
-                          max="1000"
-                          value={maxPrice}
-                          onChange={(e) => onMaxPriceChange(Number(e.target.value))}
-                          className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        />
-                      </div>
-                    </div>
-                  </Card>
-                </motion.div>
-              )}
-            </div>
           </div>
         </div>
       </motion.aside>

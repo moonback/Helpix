@@ -14,7 +14,7 @@ import {
   Eye,
   Share2
 } from 'lucide-react';
-import { useRentableItems } from '@/features/map/hooks/useRentableItems';
+
 import { useAuthStore } from '@/stores/authStore';
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { useReverseGeocoding } from '@/hooks/useReverseGeocoding';
@@ -25,7 +25,7 @@ import Card from '@/components/ui/Card';
 const RentableItemDetailPage: React.FC = () => {
   const { itemId } = useParams<{ itemId: string }>();
   const navigate = useNavigate();
-  const { items: rentableItems, loading: itemsLoading, error: itemsError } = useRentableItems();
+
   const { user } = useAuthStore();
   const { latitude, longitude } = useGeolocation();
   const { address: itemAddress, isLoading: isLoadingAddress, getAddressFromCoords } = useReverseGeocoding();

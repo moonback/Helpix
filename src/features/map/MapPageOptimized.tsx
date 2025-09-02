@@ -5,7 +5,7 @@ import { useTaskStore } from '@/stores/taskStore';
 import { useAuthStore } from '@/stores/authStore';
 import { Task } from '@/types';
 import { usePaymentNotifications } from '@/hooks/usePaymentNotifications';
-import { useRentableItems } from './hooks/useRentableItems';
+
 import { useGeolocation } from '@/hooks/useGeolocation';
 import PageContainer from '@/components/ui/PageContainer';
 import SectionHeader from '@/components/ui/SectionHeader';
@@ -18,7 +18,7 @@ import { MapPin } from 'lucide-react';
 const MapView = lazy(() => import('./components/MapView'));
 const TasksListView = lazy(() => import('./components/TasksListView'));
 const FiltersSidebar = lazy(() => import('./components/FiltersSidebar'));
-const RentModal = lazy(() => import('./components/RentModal'));
+
 const MapHeader = lazy(() => import('./components/MapHeader'));
 
 // Type partiel pour les tâches de la carte
@@ -65,7 +65,7 @@ const MapPageOptimized: React.FC = () => {
   const navigate = useNavigate();
   const { tasks, fetchTasks, isLoading } = useTaskStore();
   const { user } = useAuthStore();
-  const { items: rentableItems, loading: itemsLoading } = useRentableItems();
+
   const { addNotification } = usePaymentNotifications();
 
   // État de la vue
