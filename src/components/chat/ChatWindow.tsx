@@ -640,7 +640,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
       {/* Messages */}
         <div 
           ref={messagesContainerRef}
-          className="relative flex-1 overflow-visible p-4 md:p-6 pb-28 md:pb-44 space-y-5 md:space-y-6 bg-gradient-to-b from-transparent to-gray-50/30 dark:to-slate-800/30 h-full"
+          className="relative flex-1 overflow-y-auto overscroll-contain p-4 md:p-6 pb-28 md:pb-44 space-y-5 md:space-y-6 bg-gradient-to-b from-transparent to-gray-50/30 dark:to-slate-800/30 h-full"
         >
         {isLoading ? (
           <div className="flex items-center justify-center h-32">
@@ -672,7 +672,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
               </div>
           </div>
         ) : (
-            filteredMessages.slice(-8).map((message: Message, index: number) => {
+            filteredMessages.map((message: Message, index: number) => {
             const isOwnMessage = message.sender_id === user?.id;
               const showAvatar = index === 0 || filteredMessages[index - 1]?.sender_id !== message.sender_id;
             return (

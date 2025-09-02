@@ -672,10 +672,10 @@ const ConversationList: React.FC<ConversationListProps> = ({
         )}
 
         {/* Liste des conversations */}
-        <div className="flex-1 overflow-hidden h-full">
+        <div className="flex-1 overflow-auto h-full overscroll-contain">
           {filteredAndSortedConversations.length > 0 ? (
             <div className="p-4 space-y-2">
-                              {filteredAndSortedConversations.slice(0, 8).map((conversation) => (
+                              {filteredAndSortedConversations.map((conversation) => (
                 <div
                   key={conversation.id}
                   className={`conversation-item group p-4 rounded-2xl cursor-pointer transition-all ${
