@@ -1,8 +1,43 @@
-# 🌍 Helpix
+<div align="center">
+  <img src="public/assets/logo.png" alt="Helpix Logo" width="120" height="120" />
+  
+  # Helpix
+  
+  **La solidarité près de chez vous**
+  
+  *Une plateforme d'entraide géolocalisée qui connecte les communautés locales pour créer un écosystème de solidarité et d'échange de services.*
+  
+  [![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/votre-username/helpix)
+  [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+  [![TypeScript](https://img.shields.io/badge/TypeScript-4.9+-blue.svg)](https://www.typescriptlang.org/)
+  [![React](https://img.shields.io/badge/React-18+-61dafb.svg)](https://reactjs.org/)
+  [![Supabase](https://img.shields.io/badge/Supabase-Backend-3ecf8e.svg)](https://supabase.com/)
+  
+  [🚀 Démo Live](https://helpix-demo.vercel.app) • [📖 Documentation](docs/README.md) • [🐛 Signaler un bug](https://github.com/votre-username/helpix/issues) • [💡 Demander une fonctionnalité](https://github.com/votre-username/helpix/discussions)
+</div>
 
-**Une plateforme d'entraide géolocalisée qui connecte les communautés locales pour créer un écosystème de solidarité et d'échange de services.**
+---
 
-Helpix permet aux utilisateurs de proposer et demander de l'aide dans leur région, en utilisant un système de crédits équitable et une interface moderne et intuitive.
+## 🎯 À Propos
+
+**Helpix** est une plateforme d'entraide géolocalisée qui révolutionne la façon dont les communautés s'entraident. Grâce à un système de crédits équitable et une interface moderne, chaque utilisateur peut facilement proposer ou demander de l'aide dans son quartier.
+
+### ✨ **Pourquoi Helpix ?**
+
+- 🤝 **Solidarité locale** : Connectez-vous avec vos voisins
+- 💰 **Système équitable** : Gagnez des crédits en rendant service
+- 📍 **Géolocalisation intelligente** : Trouvez l'aide près de chez vous
+- 🔒 **Sécurisé et fiable** : Transactions protégées et profils vérifiés
+- 📱 **Mobile-first** : Interface optimisée pour tous les appareils
+
+## 📱 Captures d'Écran
+
+<div align="center">
+  <img src="docs/screenshots/home-mobile.png" alt="Page d'accueil mobile" width="200" />
+  <img src="docs/screenshots/tasks-desktop.png" alt="Liste des tâches desktop" width="300" />
+  <img src="docs/screenshots/map-view.png" alt="Vue carte" width="200" />
+  <img src="docs/screenshots/chat-interface.png" alt="Interface de chat" width="200" />
+</div>
 
 ## 🚀 Fonctionnalités Principales
 
@@ -100,8 +135,8 @@ Supabase CLI >= 1.0.0 (optionnel pour dev local)
 
 ### **1. Cloner le Repository**
 ```bash
-git clone https://github.com/votre-username/entraide-universelle.git
-cd entraide-universelle
+git clone https://github.com/votre-username/helpix.git
+cd helpix
 ```
 
 ### **2. Installer les Dépendances**
@@ -126,6 +161,7 @@ VITE_STRIPE_PUBLIC_KEY=your_stripe_public_key
 # Configuration App
 VITE_APP_NAME="Helpix"
 VITE_APP_VERSION="1.0.0"
+VITE_APP_DESCRIPTION="La solidarité près de chez vous"
 ```
 
 ### **4. Configuration Supabase**
@@ -161,8 +197,10 @@ L'application sera disponible sur `http://localhost:5173`
 ## 📁 Structure du Projet
 
 ```
-entraide-universelle/
+helpix/
 ├── public/                     # Assets statiques
+│   ├── assets/                # Assets principaux
+│   │   └── logo.png          # Logo Helpix
 │   └── images/                # Images et logos
 ├── src/
 │   ├── components/            # Composants UI réutilisables
@@ -199,6 +237,7 @@ entraide-universelle/
 │   │   ├── utils.ts         # Fonctions utilitaires
 │   │   ├── creditUtils.ts   # Logique des crédits
 │   │   ├── creditPricing.ts # Tarification
+│   │   ├── branding.ts      # Textes et branding
 │   │   └── router.ts        # Configuration des routes
 │   ├── types/               # Types TypeScript
 │   │   └── index.ts         # Définitions globales
@@ -263,8 +302,8 @@ VITE_STRIPE_PUBLIC_KEY=pk_test_your_stripe_public_key
 # === CONFIGURATION APP ===
 VITE_APP_NAME="Helpix"
 VITE_APP_VERSION="1.0.0"
-VITE_APP_DESCRIPTION="Plateforme d'entraide géolocalisée"
-VITE_APP_URL=https://entraide-universelle.com
+VITE_APP_DESCRIPTION="La solidarité près de chez vous"
+VITE_APP_URL=https://helpix.app
 
 # === DÉVELOPPEMENT ===
 VITE_DEBUG_MODE=false
@@ -392,16 +431,16 @@ Nous utilisons [Conventional Commits](https://www.conventionalcommits.org/):
 ## 🆘 Support et Communauté
 
 ### **Obtenir de l'Aide**
-- 📧 **Email** : support@entraide-universelle.com
-- 💬 **Discord** : [Rejoindre notre communauté](https://discord.gg/entraide-universelle)
-- 🐛 **Issues** : [GitHub Issues](https://github.com/votre-username/entraide-universelle/issues)
-- 💡 **Discussions** : [GitHub Discussions](https://github.com/votre-username/entraide-universelle/discussions)
+- 📧 **Email** : support@helpix.app
+- 💬 **Discord** : [Rejoindre notre communauté](https://discord.gg/helpix)
+- 🐛 **Issues** : [GitHub Issues](https://github.com/votre-username/helpix/issues)
+- 💡 **Discussions** : [GitHub Discussions](https://github.com/votre-username/helpix/discussions)
 
 ### **Ressources**
 - [FAQ](docs/FAQ.md) - Questions fréquentes
 - [Tutoriels](docs/tutorials/) - Guides d'utilisation
-- [Blog](https://blog.entraide-universelle.com) - Actualités et guides
-- [Status Page](https://status.entraide-universelle.com) - État des services
+- [Blog](https://blog.helpix.app) - Actualités et guides
+- [Status Page](https://status.helpix.app) - État des services
 
 ## 📄 Licence
 
@@ -453,7 +492,7 @@ Ce projet s'inspire des valeurs de solidarité, d'entraide et de communauté. No
 
 **Développé avec ❤️ par l'équipe Helpix**
 
-[Site Web](https://entraide-universelle.com) • [Twitter](https://twitter.com/entraide_univ) • [LinkedIn](https://linkedin.com/company/entraide-universelle) • [Blog](https://blog.entraide-universelle.com)
+[Site Web](https://helpix.app) • [Twitter](https://twitter.com/helpix_app) • [LinkedIn](https://linkedin.com/company/helpix) • [Blog](https://blog.helpix.app)
 
 ---
 
