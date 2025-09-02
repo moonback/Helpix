@@ -1,6 +1,9 @@
 -- Script simple pour corriger les clés étrangères manquantes
 -- Exécutez ce script dans l'éditeur SQL de Supabase
 
+-- Vérifier les valeurs disponibles dans l'enum rental_status_enum
+SELECT unnest(enum_range(NULL::rental_status_enum)) as status_values;
+
 -- Activer RLS sur la table rentals si pas déjà fait
 ALTER TABLE public.rentals ENABLE ROW LEVEL SECURITY;
 
@@ -98,6 +101,7 @@ BEGIN
   END IF;
 
   -- Politique pour permettre aux propriétaires de mettre à jour leurs locations
+  -- Seul le propriétaire peut accepter/refuser une demande de location
   IF NOT EXISTS (
     SELECT 1 FROM pg_policies 
     WHERE tablename = 'rentals' AND policyname = 'rentals_update_own'
@@ -115,6 +119,18 @@ BEGIN
   ) THEN
     CREATE POLICY "rentals_delete_own" ON public.rentals
       FOR DELETE USING (
+        auth.uid() = owner_id
+      );
+  END IF;
+
+  -- Politique spécifique pour les changements de statut (acceptation/refus)
+  -- Seul le propriétaire peut changer le statut d'une location
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies 
+    WHERE tablename = 'rentals' AND policyname = 'rentals_status_update_owner'
+  ) THEN
+    CREATE POLICY "rentals_status_update_owner" ON public.rentals
+      FOR UPDATE USING (
         auth.uid() = owner_id
       );
   END IF;

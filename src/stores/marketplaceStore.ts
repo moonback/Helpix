@@ -311,7 +311,26 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
     try {
       let query = supabase
         .from('rentals')
-        .select('*')
+        .select(`
+          *,
+          items!rentals_item_id_fkey (
+            id,
+            name,
+            description,
+            images,
+            daily_price
+          ),
+          owner:users!rentals_owner_id_fkey (
+            id,
+            name,
+            avatar_url
+          ),
+          renter:users!rentals_renter_id_fkey (
+            id,
+            name,
+            avatar_url
+          )
+        `)
         .order('created_at', { ascending: false });
 
       if (userId) {
@@ -324,6 +343,9 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
 
       const processedRentals: Rental[] = (data || []).map((rental: any) => ({
         ...rental,
+        item: rental.items,
+        owner: rental.owner,
+        renter: rental.renter,
       }));
 
       set({ rentals: processedRentals });
@@ -338,7 +360,26 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
     try {
       const { data, error } = await supabase
         .from('rentals')
-        .select('*')
+        .select(`
+          *,
+          items!rentals_item_id_fkey (
+            id,
+            name,
+            description,
+            images,
+            daily_price
+          ),
+          owner:users!rentals_owner_id_fkey (
+            id,
+            name,
+            avatar_url
+          ),
+          renter:users!rentals_renter_id_fkey (
+            id,
+            name,
+            avatar_url
+          )
+        `)
         .eq('id', id)
         .single();
 
@@ -347,6 +388,9 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
       if (data) {
         return {
           ...data,
+          item: data.items,
+          owner: data.owner,
+          renter: data.renter,
         };
       }
       return null;
@@ -409,6 +453,42 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
 
   updateRentalStatus: async (id: string, status: RentalStatus) => {
     try {
+      // Récupérer l'utilisateur actuel
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('Utilisateur non authentifié');
+      }
+
+      // Récupérer la location pour vérifier que l'utilisateur est le propriétaire
+      const { data: rentalData, error: fetchError } = await supabase
+        .from('rentals')
+        .select('owner_id, status')
+        .eq('id', id)
+        .single();
+
+      if (fetchError || !rentalData) {
+        throw new Error('Location non trouvée');
+      }
+
+      // Vérifier que l'utilisateur est le propriétaire
+      if (rentalData.owner_id !== user.id) {
+        throw new Error('Seul le propriétaire peut modifier le statut de la location');
+      }
+
+      // Vérifier que le changement de statut est valide
+      const validStatusTransitions: Record<string, string[]> = {
+        'requested': ['accepted', 'cancelled'], // Pas de "rejected", on utilise "cancelled"
+        'accepted': ['active', 'cancelled'],
+        'active': ['completed', 'cancelled'],
+        'cancelled': [],
+        'completed': []
+      };
+
+      const currentStatus = rentalData.status;
+      if (!validStatusTransitions[currentStatus]?.includes(status)) {
+        throw new Error(`Impossible de changer le statut de "${currentStatus}" vers "${status}"`);
+      }
+
       const { error } = await supabase
         .from('rentals')
         .update({ status })
@@ -426,6 +506,34 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
 
   cancelRental: async (id: string, reason?: string) => {
     try {
+      // Récupérer l'utilisateur actuel
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('Utilisateur non authentifié');
+      }
+
+      // Récupérer la location pour vérifier les permissions
+      const { data: rentalData, error: fetchError } = await supabase
+        .from('rentals')
+        .select('owner_id, renter_id, status')
+        .eq('id', id)
+        .single();
+
+      if (fetchError || !rentalData) {
+        throw new Error('Location non trouvée');
+      }
+
+      // Vérifier que l'utilisateur est soit le propriétaire soit le locataire
+      if (rentalData.owner_id !== user.id && rentalData.renter_id !== user.id) {
+        throw new Error('Seul le propriétaire ou le locataire peut annuler cette location');
+      }
+
+      // Vérifier que l'annulation est possible selon le statut actuel
+      const cancellableStatuses = ['requested', 'accepted', 'active'];
+      if (!cancellableStatuses.includes(rentalData.status)) {
+        throw new Error(`Impossible d'annuler une location avec le statut "${rentalData.status}"`);
+      }
+
       const updateData: any = { 
         status: 'cancelled',
       };
