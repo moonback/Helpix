@@ -461,7 +461,7 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
       ));
       const totalCredits = totalDays * rentalData.dailyPrice;
       const depositCredits = rentalData.depositCredits || 0;
-      const totalToReserve = totalCredits + depositCredits;
+
 
       // Réserver SEULEMENT les crédits de location (pas la caution)
       const { error: reserveError } = await supabase.rpc('reserve_rental_credits', {

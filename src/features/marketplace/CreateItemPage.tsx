@@ -7,7 +7,7 @@ import {
   Upload, 
   MapPin, 
   DollarSign, 
-  Shield,
+
   Tag,
   Camera,
   X
@@ -30,9 +30,7 @@ const CreateItemPage: React.FC = () => {
   const { 
     createItem, 
     updateItem, 
-    fetchItemById, 
-    isLoading, 
-    error 
+    fetchItemById
   } = useMarketplaceStore();
   const { user } = useAuthStore();
   const { latitude, longitude } = useGeolocation();

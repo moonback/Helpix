@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, SlidersHorizontal, RotateCcw } from 'lucide-react';
 import { MarketplaceFilter, ItemCategory, ItemCondition } from '@/types';
 import Button from '@/components/ui/Button';
-import Card from '@/components/ui/Card';
+
 
 interface MarketplaceFilterModalProps {
   isOpen: boolean;
@@ -96,7 +96,7 @@ const MarketplaceFilterModal: React.FC<MarketplaceFilterModalProps> = ({
   const handleResetFilters = () => {
     const resetFilters: MarketplaceFilter = {
       available_only: false,
-      price_range: { min: 0, max: 1000 },
+      price_range: { min: 0, max: 1000 } as { min: number; max: number },
       location_radius: 50,
     };
     setLocalFilters(resetFilters);

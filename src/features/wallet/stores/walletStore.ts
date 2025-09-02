@@ -173,12 +173,14 @@ export const useWalletStore = create<WalletStore>((set, get) => ({
       // Transformer les données pour correspondre au format attendu
       const creditEarnings = data?.map(transaction => ({
         id: transaction.id,
+        user_id: transaction.wallet?.user_id || '',
+        task_id: 0, // À récupérer depuis les métadonnées si nécessaire
+        help_offer_id: transaction.reference_id || '',
         amount: transaction.amount,
         status: transaction.status,
         created_at: transaction.created_at,
-        description: transaction.description,
-        reference_type: transaction.reference_type,
-        reference_id: transaction.reference_id
+        task_title: transaction.metadata?.task_title || 'Tâche',
+        task_owner: 'Propriétaire'
       })) || [];
 
       set({ creditEarnings });
@@ -213,12 +215,15 @@ export const useWalletStore = create<WalletStore>((set, get) => ({
       // Transformer les données pour correspondre au format attendu
       const withdrawalRequests = data?.map(transaction => ({
         id: transaction.id,
+        user_id: transaction.wallet?.user_id || '',
         amount: transaction.amount,
         status: transaction.status,
         created_at: transaction.created_at,
-        description: transaction.description,
-        reference_type: transaction.reference_type,
-        reference_id: transaction.reference_id
+        payment_method: 'bank_transfer' as const,
+        account_details: {
+          bank_name: 'Banque',
+          account_number: 'N/A'
+        }
       })) || [];
 
       set({ withdrawalRequests });

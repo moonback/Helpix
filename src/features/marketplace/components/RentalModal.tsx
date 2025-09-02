@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Calendar, DollarSign, Shield, Clock, AlertCircle } from 'lucide-react';
+import { X, Calendar, AlertCircle } from 'lucide-react';
 import { Item, User } from '@/types';
 import { useMarketplaceStore } from '@/stores/marketplaceStore';
 import Button from '@/components/ui/Button';
@@ -19,7 +19,7 @@ const RentalModal: React.FC<RentalModalProps> = ({
   item,
   user
 }) => {
-  const { requestRental, isLoading } = useMarketplaceStore();
+  const { requestRental } = useMarketplaceStore();
   
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');

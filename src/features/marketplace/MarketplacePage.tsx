@@ -4,13 +4,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useMarketplaceStore } from '@/stores/marketplaceStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useGeolocation } from '@/hooks/useGeolocation';
-import { Item, ItemCategory, MarketplaceFilter, MarketplaceSort } from '@/types';
+import { ItemCategory, MarketplaceFilter, MarketplaceSort } from '@/types';
 
 // Components
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
-import FilterModal from '@/components/ui/FilterModal';
+
 import FilterButton from '@/components/ui/FilterButton';
 import FilterBadge from '@/components/ui/FilterBadge';
 import MarketplaceItemCard from './components/MarketplaceItemCard';
@@ -27,14 +27,14 @@ import {
   SortAsc,
   SortDesc,
   Eye,
-  MapPin,
+
   Grid3X3,
   List,
   TrendingUp,
   Star,
   Package,
-  Users,
-  DollarSign
+
+
 } from 'lucide-react';
 
 const MarketplacePage: React.FC = () => {

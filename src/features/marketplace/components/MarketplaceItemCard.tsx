@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { 
   MapPin, 
   Star, 
-  Clock, 
+ 
   DollarSign, 
   Eye, 
   MessageCircle, 
@@ -60,7 +60,7 @@ const MarketplaceItemCard: React.FC<MarketplaceItemCardProps> = ({
       });
     }
   }, [item.user_id, owner, fetchUserInfo]);
-  const navigate = useNavigate();
+
 
   // Calculer la distance si les coordonnées sont disponibles
   const distance = React.useMemo(() => {

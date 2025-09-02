@@ -5,9 +5,7 @@ import {
   Users, 
   Star, 
   TrendingUp,
-  DollarSign,
-  MapPin,
-  Clock
+
 } from 'lucide-react';
 import Card from '@/components/ui/Card';
 

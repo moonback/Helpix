@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Star, User, MessageCircle, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { Star, MessageCircle, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { useMarketplaceStore } from '@/stores/marketplaceStore';
-import { RentalReview } from '@/types';
+
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 
@@ -27,7 +27,7 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({ itemId }) => {
   }, [itemId, fetchReviews]);
 
   // Filtrer les avis pour cet objet
-  const itemReviews = reviews.filter(review => 
+  const itemReviews = reviews.filter(() => 
     // TODO: Ajouter une relation item_id dans les avis
     true // Pour l'instant, on affiche tous les avis
   );

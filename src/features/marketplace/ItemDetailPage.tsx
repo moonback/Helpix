@@ -13,7 +13,7 @@ import {
   Heart,
   Share2,
   Package,
-  Clock,
+
   CheckCircle,
   AlertCircle
 } from 'lucide-react';
@@ -43,8 +43,8 @@ const ItemDetailPage: React.FC = () => {
 
   // State
   const [item, setItem] = useState<Item | null>(null);
-  const [owner, setOwner] = useState<UserType | null>(null);
-  const [rentals, setRentals] = useState<Rental[]>([]);
+  const [owner, setOwner] = useState<User | null>(null);
+
   const [isRentalModalOpen, setIsRentalModalOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
