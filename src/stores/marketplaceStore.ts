@@ -61,6 +61,9 @@ interface MarketplaceStore {
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
   
+  // Fonction utilitaire pour gérer les crédits
+  updateUserCredits: (userId: string, amount: number, type: 'credit' | 'debit', description: string) => Promise<number>;
+  
   // Statistiques
   getMarketplaceStats: () => {
     totalItems: number;
@@ -108,6 +111,74 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
     } catch (error) {
       console.error('Erreur lors de la récupération des infos utilisateur:', error);
       return null;
+    }
+  },
+
+  // Fonction utilitaire pour gérer les crédits
+  updateUserCredits: async (userId: string, amount: number, type: 'credit' | 'debit', description: string) => {
+    try {
+      // Récupérer le portefeuille de l'utilisateur
+      const { data: wallet, error: walletError } = await supabase
+        .from('wallets')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
+
+      if (walletError && walletError.code !== 'PGRST116') {
+        throw walletError;
+      }
+
+      const currentBalance = wallet?.balance || 0;
+      const newBalance = type === 'credit' 
+        ? currentBalance + amount 
+        : currentBalance - amount;
+
+      if (newBalance < 0) {
+        throw new Error('Solde insuffisant');
+      }
+
+      // Mettre à jour ou créer le portefeuille
+      if (wallet) {
+        const { error: updateError } = await supabase
+          .from('wallets')
+          .update({ 
+            balance: newBalance,
+            updated_at: new Date().toISOString()
+          })
+          .eq('user_id', userId);
+
+        if (updateError) throw updateError;
+      } else {
+        const { error: createError } = await supabase
+          .from('wallets')
+          .insert({
+            user_id: userId,
+            balance: newBalance,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          });
+
+        if (createError) throw createError;
+      }
+
+      // Créer une transaction
+      const { error: transactionError } = await supabase
+        .from('transactions')
+        .insert({
+          user_id: userId,
+          amount: type === 'credit' ? amount : -amount,
+          type: type,
+          description: description,
+          balance_after: newBalance,
+          created_at: new Date().toISOString()
+        });
+
+      if (transactionError) throw transactionError;
+
+      return newBalance;
+    } catch (error: any) {
+      console.error('Erreur lors de la mise à jour des crédits:', error);
+      throw error;
     }
   },
 
@@ -459,10 +530,10 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
         throw new Error('Utilisateur non authentifié');
       }
 
-      // Récupérer la location pour vérifier que l'utilisateur est le propriétaire
+      // Récupérer la location complète pour vérifier les permissions et gérer les crédits
       const { data: rentalData, error: fetchError } = await supabase
         .from('rentals')
-        .select('owner_id, status')
+        .select('owner_id, renter_id, status, total_credits, deposit_credits')
         .eq('id', id)
         .single();
 
@@ -477,7 +548,7 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
 
       // Vérifier que le changement de statut est valide
       const validStatusTransitions: Record<string, string[]> = {
-        'requested': ['accepted', 'cancelled'], // Pas de "rejected", on utilise "cancelled"
+        'requested': ['accepted', 'cancelled'],
         'accepted': ['active', 'cancelled'],
         'active': ['completed', 'cancelled'],
         'cancelled': [],
@@ -489,6 +560,74 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
         throw new Error(`Impossible de changer le statut de "${currentStatus}" vers "${status}"`);
       }
 
+      // Gérer les crédits selon le changement de statut
+      if (currentStatus === 'requested' && status === 'accepted') {
+        // Débiter le locataire (réservation)
+        await get().updateUserCredits(
+          rentalData.renter_id, 
+          rentalData.total_credits, 
+          'debit', 
+          `Réservation d'objet - Location #${id}`
+        );
+        
+        // Créditer le propriétaire
+        await get().updateUserCredits(
+          rentalData.owner_id, 
+          rentalData.total_credits, 
+          'credit', 
+          `Location acceptée - Location #${id}`
+        );
+      } else if (currentStatus === 'accepted' && status === 'active') {
+        // Aucun changement de crédits, juste démarrage de la location
+      } else if (currentStatus === 'active' && status === 'completed') {
+        // Rembourser le dépôt au locataire
+        if (rentalData.deposit_credits > 0) {
+          await get().updateUserCredits(
+            rentalData.renter_id, 
+            rentalData.deposit_credits, 
+            'credit', 
+            `Remboursement dépôt - Location #${id}`
+          );
+        }
+      } else if (status === 'cancelled') {
+        // Gérer les remboursements selon le statut actuel
+        if (currentStatus === 'accepted') {
+          // Rembourser le locataire
+          await get().updateUserCredits(
+            rentalData.renter_id, 
+            rentalData.total_credits, 
+            'credit', 
+            `Remboursement location annulée - Location #${id}`
+          );
+          
+          // Débiter le propriétaire
+          await get().updateUserCredits(
+            rentalData.owner_id, 
+            rentalData.total_credits, 
+            'debit', 
+            `Location annulée - Location #${id}`
+          );
+        } else if (currentStatus === 'active') {
+          // Rembourser partiellement le locataire (proportionnel)
+          const refundAmount = Math.floor(rentalData.total_credits * 0.5); // 50% de remboursement
+          await get().updateUserCredits(
+            rentalData.renter_id, 
+            refundAmount, 
+            'credit', 
+            `Remboursement partiel location annulée - Location #${id}`
+          );
+          
+          // Débiter le propriétaire
+          await get().updateUserCredits(
+            rentalData.owner_id, 
+            refundAmount, 
+            'debit', 
+            `Location annulée en cours - Location #${id}`
+          );
+        }
+      }
+
+      // Mettre à jour le statut de la location
       const { error } = await supabase
         .from('rentals')
         .update({ status })
@@ -512,10 +651,10 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
         throw new Error('Utilisateur non authentifié');
       }
 
-      // Récupérer la location pour vérifier les permissions
+      // Récupérer la location pour vérifier les permissions et gérer les crédits
       const { data: rentalData, error: fetchError } = await supabase
         .from('rentals')
-        .select('owner_id, renter_id, status')
+        .select('owner_id, renter_id, status, total_credits, deposit_credits')
         .eq('id', id)
         .single();
 
@@ -532,6 +671,59 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
       const cancellableStatuses = ['requested', 'accepted', 'active'];
       if (!cancellableStatuses.includes(rentalData.status)) {
         throw new Error(`Impossible d'annuler une location avec le statut "${rentalData.status}"`);
+      }
+
+      // Gérer les crédits selon le statut actuel et qui annule
+      if (rentalData.status === 'accepted') {
+        if (user.id === rentalData.renter_id) {
+          // Le locataire annule : remboursement complet
+          await get().updateUserCredits(
+            rentalData.renter_id, 
+            rentalData.total_credits, 
+            'credit', 
+            `Annulation par locataire - Location #${id}`
+          );
+          
+          await get().updateUserCredits(
+            rentalData.owner_id, 
+            rentalData.total_credits, 
+            'debit', 
+            `Location annulée par locataire - Location #${id}`
+          );
+        } else {
+          // Le propriétaire annule : remboursement + pénalité
+          await get().updateUserCredits(
+            rentalData.renter_id, 
+            rentalData.total_credits, 
+            'credit', 
+            `Remboursement annulation propriétaire - Location #${id}`
+          );
+          
+          // Pénalité pour le propriétaire (10% des crédits)
+          const penalty = Math.floor(rentalData.total_credits * 0.1);
+          await get().updateUserCredits(
+            rentalData.owner_id, 
+            penalty, 
+            'debit', 
+            `Pénalité annulation - Location #${id}`
+          );
+        }
+      } else if (rentalData.status === 'active') {
+        // Location en cours : remboursement partiel
+        const refundAmount = Math.floor(rentalData.total_credits * 0.3); // 30% de remboursement
+        await get().updateUserCredits(
+          rentalData.renter_id, 
+          refundAmount, 
+          'credit', 
+          `Remboursement partiel annulation - Location #${id}`
+        );
+        
+        await get().updateUserCredits(
+          rentalData.owner_id, 
+          refundAmount, 
+          'debit', 
+          `Location annulée en cours - Location #${id}`
+        );
       }
 
       const updateData: any = { 

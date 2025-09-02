@@ -293,67 +293,89 @@ const RentalsPage: React.FC = () => {
 
                       {/* Actions */}
                       <div className="flex flex-col gap-2 ml-4">
-                        {rental.status === 'requested' && (
+                        {/* Actions pour le propriétaire */}
+                        {user?.id === rental.owner_id && (
                           <>
-                            <Button 
-                              size="sm" 
-                              onClick={() => setStatus(rental.id, 'accepted')}
-                              className="text-xs"
-                            >
-                              <CheckCircle className="w-3 h-3 mr-1" />
-                              Accepter
-                            </Button>
-                            <Button 
-                              size="sm" 
-                              variant="outline" 
-                              onClick={() => handleCancel(rental.id, 'Demande refusée par le propriétaire')}
-                              className="text-xs"
-                            >
-                              <XCircle className="w-3 h-3 mr-1" />
-                              Refuser
-                            </Button>
+                            {rental.status === 'requested' && (
+                              <>
+                                <Button 
+                                  size="sm" 
+                                  onClick={() => setStatus(rental.id, 'accepted')}
+                                  className="text-xs"
+                                >
+                                  <CheckCircle className="w-3 h-3 mr-1" />
+                                  Accepter
+                                </Button>
+                                <Button 
+                                  size="sm" 
+                                  variant="outline" 
+                                  onClick={() => handleCancel(rental.id, 'Demande refusée par le propriétaire')}
+                                  className="text-xs"
+                                >
+                                  <XCircle className="w-3 h-3 mr-1" />
+                                  Refuser
+                                </Button>
+                              </>
+                            )}
+                            {rental.status === 'accepted' && (
+                              <>
+                                <Button 
+                                  size="sm" 
+                                  onClick={() => setStatus(rental.id, 'active')}
+                                  className="text-xs"
+                                >
+                                  <Play className="w-3 h-3 mr-1" />
+                                  Démarrer
+                                </Button>
+                                <Button 
+                                  size="sm" 
+                                  variant="outline" 
+                                  onClick={() => handleCancel(rental.id, 'Location annulée')}
+                                  className="text-xs"
+                                >
+                                  <XCircle className="w-3 h-3 mr-1" />
+                                  Annuler
+                                </Button>
+                              </>
+                            )}
+                            {rental.status === 'active' && (
+                              <>
+                                <Button 
+                                  size="sm" 
+                                  onClick={() => setStatus(rental.id, 'completed')}
+                                  className="text-xs"
+                                >
+                                  <CheckCircle className="w-3 h-3 mr-1" />
+                                  Terminer
+                                </Button>
+                                <Button 
+                                  size="sm" 
+                                  variant="outline" 
+                                  onClick={() => handleCancel(rental.id, 'Location annulée en cours')}
+                                  className="text-xs"
+                                >
+                                  <XCircle className="w-3 h-3 mr-1" />
+                                  Annuler
+                                </Button>
+                              </>
+                            )}
                           </>
                         )}
-                        {rental.status === 'accepted' && (
+
+                        {/* Actions pour le locataire */}
+                        {user?.id === rental.renter_id && (
                           <>
-                            <Button 
-                              size="sm" 
-                              onClick={() => setStatus(rental.id, 'active')}
-                              className="text-xs"
-                            >
-                              <Play className="w-3 h-3 mr-1" />
-                              Démarrer
-                            </Button>
-                            <Button 
-                              size="sm" 
-                              variant="outline" 
-                              onClick={() => handleCancel(rental.id, 'Location annulée')}
-                              className="text-xs"
-                            >
-                              <XCircle className="w-3 h-3 mr-1" />
-                              Annuler
-                            </Button>
-                          </>
-                        )}
-                        {rental.status === 'active' && (
-                          <>
-                            <Button 
-                              size="sm" 
-                              onClick={() => setStatus(rental.id, 'completed')}
-                              className="text-xs"
-                            >
-                              <CheckCircle className="w-3 h-3 mr-1" />
-                              Terminer
-                            </Button>
-                            <Button 
-                              size="sm" 
-                              variant="outline" 
-                              onClick={() => handleCancel(rental.id, 'Location annulée en cours')}
-                              className="text-xs"
-                            >
-                              <XCircle className="w-3 h-3 mr-1" />
-                              Annuler
-                            </Button>
+                            {(rental.status === 'accepted' || rental.status === 'active') && (
+                              <Button 
+                                size="sm" 
+                                variant="outline" 
+                                onClick={() => handleCancel(rental.id, 'Annulation par le locataire')}
+                                className="text-xs"
+                              >
+                                <XCircle className="w-3 h-3 mr-1" />
+                                Annuler ma demande
+                              </Button>
+                            )}
                           </>
                         )}
                       </div>
