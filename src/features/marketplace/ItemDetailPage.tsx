@@ -20,7 +20,7 @@ import {
 import { useMarketplaceStore } from '@/stores/marketplaceStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useGeolocation } from '@/hooks/useGeolocation';
-import { Item, Rental } from '@/types';
+import { Item } from '@/types';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import RentalModal from './components/RentalModal';
@@ -43,7 +43,7 @@ const ItemDetailPage: React.FC = () => {
 
   // State
   const [item, setItem] = useState<Item | null>(null);
-  const [owner, setOwner] = useState<User | null>(null);
+  const [owner, setOwner] = useState<any>(null);
 
   const [isRentalModalOpen, setIsRentalModalOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
@@ -77,7 +77,7 @@ const ItemDetailPage: React.FC = () => {
         // Les rentals sont maintenant dans le store, on les récupère
         const { rentals } = useMarketplaceStore.getState();
         const itemRentals = rentals.filter(rental => rental.item_id === parseInt(itemId));
-        setRentals(itemRentals);
+        // setRentals(itemRentals); // Variable supprimée
       };
       loadRentals();
     }

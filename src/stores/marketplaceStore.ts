@@ -460,7 +460,7 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
         (new Date(rentalData.endDate).getTime() - new Date(rentalData.startDate).getTime()) / (1000 * 60 * 60 * 24)
       ));
       const totalCredits = totalDays * rentalData.dailyPrice;
-      const depositCredits = rentalData.depositCredits || 0;
+
 
 
       // Réserver SEULEMENT les crédits de location (pas la caution)

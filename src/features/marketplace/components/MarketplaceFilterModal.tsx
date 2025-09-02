@@ -75,7 +75,8 @@ const MarketplaceFilterModal: React.FC<MarketplaceFilterModalProps> = ({
     setLocalFilters({
       ...localFilters,
       price_range: {
-        ...localFilters.price_range,
+        min: localFilters.price_range?.min || 0,
+        max: localFilters.price_range?.max || 1000,
         [field]: value
       }
     });
