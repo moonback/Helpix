@@ -28,7 +28,6 @@ import FilterBadge from '@/components/ui/FilterBadge';
 import { 
   Search, 
   Plus, 
-  Users, 
   Clock,
   Filter,
   SortAsc,
@@ -40,7 +39,6 @@ import {
   MessageCircle,
   Hand,
   Lightbulb,
-  Heart,
   MapPin,
   Package
 } from 'lucide-react';
