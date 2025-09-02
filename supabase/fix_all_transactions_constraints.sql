@@ -20,7 +20,9 @@ CHECK (reference_type IN (
   'rental_payment', 
   'rental_refund',
   'rental_reserve',
-  'rental_unreserve'
+  'rental_unreserve',
+  'rental_deposit',
+  'rental_deposit_refund'
 ));
 
 -- 4. Vérifier les contraintes appliquées

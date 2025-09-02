@@ -156,7 +156,7 @@ export const useWalletStore = create<WalletStore>((set, get) => ({
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Utilisateur non connecté');
 
-      // Récupérer les transactions de crédit depuis la table transactions
+      // Récupérer les transactions de crédit depuis la table transactions (exclure les dépôts)
       const { data, error } = await supabase
         .from('transactions')
         .select(`
@@ -165,6 +165,7 @@ export const useWalletStore = create<WalletStore>((set, get) => ({
         `)
         .eq('wallet.user_id', user.id)
         .eq('type', 'credit')
+        .neq('reference_type', 'rental_deposit') // Exclure les dépôts
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -274,29 +275,32 @@ export const useWalletStore = create<WalletStore>((set, get) => ({
         .order('created_at', { ascending: false })
         .limit(10);
 
-      // Calculer les gains mensuels
+      // Calculer les gains mensuels (exclure les dépôts)
       const startOfMonth = new Date();
       startOfMonth.setDate(1);
       startOfMonth.setHours(0, 0, 0, 0);
 
       const { data: monthlyEarnings } = await supabase
         .from('transactions')
-        .select('amount')
+        .select('amount, reference_type')
         .eq('wallet_id', walletData.id)
         .eq('type', 'credit')
+        .neq('reference_type', 'rental_deposit') // Exclure les dépôts
         .gte('created_at', startOfMonth.toISOString());
 
       const monthlyEarningsTotal = monthlyEarnings?.reduce((sum, t) => sum + t.amount, 0) || 0;
 
-      // Récupérer les gains en attente (transactions de crédit en attente)
+      // Récupérer les gains en attente (transactions de crédit en attente, exclure les dépôts)
       const { data: pendingEarnings } = await supabase
         .from('transactions')
         .select(`
           amount,
+          reference_type,
           wallet:wallet_id(user_id)
         `)
         .eq('wallet.user_id', user.id)
         .eq('type', 'credit')
+        .neq('reference_type', 'rental_deposit') // Exclure les dépôts
         .eq('status', 'pending');
 
       const pendingEarningsTotal = pendingEarnings?.reduce((sum, e) => sum + e.amount, 0) || 0;

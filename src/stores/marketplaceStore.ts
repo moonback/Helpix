@@ -64,6 +64,9 @@ interface MarketplaceStore {
   // Fonction utilitaire pour gérer les crédits
   updateUserCredits: (userId: string, amount: number, type: 'credit' | 'debit', description: string, referenceType?: string, referenceId?: string) => Promise<number>;
   
+  // Gestion des cautions
+  forfeitDeposit: (rentalId: string, ownerId: string, reason: string) => Promise<void>;
+  
   // Statistiques
   getMarketplaceStats: () => {
     totalItems: number;
@@ -566,41 +569,42 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
           id
         );
         
-        // Débiter le dépôt au locataire (si il y en a un)
-        if (rentalData.deposit_credits > 0) {
-          await get().updateUserCredits(
-            rentalData.renter_id, 
-            rentalData.deposit_credits, 
-            'debit', 
-            `Dépôt location - Location #${id}`,
-            'rental_payment',
-            id
-          );
-        }
-        
-        // Créditer le propriétaire (location + dépôt)
-        const totalToCredit = rentalData.total_credits + (rentalData.deposit_credits || 0);
+        // Créditer le propriétaire (seulement les crédits de location)
         await get().updateUserCredits(
           rentalData.owner_id, 
-          totalToCredit, 
+          rentalData.total_credits, 
           'credit', 
           `Location acceptée - Location #${id}`,
           'rental_payment',
           id
         );
+        
+        // Si il y a un dépôt, le bloquer dans l'escrow (pas de crédit au propriétaire)
+        if (rentalData.deposit_credits > 0) {
+          const { error: escrowError } = await supabase.rpc('hold_escrow_deposit', {
+            p_rental_id: id,
+            p_amount: rentalData.deposit_credits,
+            p_renter_id: rentalData.renter_id
+          });
+          
+          if (escrowError) {
+            throw new Error(`Erreur lors du blocage de la caution : ${escrowError.message}`);
+          }
+        }
       } else if (currentStatus === 'accepted' && status === 'active') {
         // Aucun changement de crédits, juste démarrage de la location
       } else if (currentStatus === 'active' && status === 'completed') {
-        // Rembourser le dépôt au locataire
+        // Libérer la caution de l'escrow et la rembourser au locataire
         if (rentalData.deposit_credits > 0) {
-          await get().updateUserCredits(
-            rentalData.renter_id, 
-            rentalData.deposit_credits, 
-            'credit', 
-            `Remboursement dépôt - Location #${id}`,
-            'rental_refund',
-            id
-          );
+          const { error: escrowError } = await supabase.rpc('release_escrow_deposit', {
+            p_rental_id: id,
+            p_renter_id: rentalData.renter_id,
+            p_reason: 'Location terminée avec succès'
+          });
+          
+          if (escrowError) {
+            throw new Error(`Erreur lors du remboursement de la caution : ${escrowError.message}`);
+          }
         }
       } else if (status === 'cancelled') {
         // Gérer les remboursements selon le statut actuel
@@ -615,10 +619,10 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
           });
         } else if (currentStatus === 'accepted') {
           // Rembourser le locataire et débitter le propriétaire
-          const totalToRefund = rentalData.total_credits + (rentalData.deposit_credits || 0);
+          // Rembourser les crédits de location
           await get().updateUserCredits(
             rentalData.renter_id, 
-            totalToRefund, 
+            rentalData.total_credits, 
             'credit', 
             `Remboursement location annulée - Location #${id}`,
             'rental_refund',
@@ -627,12 +631,25 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
           
           await get().updateUserCredits(
             rentalData.owner_id, 
-            totalToRefund, 
+            rentalData.total_credits, 
             'debit', 
             `Location annulée - Location #${id}`,
             'rental_refund',
             id
           );
+          
+          // Libérer la caution de l'escrow et la rembourser au locataire
+          if (rentalData.deposit_credits > 0) {
+            const { error: escrowError } = await supabase.rpc('release_escrow_deposit', {
+              p_rental_id: id,
+              p_renter_id: rentalData.renter_id,
+              p_reason: 'Location annulée'
+            });
+            
+            if (escrowError) {
+              throw new Error(`Erreur lors du remboursement de la caution : ${escrowError.message}`);
+            }
+          }
         } else if (currentStatus === 'active') {
           // Rembourser partiellement le locataire (proportionnel)
           const totalCredits = rentalData.total_credits + (rentalData.deposit_credits || 0);
@@ -716,10 +733,10 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
       } else if (rentalData.status === 'accepted') {
         if (user.id === rentalData.renter_id) {
           // Le locataire annule : remboursement complet
-          const totalToRefund = rentalData.total_credits + (rentalData.deposit_credits || 0);
+          // Rembourser les crédits de location
           await get().updateUserCredits(
             rentalData.renter_id, 
-            totalToRefund, 
+            rentalData.total_credits, 
             'credit', 
             `Annulation par locataire - Location #${id}`,
             'rental_refund',
@@ -728,26 +745,39 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
           
           await get().updateUserCredits(
             rentalData.owner_id, 
-            totalToRefund, 
+            rentalData.total_credits, 
             'debit', 
             `Location annulée par locataire - Location #${id}`,
             'rental_refund',
             id
           );
+          
+          // Libérer la caution de l'escrow et la rembourser au locataire
+          if (rentalData.deposit_credits > 0) {
+            const { error: escrowError } = await supabase.rpc('release_escrow_deposit', {
+              p_rental_id: id,
+              p_renter_id: rentalData.renter_id,
+              p_reason: 'Annulation par locataire'
+            });
+            
+            if (escrowError) {
+              throw new Error(`Erreur lors du remboursement de la caution : ${escrowError.message}`);
+            }
+          }
         } else {
           // Le propriétaire annule : remboursement + pénalité
-          const totalToRefund = rentalData.total_credits + (rentalData.deposit_credits || 0);
+          // Rembourser les crédits de location
           await get().updateUserCredits(
             rentalData.renter_id, 
-            totalToRefund, 
+            rentalData.total_credits, 
             'credit', 
             `Remboursement annulation propriétaire - Location #${id}`,
             'rental_refund',
             id
           );
           
-          // Pénalité pour le propriétaire (10% des crédits)
-          const penalty = Math.floor(totalToRefund * 0.1);
+          // Pénalité pour le propriétaire (10% des crédits de location seulement)
+          const penalty = Math.floor(rentalData.total_credits * 0.1);
           await get().updateUserCredits(
             rentalData.owner_id, 
             penalty, 
@@ -756,6 +786,19 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
             'rental_refund',
             id
           );
+          
+          // Libérer la caution de l'escrow et la rembourser au locataire
+          if (rentalData.deposit_credits > 0) {
+            const { error: escrowError } = await supabase.rpc('release_escrow_deposit', {
+              p_rental_id: id,
+              p_renter_id: rentalData.renter_id,
+              p_reason: 'Annulation par propriétaire'
+            });
+            
+            if (escrowError) {
+              throw new Error(`Erreur lors du remboursement de la caution : ${escrowError.message}`);
+            }
+          }
         }
       } else if (rentalData.status === 'active') {
         // Location en cours : remboursement partiel
@@ -984,6 +1027,23 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
     });
 
     return stats;
+  },
+
+  // Fonction pour confisquer une caution en cas de dommage
+  forfeitDeposit: async (rentalId: string, ownerId: string, reason: string) => {
+    try {
+      const { error } = await supabase.rpc('forfeit_escrow_deposit', {
+        p_rental_id: rentalId,
+        p_owner_id: ownerId,
+        p_reason: reason
+      });
+
+      if (error) {
+        throw new Error(`Erreur lors de la confiscation de la caution : ${error.message}`);
+      }
+    } catch (error: any) {
+      throw new Error(`Erreur lors de la confiscation de la caution : ${error.message}`);
+    }
   },
 }));
 
