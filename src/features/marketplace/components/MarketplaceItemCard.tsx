@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import SafeImage from '@/components/ui/SafeImage';
 
 import { 
   MapPin, 
   Star, 
- 
+  
   DollarSign, 
   Eye, 
   MessageCircle, 
@@ -108,18 +109,25 @@ const MarketplaceItemCard: React.FC<MarketplaceItemCardProps> = ({
         <Card className="p-6 hover:shadow-lg transition-all duration-300 cursor-pointer group">
           <div className="flex gap-6">
             {/* Image */}
-            <div className="flex-shrink-0">
+            <div className="flex-shrink-0 relative">
               <div className="w-24 h-24 bg-gradient-to-br from-emerald-100 to-green-100 rounded-xl flex items-center justify-center overflow-hidden">
                 {item.images && item.images.length > 0 ? (
-                  <img 
+                  <SafeImage 
                     src={item.images[0]} 
                     alt={item.name}
                     className="w-full h-full object-cover"
+                    fallbackIcon={<Package className="w-8 h-8 text-emerald-600" />}
                   />
                 ) : (
                   <Package className="w-8 h-8 text-emerald-600" />
                 )}
               </div>
+              {/* Indicateur de plusieurs images */}
+              {item.images && item.images.length > 1 && (
+                <div className="absolute -top-1 -right-1 bg-emerald-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-medium">
+                  +{item.images.length - 1}
+                </div>
+              )}
             </div>
 
             {/* Contenu */}
@@ -222,15 +230,23 @@ const MarketplaceItemCard: React.FC<MarketplaceItemCardProps> = ({
         <div className="relative mb-4">
           <div className="aspect-square bg-gradient-to-br from-emerald-100 to-green-100 rounded-xl flex items-center justify-center overflow-hidden">
             {item.images && item.images.length > 0 ? (
-              <img 
+              <SafeImage 
                 src={item.images[0]} 
                 alt={item.name}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                fallbackIcon={<Package className="w-12 h-12 text-emerald-600" />}
               />
             ) : (
               <Package className="w-12 h-12 text-emerald-600" />
             )}
           </div>
+          
+          {/* Indicateur de plusieurs images */}
+          {item.images && item.images.length > 1 && (
+            <div className="absolute top-2 right-2 bg-emerald-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-medium">
+              +{item.images.length - 1}
+            </div>
+          )}
           
           {/* Badges */}
           <div className="absolute top-2 left-2 flex flex-col gap-1">

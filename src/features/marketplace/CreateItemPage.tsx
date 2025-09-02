@@ -16,10 +16,12 @@ import { useMarketplaceStore } from '@/stores/marketplaceStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { ItemCategory, ItemCondition } from '@/types';
+import { uploadImages } from '@/lib/imageUpload';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
 import Textarea from '@/components/ui/Textarea';
+import SafeImage from '@/components/ui/SafeImage';
 
 const CreateItemPage: React.FC = () => {
   const navigate = useNavigate();
@@ -45,6 +47,7 @@ const CreateItemPage: React.FC = () => {
     deposit: '',
     tags: [] as string[],
     images: [] as string[],
+    imageFiles: [] as File[],
     location: '',
     latitude: latitude || 0,
     longitude: longitude || 0,
@@ -90,6 +93,7 @@ const CreateItemPage: React.FC = () => {
             deposit: item.deposit?.toString() || '',
             tags: item.tags || [],
             images: item.images || [],
+            imageFiles: [],
             location: item.location || '',
             latitude: item.latitude || latitude || 0,
             longitude: item.longitude || longitude || 0,
@@ -138,19 +142,35 @@ const CreateItemPage: React.FC = () => {
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (files) {
-      // TODO: Implémenter l'upload d'images vers Supabase Storage
-      const newImages = Array.from(files).map(file => URL.createObjectURL(file));
+      const newFiles = Array.from(files);
+      
+      // Limiter à 5 images maximum
+      const maxImages = 5;
+      const currentCount = (formData.imageFiles?.length || 0) + (formData.images?.length || 0);
+      const availableSlots = maxImages - currentCount;
+      
+      if (availableSlots <= 0) {
+        alert(`Vous ne pouvez ajouter que ${maxImages} images maximum.`);
+        return;
+      }
+      
+      const filesToAdd = newFiles.slice(0, availableSlots);
+      
       setFormData(prev => ({
         ...prev,
-        images: [...prev.images, ...newImages]
+        imageFiles: [...(prev.imageFiles || []), ...filesToAdd]
       }));
+      
+      if (newFiles.length > availableSlots) {
+        alert(`${newFiles.length - availableSlots} image(s) n'ont pas été ajoutées (limite de ${maxImages} images).`);
+      }
     }
   };
 
   const handleRemoveImage = (index: number) => {
     setFormData(prev => ({
       ...prev,
-      images: prev.images.filter((_, i) => i !== index)
+      imageFiles: prev.imageFiles?.filter((_, i) => i !== index) || []
     }));
   };
 
@@ -165,6 +185,13 @@ const CreateItemPage: React.FC = () => {
     setIsSubmitting(true);
 
     try {
+      // Upload des nouvelles images si il y en a
+      let uploadedImageUrls: string[] = [];
+      if (formData.imageFiles && formData.imageFiles.length > 0) {
+        const uploadResults = await uploadImages(formData.imageFiles);
+        uploadedImageUrls = uploadResults.map(result => result.url);
+      }
+
       const itemData = {
         name: formData.name,
         description: formData.description,
@@ -173,7 +200,10 @@ const CreateItemPage: React.FC = () => {
         daily_price: parseInt(formData.daily_price) || 0,
         deposit: parseInt(formData.deposit) || 0,
         tags: formData.tags,
-        images: formData.images,
+        images: [
+          ...formData.images, // Images existantes (pour l'édition)
+          ...uploadedImageUrls // Nouvelles images uploadées
+        ],
         location: formData.location,
         latitude: formData.latitude,
         longitude: formData.longitude,
@@ -374,29 +404,76 @@ const CreateItemPage: React.FC = () => {
                 >
                   <Upload className="w-4 h-4" />
                   Ajouter des photos
+                  <span className="text-sm text-slate-500">
+                    ({(formData.imageFiles?.length || 0) + (formData.images?.length || 0)}/5)
+                  </span>
                 </label>
               </div>
 
-              {formData.images.length > 0 && (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {formData.images.map((image, index) => (
-                    <div key={index} className="relative">
-                      <img
-                        src={image}
-                        alt={`Image ${index + 1}`}
-                        className="w-full h-24 object-cover rounded-lg"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveImage(index)}
-                        className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600"
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
+              {(formData.images && formData.images.length > 0) || (formData.imageFiles && formData.imageFiles.length > 0) ? (
+                <div className="space-y-4">
+                  {/* Images existantes */}
+                  {formData.images && formData.images.length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-medium text-slate-700 mb-2">Images existantes</h4>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {formData.images.map((image, index) => (
+                          <div key={`existing-${index}`} className="relative">
+                            <SafeImage
+                              src={image}
+                              alt={`Image existante ${index + 1}`}
+                              className="w-full h-24 object-cover rounded-lg"
+                              fallbackIcon={<div className="w-full h-24 bg-slate-100 rounded-lg flex items-center justify-center">
+                                <span className="text-slate-400 text-xs">📷</span>
+                              </div>}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setFormData(prev => ({
+                                  ...prev,
+                                  images: prev.images?.filter((_, i) => i !== index) || []
+                                }));
+                              }}
+                              className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  ))}
+                  )}
+                  
+                  {/* Nouvelles images */}
+                  {formData.imageFiles && formData.imageFiles.length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-medium text-slate-700 mb-2">Nouvelles images</h4>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {formData.imageFiles.map((file, index) => (
+                          <div key={`new-${index}`} className="relative">
+                            <SafeImage
+                              src={URL.createObjectURL(file)}
+                              alt={`Nouvelle image ${index + 1}`}
+                              className="w-full h-24 object-cover rounded-lg"
+                              fallbackIcon={<div className="w-full h-24 bg-slate-100 rounded-lg flex items-center justify-center">
+                                <span className="text-slate-400 text-xs">📷</span>
+                              </div>}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveImage(index)}
+                              className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
-              )}
+              ) : null}
             </div>
           </Card>
 

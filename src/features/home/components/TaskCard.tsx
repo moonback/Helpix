@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
+import SafeImage from '@/components/ui/SafeImage';
 import { calculateDistance, formatDistance } from '@/lib/utils';
 
 interface Task {
@@ -36,6 +37,7 @@ interface Task {
   status?: string;
   latitude?: number;
   longitude?: number;
+  images?: string[];
 }
 
 interface TaskCardProps {
@@ -182,6 +184,33 @@ const TaskCard: React.FC<TaskCardProps> = React.memo(({
         <p className="text-slate-600 text-sm mb-6 leading-relaxed line-clamp-3">
           {task.description}
         </p>
+
+        {/* Images */}
+        {task.images && task.images.length > 0 && (
+          <div className="mb-6">
+            <div className="flex gap-2 overflow-x-auto pb-2">
+              {task.images.slice(0, 3).map((image, index) => (
+                <div key={index} className="flex-shrink-0">
+                  <SafeImage
+                    src={image}
+                    alt={`Image ${index + 1} de la tâche`}
+                    className="w-20 h-20 object-cover rounded-lg border border-slate-200"
+                    fallbackIcon={<div className="w-20 h-20 bg-slate-100 rounded-lg flex items-center justify-center">
+                      <span className="text-slate-400 text-xs">📷</span>
+                    </div>}
+                  />
+                </div>
+              ))}
+              {task.images.length > 3 && (
+                <div className="flex-shrink-0 w-20 h-20 bg-slate-100 rounded-lg flex items-center justify-center border border-slate-200">
+                  <span className="text-slate-500 text-xs font-medium">
+                    +{task.images.length - 3}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Enhanced Details Grid */}
         <div className="grid grid-cols-2 gap-4 mb-6">

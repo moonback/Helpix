@@ -121,6 +121,7 @@ export interface Task {
   estimated_duration: number; // en heures
   actual_duration?: number; // en heures
   location: string;
+  images?: string[]; // URLs des images
   latitude?: number;
   longitude?: number;
   required_skills: string[];
