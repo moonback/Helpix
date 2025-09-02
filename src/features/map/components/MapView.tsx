@@ -9,16 +9,7 @@ import { useMapKey } from '@/hooks/useMapKey';
 
 // React-Leaflet components imported directly to avoid Suspense remounts
 
-interface RentableItemMarker {
-  id: number;
-  name: string;
-  description: string;
-  daily_price: number | null;
-  deposit: number;
-  available: boolean;
-  owner_id: string;
-  location: { lat: number; lng: number } | null;
-}
+
 
 interface MapViewProps {
   // Tâches
@@ -26,20 +17,12 @@ interface MapViewProps {
   userLocation: { lat: number; lng: number } | null;
   onTaskClick: (task: MapTask) => void;
   onOfferHelp: (taskId: number) => void;
-  // Items louables
-  rentableItems: RentableItemMarker[];
-  onItemClick: (item: RentableItemMarker) => void;
   // Filtres
   filterCategory: 'local' | 'remote' | 'all';
   filterPriority: 'urgent' | 'high' | 'medium' | 'low' | 'all';
   radiusKm: number;
-  itemSearch: string;
-  onlyAvailableItems: boolean;
-  minPrice: number;
-  maxPrice: number;
   // État
   isLoading: boolean;
-  itemsLoading: boolean;
   // Actions
   onRecenter: () => void;
   className?: string;
@@ -72,17 +55,10 @@ const MapContent: React.FC<MapViewProps> = (props) => {
     userLocation,
     onTaskClick,
     onOfferHelp,
-    rentableItems,
-    onItemClick,
     filterCategory,
     filterPriority,
     radiusKm,
-    itemSearch,
-    onlyAvailableItems,
-    minPrice,
-    maxPrice,
     isLoading,
-    itemsLoading,
     onRecenter,
     className = ''
   } = props;
@@ -134,17 +110,10 @@ const MapContent: React.FC<MapViewProps> = (props) => {
                 userLocation={userLocation}
                 onTaskClick={onTaskClick}
                 onOfferHelp={onOfferHelp}
-                rentableItems={rentableItems}
-                onItemClick={onItemClick}
                 filterCategory={filterCategory}
                 filterPriority={filterPriority}
                 radiusKm={radiusKm}
-                itemSearch={itemSearch}
-                onlyAvailableItems={onlyAvailableItems}
-                minPrice={minPrice}
-                maxPrice={maxPrice}
                 isLoading={isLoading}
-                itemsLoading={itemsLoading}
               />
             </Suspense>
           </MapContainer>

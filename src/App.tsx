@@ -16,7 +16,10 @@ const WalletPage = React.lazy(() => import('@/features/wallet/WalletPage'));
 const ProfilePage = React.lazy(() => import('@/features/profile/ProfilePage'));
 const DashboardPage = React.lazy(() => import('@/features/dashboard/DashboardPage'));
 const RentalsPage = React.lazy(() => import('@/features/rentals/RentalsPage'));
-const RentableItemDetailPage = React.lazy(() => import('@/features/rentals/RentableItemDetailPage'));
+
+const MarketplacePage = React.lazy(() => import('@/features/marketplace/MarketplacePage'));
+const ItemDetailPage = React.lazy(() => import('@/features/marketplace/ItemDetailPage'));
+const CreateItemPage = React.lazy(() => import('@/features/marketplace/CreateItemPage'));
 const TaskDetailPage = React.lazy(() => import('@/features/task-detail/TaskDetailPage'));
 const EditTaskPage = React.lazy(() => import('@/features/edit/EditTaskPage'));
 const HelpOffersPage = React.lazy(() => import('@/features/help-offers/HelpOffersPage'));
@@ -162,9 +165,32 @@ const App: React.FC = () => {
                 </div>
               </ProtectedRoute>
             } />
-            <Route path="/rentals/:itemId" element={
+
+            <Route path="/marketplace" element={
               <ProtectedRoute>
-                <RentableItemDetailPage />
+                <div className="pb-16">
+                  <MarketplacePage />
+                </div>
+              </ProtectedRoute>
+            } />
+            <Route path="/marketplace/:itemId" element={
+              <ProtectedRoute>
+                <ItemDetailPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/marketplace/create" element={
+              <ProtectedRoute>
+                <CreateItemPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/marketplace/:itemId/edit" element={
+              <ProtectedRoute>
+                <CreateItemPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/marketplace/:itemId/rent" element={
+              <ProtectedRoute>
+                <ItemDetailPage />
               </ProtectedRoute>
             } />
             <Route path="/dashboard" element={

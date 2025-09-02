@@ -1,61 +1,51 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar, Clock, DollarSign, Package, User, MapPin, CheckCircle, XCircle, Play, Pause } from 'lucide-react';
+import { Calendar, Clock, DollarSign, Package, User, MapPin, CheckCircle, XCircle, Play } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
-import { listMyRentals, updateRentalStatus } from '@/lib/rentals';
 import { useAuthStore } from '@/stores/authStore';
+import { useMarketplaceStore } from '@/stores/marketplaceStore';
+import { RentalStatus } from '@/types';
 
-type Rental = {
-  id: string;
-  item_id: number;
-  owner_id: string;
-  renter_id: string;
-  start_date: string;
-  end_date: string;
-  daily_price: number;
-  total_credits: number;
-  deposit_credits: number;
-  status: 'requested' | 'accepted' | 'active' | 'completed' | 'cancelled';
-  created_at: string;
-  updated_at: string;
-  item_name?: string;
-  item_description?: string;
-  owner_name?: string;
-  renter_name?: string;
-};
+// Utilisation du type Rental importé de @/types
 
 const RentalsPage: React.FC = () => {
   const { user } = useAuthStore();
-  const [rentals, setRentals] = useState<Rental[]>([]);
-  const [loading, setLoading] = useState(false);
+  const { rentals, isLoading, fetchRentals, updateRentalStatus, cancelRental } = useMarketplaceStore();
   const [filter, setFilter] = useState<'all' | 'requested' | 'accepted' | 'active' | 'completed' | 'cancelled'>('all');
 
   useEffect(() => {
-    (async () => {
-      if (!user?.id) return;
-      setLoading(true);
-      try {
-        const data = await listMyRentals(user.id);
-        setRentals(data as unknown as Rental[]);
-      } catch (e) {
-        console.error(e);
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, [user?.id]);
+    if (user?.id) {
+      fetchRentals(user.id);
+    }
+  }, [user?.id, fetchRentals]);
 
-  const setStatus = async (id: string, status: Rental['status']) => {
+  const setStatus = async (id: string, status: RentalStatus) => {
     try {
-      const updated = await updateRentalStatus(id, status);
-      setRentals(prev => prev.map(r => r.id === id ? { ...(r as any), status: updated.status } : r));
-    } catch (e) {
-      console.error(e);
+      await updateRentalStatus(id, status);
+      // Le store se met à jour automatiquement
+    } catch (e: any) {
+      console.error('Erreur lors de la mise à jour du statut:', e);
+      
+      // Afficher un message d'erreur plus clair à l'utilisateur
+      if (e.message?.includes('Solde insuffisant')) {
+        alert('❌ Impossible d\'accepter cette demande : le locataire n\'a pas suffisamment de crédits pour effectuer cette location.');
+      } else {
+        alert(`❌ Erreur lors de la mise à jour du statut : ${e.message || 'Erreur inconnue'}`);
+      }
     }
   };
 
-  const getStatusColor = (status: Rental['status']) => {
+  const handleCancel = async (id: string, reason?: string) => {
+    try {
+      await cancelRental(id, reason);
+      // Le store se met à jour automatiquement
+    } catch (e) {
+      console.error('Erreur lors de l\'annulation:', e);
+    }
+  };
+
+  const getStatusColor = (status: RentalStatus) => {
     switch (status) {
       case 'requested': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
       case 'accepted': return 'bg-blue-100 text-blue-800 border-blue-200';
@@ -66,7 +56,7 @@ const RentalsPage: React.FC = () => {
     }
   };
 
-  const getStatusIcon = (status: Rental['status']) => {
+  const getStatusIcon = (status: RentalStatus) => {
     switch (status) {
       case 'requested': return <Clock className="w-3 h-3" />;
       case 'accepted': return <CheckCircle className="w-3 h-3" />;
@@ -77,7 +67,7 @@ const RentalsPage: React.FC = () => {
     }
   };
 
-  const getStatusLabel = (status: Rental['status']) => {
+  const getStatusLabel = (status: RentalStatus) => {
     switch (status) {
       case 'requested': return 'En attente';
       case 'accepted': return 'Acceptée';
@@ -159,7 +149,7 @@ const RentalsPage: React.FC = () => {
           transition={{ delay: 0.2 }}
         >
           <Card className="p-6">
-            {loading ? (
+            {isLoading ? (
               <div className="flex items-center justify-center py-12">
                 <div className="flex items-center gap-3">
                   <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
@@ -189,18 +179,34 @@ const RentalsPage: React.FC = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.1 }}
-                    className="bg-white rounded-2xl border border-slate-200 p-6 hover:shadow-lg transition-all duration-300"
+                    className={`rounded-2xl border p-6 transition-all duration-300 ${
+                      rental.status === 'completed' || rental.status === 'cancelled'
+                        ? 'bg-slate-50 border-slate-200 opacity-75'
+                        : 'bg-white border-slate-200 hover:shadow-lg'
+                    }`}
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         {/* Header */}
                         <div className="flex items-center gap-3 mb-4">
-                          <div className="w-12 h-12 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-xl flex items-center justify-center">
-                            <Package className="w-6 h-6 text-blue-600" />
+                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                            rental.status === 'completed' || rental.status === 'cancelled'
+                              ? 'bg-slate-100'
+                              : 'bg-gradient-to-r from-blue-100 to-indigo-100'
+                          }`}>
+                            <Package className={`w-6 h-6 ${
+                              rental.status === 'completed' || rental.status === 'cancelled'
+                                ? 'text-slate-400'
+                                : 'text-blue-600'
+                            }`} />
                           </div>
                           <div>
-                            <h3 className="text-lg font-semibold text-slate-800">
-                              {rental.item_name || `Objet #${rental.item_id}`}
+                            <h3 className={`text-lg font-semibold ${
+                              rental.status === 'completed' || rental.status === 'cancelled'
+                                ? 'text-slate-500'
+                                : 'text-slate-800'
+                            }`}>
+                              {rental.item?.name || `Objet #${rental.item_id}`}
                             </h3>
                             <div className="flex items-center gap-2 mt-1">
                               <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(rental.status)}`}>
@@ -215,96 +221,285 @@ const RentalsPage: React.FC = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                           <div className="space-y-3">
                             <div className="flex items-center gap-2">
-                              <Calendar className="w-4 h-4 text-slate-400" />
+                              <Calendar className={`w-4 h-4 ${
+                                rental.status === 'completed' || rental.status === 'cancelled'
+                                  ? 'text-slate-300'
+                                  : 'text-slate-400'
+                              }`} />
                               <div>
-                                <p className="text-xs text-slate-500">Période de location</p>
-                                <p className="text-sm font-medium text-slate-800">
+                                <p className={`text-xs ${
+                                  rental.status === 'completed' || rental.status === 'cancelled'
+                                    ? 'text-slate-400'
+                                    : 'text-slate-500'
+                                }`}>Période de location</p>
+                                <p className={`text-sm font-medium ${
+                                  rental.status === 'completed' || rental.status === 'cancelled'
+                                    ? 'text-slate-500'
+                                    : 'text-slate-800'
+                                }`}>
                                   {formatDate(rental.start_date)} → {formatDate(rental.end_date)}
                                 </p>
                               </div>
                             </div>
                             
                             <div className="flex items-center gap-2">
-                              <DollarSign className="w-4 h-4 text-slate-400" />
+                              <DollarSign className={`w-4 h-4 ${
+                                rental.status === 'completed' || rental.status === 'cancelled'
+                                  ? 'text-slate-300'
+                                  : 'text-slate-400'
+                              }`} />
                               <div>
-                                <p className="text-xs text-slate-500">Prix par jour</p>
-                                <p className="text-sm font-medium text-slate-800">{rental.daily_price} crédits</p>
+                                <p className={`text-xs ${
+                                  rental.status === 'completed' || rental.status === 'cancelled'
+                                    ? 'text-slate-400'
+                                    : 'text-slate-500'
+                                }`}>Prix par jour</p>
+                                <p className={`text-sm font-medium ${
+                                  rental.status === 'completed' || rental.status === 'cancelled'
+                                    ? 'text-slate-500'
+                                    : 'text-slate-800'
+                                }`}>{rental.daily_price} crédits</p>
                               </div>
                             </div>
                           </div>
 
                           <div className="space-y-3">
                             <div className="flex items-center gap-2">
-                              <User className="w-4 h-4 text-slate-400" />
+                              <User className={`w-4 h-4 ${
+                                rental.status === 'completed' || rental.status === 'cancelled'
+                                  ? 'text-slate-300'
+                                  : 'text-slate-400'
+                              }`} />
                               <div>
-                                <p className="text-xs text-slate-500">Total</p>
-                                <p className="text-sm font-medium text-slate-800">{rental.total_credits} crédits</p>
+                                <p className={`text-xs ${
+                                  rental.status === 'completed' || rental.status === 'cancelled'
+                                    ? 'text-slate-400'
+                                    : 'text-slate-500'
+                                }`}>Total</p>
+                                <p className={`text-sm font-medium ${
+                                  rental.status === 'completed' || rental.status === 'cancelled'
+                                    ? 'text-slate-500'
+                                    : 'text-slate-800'
+                                }`}>{rental.total_credits} crédits</p>
                               </div>
                             </div>
                             
                             <div className="flex items-center gap-2">
-                              <MapPin className="w-4 h-4 text-slate-400" />
+                              <MapPin className={`w-4 h-4 ${
+                                rental.status === 'completed' || rental.status === 'cancelled'
+                                  ? 'text-slate-300'
+                                  : 'text-slate-400'
+                              }`} />
                               <div>
-                                <p className="text-xs text-slate-500">Dépôt</p>
-                                <p className="text-sm font-medium text-slate-800">{rental.deposit_credits} crédits</p>
+                                <p className={`text-xs ${
+                                  rental.status === 'completed' || rental.status === 'cancelled'
+                                    ? 'text-slate-400'
+                                    : 'text-slate-500'
+                                }`}>Dépôt</p>
+                                <p className={`text-sm font-medium ${
+                                  rental.status === 'completed' || rental.status === 'cancelled'
+                                    ? 'text-slate-500'
+                                    : 'text-slate-800'
+                                }`}>{rental.deposit_credits} crédits</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Informations sur les participants */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                          <div className="space-y-3">
+                            <div className="flex items-center gap-3">
+                              <div className={`w-8 h-8 rounded-full flex items-center justify-center overflow-hidden ${
+                                rental.status === 'completed' || rental.status === 'cancelled'
+                                  ? 'bg-slate-100'
+                                  : 'bg-gradient-to-r from-blue-100 to-indigo-100'
+                              }`}>
+                                {rental.owner?.avatar_url ? (
+                                  <img 
+                                    src={rental.owner.avatar_url} 
+                                    alt={rental.owner.name}
+                                    className={`w-full h-full object-cover ${
+                                      rental.status === 'completed' || rental.status === 'cancelled'
+                                        ? 'opacity-50'
+                                        : ''
+                                    }`}
+                                  />
+                                ) : (
+                                  <User className={`w-4 h-4 ${
+                                    rental.status === 'completed' || rental.status === 'cancelled'
+                                      ? 'text-slate-400'
+                                      : 'text-blue-600'
+                                  }`} />
+                                )}
+                              </div>
+                              <div>
+                                <p className={`text-xs ${
+                                  rental.status === 'completed' || rental.status === 'cancelled'
+                                    ? 'text-slate-400'
+                                    : 'text-slate-500'
+                                }`}>Propriétaire</p>
+                                <p className={`text-sm font-medium ${
+                                  rental.status === 'completed' || rental.status === 'cancelled'
+                                    ? 'text-slate-500'
+                                    : 'text-slate-800'
+                                }`}>
+                                  {rental.owner?.name || 'Propriétaire'}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="space-y-3">
+                            <div className="flex items-center gap-3">
+                              <div className={`w-8 h-8 rounded-full flex items-center justify-center overflow-hidden ${
+                                rental.status === 'completed' || rental.status === 'cancelled'
+                                  ? 'bg-slate-100'
+                                  : 'bg-gradient-to-r from-green-100 to-emerald-100'
+                              }`}>
+                                {rental.renter?.avatar_url ? (
+                                  <img 
+                                    src={rental.renter.avatar_url} 
+                                    alt={rental.renter.name}
+                                    className={`w-full h-full object-cover ${
+                                      rental.status === 'completed' || rental.status === 'cancelled'
+                                        ? 'opacity-50'
+                                        : ''
+                                    }`}
+                                  />
+                                ) : (
+                                  <User className={`w-4 h-4 ${
+                                    rental.status === 'completed' || rental.status === 'cancelled'
+                                      ? 'text-slate-400'
+                                      : 'text-green-600'
+                                  }`} />
+                                )}
+                              </div>
+                              <div>
+                                <p className={`text-xs ${
+                                  rental.status === 'completed' || rental.status === 'cancelled'
+                                    ? 'text-slate-400'
+                                    : 'text-slate-500'
+                                }`}>Locataire</p>
+                                <p className={`text-sm font-medium ${
+                                  rental.status === 'completed' || rental.status === 'cancelled'
+                                    ? 'text-slate-500'
+                                    : 'text-slate-800'
+                                }`}>
+                                  {rental.renter?.name || 'Locataire'}
+                                </p>
                               </div>
                             </div>
                           </div>
                         </div>
 
                         {/* Description */}
-                        {rental.item_description && (
+                        {rental.item?.description && (
                           <div className="mb-4">
-                            <p className="text-xs text-slate-500 mb-1">Description</p>
-                            <p className="text-sm text-slate-700">{rental.item_description}</p>
+                            <p className={`text-xs mb-1 ${
+                              rental.status === 'completed' || rental.status === 'cancelled'
+                                ? 'text-slate-400'
+                                : 'text-slate-500'
+                            }`}>Description</p>
+                            <p className={`text-sm ${
+                              rental.status === 'completed' || rental.status === 'cancelled'
+                                ? 'text-slate-500'
+                                : 'text-slate-700'
+                            }`}>{rental.item.description}</p>
                           </div>
                         )}
                       </div>
 
                       {/* Actions */}
-                      <div className="flex flex-col gap-2 ml-4">
-                        {rental.status === 'requested' && (
+                      {(rental.status !== 'completed' && rental.status !== 'cancelled') && (
+                        <div className="flex flex-col gap-2 ml-4">
+                          {/* Actions pour le propriétaire */}
+                          {user?.id === rental.owner_id && (
                           <>
-                            <Button 
-                              size="sm" 
-                              onClick={() => setStatus(rental.id, 'accepted')}
-                              className="text-xs"
-                            >
-                              <CheckCircle className="w-3 h-3 mr-1" />
-                              Accepter
-                            </Button>
-                            <Button 
-                              size="sm" 
-                              variant="outline" 
-                              onClick={() => setStatus(rental.id, 'cancelled')}
-                              className="text-xs"
-                            >
-                              <XCircle className="w-3 h-3 mr-1" />
-                              Refuser
-                            </Button>
+                            {rental.status === 'requested' && (
+                              <>
+                                <Button 
+                                  size="sm" 
+                                  onClick={() => setStatus(rental.id, 'accepted')}
+                                  className="text-xs"
+                                >
+                                  <CheckCircle className="w-3 h-3 mr-1" />
+                                  Accepter
+                                </Button>
+                                <Button 
+                                  size="sm" 
+                                  variant="outline" 
+                                  onClick={() => handleCancel(rental.id, 'Demande refusée par le propriétaire')}
+                                  className="text-xs"
+                                >
+                                  <XCircle className="w-3 h-3 mr-1" />
+                                  Refuser
+                                </Button>
+                              </>
+                            )}
+                            {rental.status === 'accepted' && (
+                              <>
+                                <Button 
+                                  size="sm" 
+                                  onClick={() => setStatus(rental.id, 'active')}
+                                  className="text-xs"
+                                >
+                                  <Play className="w-3 h-3 mr-1" />
+                                  Démarrer
+                                </Button>
+                                <Button 
+                                  size="sm" 
+                                  variant="outline" 
+                                  onClick={() => handleCancel(rental.id, 'Location annulée')}
+                                  className="text-xs"
+                                >
+                                  <XCircle className="w-3 h-3 mr-1" />
+                                  Annuler
+                                </Button>
+                              </>
+                            )}
+                            {rental.status === 'active' && (
+                              <>
+                                <Button 
+                                  size="sm" 
+                                  onClick={() => setStatus(rental.id, 'completed')}
+                                  className="text-xs"
+                                >
+                                  <CheckCircle className="w-3 h-3 mr-1" />
+                                  Terminer
+                                </Button>
+                                <Button 
+                                  size="sm" 
+                                  variant="outline" 
+                                  onClick={() => handleCancel(rental.id, 'Location annulée en cours')}
+                                  className="text-xs"
+                                >
+                                  <XCircle className="w-3 h-3 mr-1" />
+                                  Annuler
+                                </Button>
+                              </>
+                            )}
                           </>
                         )}
-                        {rental.status === 'accepted' && (
-                          <Button 
-                            size="sm" 
-                            onClick={() => setStatus(rental.id, 'active')}
-                            className="text-xs"
-                          >
-                            <Play className="w-3 h-3 mr-1" />
-                            Démarrer
-                          </Button>
+
+                        {/* Actions pour le locataire */}
+                        {user?.id === rental.renter_id && (
+                          <>
+                            {(rental.status === 'accepted' || rental.status === 'active') && (
+                              <Button 
+                                size="sm" 
+                                variant="outline" 
+                                onClick={() => handleCancel(rental.id, 'Annulation par le locataire')}
+                                className="text-xs"
+                              >
+                                <XCircle className="w-3 h-3 mr-1" />
+                                Annuler ma demande
+                              </Button>
+                            )}
+                          </>
                         )}
-                        {rental.status === 'active' && (
-                          <Button 
-                            size="sm" 
-                            onClick={() => setStatus(rental.id, 'completed')}
-                            className="text-xs"
-                          >
-                            <CheckCircle className="w-3 h-3 mr-1" />
-                            Terminer
-                          </Button>
-                        )}
-                      </div>
+                        </div>
+                      )}
                     </div>
                   </motion.div>
                 ))}

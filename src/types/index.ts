@@ -20,13 +20,93 @@ export interface Skill {
   skill_name: string;
 }
 
-// Types d'objets
+// Types d'objets pour le marketplace
 export interface Item {
   id: number;
   user_id: string;
-  item_name: string;
+  name: string;
+  item_name?: string; // Pour compatibilité
   description?: string;
   available: boolean;
+  is_rentable: boolean;
+  daily_price?: number; // en crédits/jour
+  deposit?: number; // en crédits
+  category: ItemCategory;
+  condition: ItemCondition;
+  images?: string[];
+  location?: string;
+  latitude?: number;
+  longitude?: number;
+  tags: string[];
+  created_at: string;
+  updated_at?: string;
+  
+  // Relations
+  owner?: User;
+  rentals?: Rental[];
+  average_rating?: number;
+  total_rentals?: number;
+}
+
+export type ItemCategory = 
+  | 'tools' | 'vehicles' | 'sports' | 'electronics' | 'home' | 'garden' 
+  | 'books' | 'clothing' | 'musical' | 'photography' | 'outdoor' | 'other';
+
+export type ItemCondition = 'excellent' | 'good' | 'fair' | 'poor';
+
+export interface Rental {
+  id: string;
+  item_id: number;
+  owner_id: string;
+  renter_id: string;
+  start_date: string;
+  end_date: string;
+  daily_price: number;
+  total_credits: number;
+  deposit_credits: number;
+  status: RentalStatus;
+  created_at: string;
+  updated_at: string;
+  
+  // Relations
+  item?: Item;
+  owner?: User;
+  renter?: User;
+  reviews?: RentalReview[];
+}
+
+export type RentalStatus = 'requested' | 'accepted' | 'active' | 'completed' | 'cancelled';
+
+export interface RentalReview {
+  id: string;
+  rental_id: string;
+  reviewer_id: string;
+  reviewee_id: string;
+  rating: number; // 1-5
+  comment?: string;
+  created_at: string;
+  
+  // Relations
+  reviewer?: User;
+  reviewee?: User;
+}
+
+export interface MarketplaceFilter {
+  category?: ItemCategory[];
+  condition?: ItemCondition[];
+  price_range?: {
+    min: number;
+    max: number;
+  };
+  location_radius?: number; // en km
+  available_only?: boolean;
+  tags?: string[];
+  rating_min?: number;
+}
+
+export interface MarketplaceSort {
+  field: 'created_at' | 'daily_price' | 'rating' | 'distance' | 'popularity';
+  direction: 'asc' | 'desc';
 }
 
 // Types de tâches étendus pour le suivi complet

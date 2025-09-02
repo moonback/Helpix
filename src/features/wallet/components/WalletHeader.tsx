@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Wallet, Settings } from 'lucide-react';
+import { ArrowLeft, Wallet } from 'lucide-react';
 import Button from '@/components/ui/Button';
 
 interface WalletHeaderProps {
@@ -39,18 +39,7 @@ const WalletHeader: React.FC<WalletHeaderProps> = ({ onBack }) => {
           </div>
         </div>
         
-        <motion.div
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-        >
-          <Button
-            variant="outline"
-            className="flex items-center space-x-2"
-          >
-            <Settings className="w-4 h-4" />
-            <span>Paramètres</span>
-          </Button>
-        </motion.div>
+      
       </div>
     </motion.div>
   );

@@ -7,7 +7,7 @@ import { useMessageStore } from '@/stores/messageStore';
 import { useWalletStore } from '@/features/wallet/stores/walletStore';
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { useReverseGeocoding } from '@/hooks/useReverseGeocoding';
-import { useRentableItems } from '@/features/map/hooks/useRentableItems';
+
 
 // Components
 import Button from '@/components/ui/Button';
@@ -16,8 +16,7 @@ import Input from '@/components/ui/Input';
 import HomeHeader from '@/components/layout/HomeHeader';
 import TaskCard from './components/TaskCard';
 import TaskCardSkeleton from './components/TaskCardSkeleton';
-import RentableItemCard from './components/RentableItemCard';
-import RentableItemCardSkeleton from './components/RentableItemCardSkeleton';
+
 import LocationPermissionBanner from '@/components/ui/LocationPermissionBanner';
 import FilterModal from '@/components/ui/FilterModal';
 import FilterButton from '@/components/ui/FilterButton';
@@ -28,20 +27,19 @@ import FilterBadge from '@/components/ui/FilterBadge';
 import { 
   Search, 
   Plus, 
-  Users, 
   Clock,
   Filter,
   SortAsc,
   SortDesc,
   Eye,
-  AlertCircle,
+
   Navigation,
   BarChart3,
   MessageCircle,
   Hand,
   Lightbulb,
-  Heart,
-  MapPin
+  MapPin,
+  Package
 } from 'lucide-react';
 
 // Types
@@ -84,7 +82,7 @@ const HomePage: React.FC = () => {
   // Hooks
   const { latitude, longitude, requestLocation } = useGeolocation();
   const { getAddressFromCoords } = useReverseGeocoding();
-  const { items: rentableItems, loading: rentableItemsLoading, error: rentableItemsError } = useRentableItems();
+
 
   // State
   const [searchTerm, setSearchTerm] = useState('');
@@ -95,7 +93,7 @@ const HomePage: React.FC = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [showQuickActions, setShowQuickActions] = useState(true);
-  const [showRentableItems, setShowRentableItems] = useState(true);
+
 
   // Quick Actions
   const quickActions: QuickAction[] = useMemo(() => [
@@ -129,6 +127,13 @@ const HomePage: React.FC = () => {
       description: 'Suivre votre activité',
       color: 'from-orange-500 to-red-600',
       action: () => navigate('/dashboard')
+    },
+    {
+      icon: <Package className="w-5 h-5" />,
+      title: 'Marketplace',
+      description: 'Objets à partager et louer',
+      color: 'from-emerald-500 to-green-600',
+      action: () => navigate('/marketplace')
     }
   ], [navigate]);
 
@@ -149,7 +154,7 @@ const HomePage: React.FC = () => {
 
   const doesTaskMatchFilters = useCallback((task: Task) => {
     if (!validateTask(task)) return false;
-    if (task.assigned_to || task.status === 'completed') return false;
+    if (task.assigned_to || task.status === 'completed' || task.status === 'cancelled') return false;
 
     const term = searchTerm.trim().toLowerCase();
     const matchesSearch = !term || (
@@ -228,25 +233,7 @@ const HomePage: React.FC = () => {
     navigate(`/task/${taskId}`);
   }, [navigate]);
 
-  const handleViewItem = useCallback((itemId: number) => {
-    navigate(`/rentals/${itemId}`);
-  }, [navigate]);
 
-  const handleRentItem = useCallback((itemId: number) => {
-    if (!user) {
-      navigate('/login');
-      return;
-    }
-    navigate(`/rentals/${itemId}/rent`);
-  }, [user, navigate]);
-
-  const handleContactItem = useCallback((itemId: number) => {
-    if (!user) {
-      navigate('/login');
-      return;
-    }
-    console.log('Contacter le propriétaire de l\'objet:', itemId);
-  }, [user, navigate]);
 
   const toggleSortOrder = useCallback(() => {
     setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
@@ -475,7 +462,7 @@ const HomePage: React.FC = () => {
                     Masquer
                   </Button>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                   {quickActions.map((action, index) => (
                     <motion.div
                       key={action.title}
@@ -777,111 +764,7 @@ const HomePage: React.FC = () => {
           )}
         </section>
 
-        {/* Rentable Items Section */}
-        <section className="mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="text-xl font-bold text-slate-800 mb-2">
-                Objets à louer
-              </h2>
-              <p className="text-slate-600 text-sm">
-                Découvrez les objets disponibles à la location près de chez vous
-              </p>
-            </div>
-            <Button
-              variant="outline"
-              onClick={() => setShowRentableItems(!showRentableItems)}
-              className="border-slate-300 hover:border-emerald-500 hover:text-emerald-600"
-            >
-              {showRentableItems ? 'Masquer' : 'Afficher'}
-            </Button>
-          </div>
 
-          <AnimatePresence>
-            {showRentableItems && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.5 }}
-              >
-                {rentableItemsLoading ? (
-                  <div className={`grid gap-4 ${
-                    viewMode === 'grid' 
-                      ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
-                      : 'grid-cols-1'
-                  }`}>
-                    {Array.from({ length: 4 }).map((_, i) => (
-                      <RentableItemCardSkeleton key={i} viewMode={viewMode} />
-                    ))}
-                  </div>
-                ) : rentableItemsError ? (
-                  <Card className="text-center py-12 bg-red-50 border border-red-200">
-                    <div className="text-red-600 mb-4">
-                      <AlertCircle className="w-12 h-12 mx-auto mb-4" />
-                      <h3 className="text-xl font-semibold mb-2">Erreur de chargement</h3>
-                      <p className="text-red-500">{rentableItemsError}</p>
-                    </div>
-                  </Card>
-                ) : rentableItems.length === 0 ? (
-                  <Card className="text-center py-16">
-                    <div className="text-6xl mb-6">📦</div>
-                    <h3 className="text-xl font-bold text-slate-800 mb-4">
-                      Aucun objet à louer
-                    </h3>
-                    <p className="text-slate-600 text-base mb-8 max-w-2xl mx-auto">
-                      Aucun objet n'est actuellement disponible à la location. Soyez le premier à proposer un objet !
-                    </p>
-                    
-                    <Button
-                      onClick={() => navigate('/rentals/create')}
-                      className="bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white"
-                    >
-                      <Plus className="w-5 h-5 mr-2" />
-                      Proposer un objet
-                    </Button>
-                  </Card>
-                ) : (
-                  <div className={`grid gap-4 ${
-                    viewMode === 'grid' 
-                      ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
-                      : 'grid-cols-1'
-                  }`}>
-                    {rentableItems.slice(0, 8).map((item, index) => (
-                      <RentableItemCard
-                        key={item.id}
-                        item={item}
-                        user={user}
-                        viewMode={viewMode}
-                        latitude={latitude || undefined}
-                        longitude={longitude || undefined}
-                        onViewItem={handleViewItem}
-                        onRent={handleRentItem}
-                        onContact={handleContactItem}
-                        onNavigate={navigate}
-                        prefersReducedMotion={false}
-                        index={index}
-                      />
-                    ))}
-                  </div>
-                )}
-
-                {rentableItems.length > 8 && (
-                  <div className="text-center mt-8">
-                    <Button
-                      variant="outline"
-                      onClick={() => navigate('/rentals')}
-                      className="border-slate-300 hover:border-emerald-500 hover:text-emerald-600"
-                    >
-                      <Eye className="w-5 h-5 mr-2" />
-                      Voir tous les objets ({rentableItems.length})
-                    </Button>
-                  </div>
-                )}
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </section>
       </main>
 
       {/* Filter Modal */}

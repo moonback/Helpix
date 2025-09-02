@@ -2,18 +2,20 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
 import { useMessageStore } from '@/stores/messageStore';
-import { Home, Map, Plus, Wallet, User, MessageCircle, BarChart3, MoreHorizontal, Calendar } from 'lucide-react';
+import { Home, Map, Plus, Wallet, User, MessageCircle, BarChart3, MoreHorizontal, Calendar, Package, LogOut } from 'lucide-react';
 
 // Centralize the tab configuration for better readability and reusability
 // Primary tabs shown in the bar
 const primaryTabs = [
   { path: '/', icon: Home, label: 'Accueil' },
   { path: '/map', icon: Map, label: 'Carte' },
+  { path: '/marketplace', icon: Package, label: 'Marketplace' },
   { path: '/chat', icon: MessageCircle, label: 'Messages' },
 ];
 
 // Overflow tabs shown in the More menu (keeps all links)
 const overflowTabs = [
+  { path: '/add', icon: Plus, label: 'Ajouter' },
   { path: '/dashboard', icon: BarChart3, label: 'Tableau de bord' },
   { path: '/profile', icon: User, label: 'Profil' },
   { path: '/wallet', icon: Wallet, label: 'Portefeuille' },
@@ -26,7 +28,7 @@ const BottomNavigation: React.FC = () => {
   const [isMoreOpen, setIsMoreOpen] = useState(false);
   const moreBtnRef = useRef<HTMLButtonElement | null>(null);
   const moreMenuRef = useRef<HTMLDivElement | null>(null);
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, signOut } = useAuthStore();
   const { unreadCount } = useMessageStore();
 
   // Close menu when clicking outside
@@ -49,6 +51,16 @@ const BottomNavigation: React.FC = () => {
 
   const handleNavigation = (path: string) => {
     navigate(path);
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      navigate('/');
+      setIsMoreOpen(false);
+    } catch (error) {
+      console.error('Erreur lors de la déconnexion:', error);
+    }
   };
 
   if (!isAuthenticated) {
@@ -118,61 +130,38 @@ const BottomNavigation: React.FC = () => {
               </button>
             );
           })}
+        </div>
 
-          {/* More menu trigger with enhanced styling */}
+        {/* Floating More Menu Button */}
+        <div className="pointer-events-none absolute top-3 left-1/2 -translate-x-1/2">
           <button
             ref={moreBtnRef}
             onClick={() => setIsMoreOpen((v) => !v)}
-            className={`
-              group relative flex flex-col items-center justify-center w-full h-full transition-all duration-200 ease-out
-              hover:scale-105 active:scale-95
-              ${isMoreOpen 
-                ? 'text-blue-600 dark:text-blue-400' 
-                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-              }
-            `}
+            className={`pointer-events-auto group relative h-12 w-12 rounded-full flex items-center justify-center shadow-xl ring-4 ring-white/80 dark:ring-gray-900/80 transition-all duration-300 ease-out hover:scale-105 active:scale-95 ${
+              isMoreOpen 
+                ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:shadow-blue-500/25' 
+                : 'bg-white/90 dark:bg-gray-800/90 text-gray-600 dark:text-gray-300 hover:shadow-gray-500/25'
+            }`}
             aria-label="Plus"
             aria-expanded={isMoreOpen}
             aria-haspopup="menu"
           >
-            {/* Active indicator */}
-            {isMoreOpen && (
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-1 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full animate-[fadeInScale_0.3s_ease-out]" />
-            )}
-            
-            {/* Icon with rotation animation */}
-            <div className="relative">
-              <div className={`absolute inset-0 rounded-full blur-md transition-opacity duration-200 ${
-                isMoreOpen ? 'bg-blue-500/20 opacity-100' : 'opacity-0 group-hover:opacity-50 group-hover:bg-gray-500/10'
-              }`} />
-              <MoreHorizontal className={`relative h-6 w-6 mb-1 transition-all duration-200 ${
-                isMoreOpen ? 'rotate-90 drop-shadow-sm' : 'group-hover:scale-110'
-              }`} />
-            </div>
-            
-            <span className={`hidden sm:block text-[10px] font-medium transition-all duration-200 ${
-              isMoreOpen ? 'opacity-100 font-semibold' : 'opacity-75 group-hover:opacity-100'
-            }`}>
-              Plus
-            </span>
-          </button>
-        </div>
-
-        {/* Floating Add Action Button aligned and scaled like other icons */}
-        <div className="pointer-events-none absolute top-3 left-1/2 -translate-x-1/2">
-          <button
-            onClick={() => handleNavigation('/add')}
-            className="pointer-events-auto group relative h-12 w-12 rounded-full bg-gradient-to-r from-blue-600 to-blue-700 text-white flex items-center justify-center shadow-xl ring-4 ring-white/80 dark:ring-gray-900/80 hover:shadow-blue-500/25 transition-all duration-300 ease-out hover:scale-105 active:scale-95"
-            aria-label="Ajouter"
-          >
             {/* Animated background glow */}
-            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-400 to-blue-600 opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-300" />
+            <div className={`absolute inset-0 rounded-full blur-xl transition-opacity duration-300 ${
+              isMoreOpen 
+                ? 'bg-gradient-to-r from-blue-400 to-blue-600 opacity-0 group-hover:opacity-20' 
+                : 'bg-gradient-to-r from-gray-400 to-gray-600 opacity-0 group-hover:opacity-20'
+            }`} />
             
-            {/* Plus icon with rotation on hover */}
-            <Plus className="relative h-6 w-6 transition-transform duration-200 group-hover:rotate-90" />
+            {/* MoreHorizontal icon with rotation animation */}
+            <MoreHorizontal className={`relative h-6 w-6 transition-all duration-200 ${
+              isMoreOpen ? 'rotate-90' : 'group-hover:rotate-45'
+            }`} />
             
-            {/* Subtle pulse effect */}
-            <div className="absolute inset-0 rounded-full bg-white/20 animate-ping opacity-0 group-active:opacity-100" />
+            {/* Subtle pulse effect when active */}
+            {isMoreOpen && (
+              <div className="absolute inset-0 rounded-full bg-white/20 animate-ping opacity-100" />
+            )}
           </button>
         </div>
 
@@ -242,6 +231,30 @@ const BottomNavigation: React.FC = () => {
                   </button>
                 );
               })}
+              
+              {/* Séparateur */}
+              <div className="mx-3 my-2 h-px bg-gradient-to-r from-transparent via-gray-200 dark:via-gray-700 to-transparent" />
+              
+              {/* Bouton de déconnexion */}
+              <button
+                onClick={handleSignOut}
+                className="group w-full flex items-center gap-3 px-3 py-3 rounded-xl text-xs transition-all duration-200 ease-out hover:scale-[1.02] active:scale-98 text-red-600 dark:text-red-400 hover:bg-gradient-to-r hover:from-red-50 hover:to-red-100 dark:hover:from-red-950/50 dark:hover:to-red-900/50"
+                role="menuitem"
+                style={{ 
+                  animationDelay: `${overflowTabs.length * 50}ms`,
+                  animation: 'slideInRight 0.3s ease-out both'
+                }}
+              >
+                {/* Icon with glow effect */}
+                <div className="relative">
+                  <div className="absolute inset-0 rounded-lg blur-sm transition-opacity duration-200 opacity-0 group-hover:opacity-30 group-hover:bg-red-500/20" />
+                  <LogOut className="relative h-5 w-5 transition-transform duration-200 group-hover:scale-110" />
+                </div>
+                
+                <span className="font-medium transition-all duration-200 group-hover:translate-x-0.5">
+                  Déconnexion
+                </span>
+              </button>
             </div>
           </>
         )}

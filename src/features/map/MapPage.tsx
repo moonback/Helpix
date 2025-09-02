@@ -2,10 +2,8 @@ import React, { useEffect, useState, useCallback, Suspense, lazy } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useTaskStore } from '@/stores/taskStore';
-import { useAuthStore } from '@/stores/authStore';
 import { Task } from '@/types';
-import { usePaymentNotifications } from '@/hooks/usePaymentNotifications';
-import { useRentableItems } from './hooks/useRentableItems';
+
 import { useGeolocation } from '@/hooks/useGeolocation';
 import PageContainer from '@/components/ui/PageContainer';
 import SectionHeader from '@/components/ui/SectionHeader';
@@ -18,7 +16,7 @@ import { MapPin } from 'lucide-react';
 const MapView = lazy(() => import('./components/MapView'));
 const TasksListView = lazy(() => import('./components/TasksListView'));
 const FiltersSidebar = lazy(() => import('./components/FiltersSidebar'));
-const RentModal = lazy(() => import('./components/RentModal'));
+
 const MapHeader = lazy(() => import('./components/MapHeader'));
 
 // Type partiel pour les tâches de la carte
@@ -26,17 +24,7 @@ export type MapTask = Pick<Task, 'id' | 'title' | 'description' | 'category' | '
   location: { lat: number; lng: number };
 };
 
-// Définition locale pour typage interne des items louables
-interface LocalRentableItemMarker {
-  id: number;
-  name: string;
-  description: string;
-  daily_price: number | null;
-  deposit: number;
-  available: boolean;
-  owner_id: string;
-  location: { lat: number; lng: number } | null;
-}
+
 
 // Composant de chargement global
 const MapPageLoadingFallback: React.FC = () => (
@@ -64,9 +52,7 @@ const MapPageLoadingFallback: React.FC = () => (
 const MapPageOptimized: React.FC = () => {
   const navigate = useNavigate();
   const { tasks, fetchTasks, isLoading } = useTaskStore();
-  const { user } = useAuthStore();
-  const { items: rentableItems, loading: itemsLoading } = useRentableItems();
-  const { addNotification } = usePaymentNotifications();
+
 
   // État de la vue
   const [mapView, setMapView] = useState<'map' | 'list'>('map');
@@ -124,17 +110,10 @@ const MapPageOptimized: React.FC = () => {
   const [radiusKm, setRadiusKm] = useState<number>(0);
   const [sortByDistance, setSortByDistance] = useState<boolean>(false);
 
-  // État des items louables
-  const [isItemsSidebarOpen, setIsItemsSidebarOpen] = useState(false);
-  const [itemSearch, setItemSearch] = useState('');
-  const [onlyAvailableItems, setOnlyAvailableItems] = useState(true);
-  const [minPrice, setMinPrice] = useState<number>(0);
-  const [maxPrice, setMaxPrice] = useState<number>(1000);
+
 
   // État des modales
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<LocalRentableItemMarker | null>(null);
-  const [isRentModalOpen, setIsRentModalOpen] = useState(false);
 
   // Chargement initial
   useEffect(() => {
@@ -162,35 +141,13 @@ const MapPageOptimized: React.FC = () => {
     navigate(`/task/${taskId}?action=help`);
   }, [navigate]);
 
-  const handleItemClick = useCallback((item: LocalRentableItemMarker) => {
-    setSelectedItem(item);
-    setIsRentModalOpen(true);
-  }, []);
+
 
   const handleRecenter = useCallback(() => {
     requestLocation();
   }, [requestLocation]);
 
-  const handleRentConfirm = useCallback(async () => {
-    if (!selectedItem || !user) return;
 
-    try {
-      // Logique de location ici
-      addNotification(
-        'success',
-        'Location confirmée',
-        'Votre demande de location a été envoyée'
-      );
-      setIsRentModalOpen(false);
-      setSelectedItem(null);
-    } catch (error) {
-      addNotification(
-        'error',
-        'Erreur',
-        'Impossible de traiter votre demande'
-      );
-    }
-  }, [selectedItem, user, addNotification]);
 
   // Calcul du nombre de filtres actifs
   const getActiveFiltersCount = () => {
@@ -199,9 +156,7 @@ const MapPageOptimized: React.FC = () => {
     if (filterPriority !== 'all') count++;
     if (radiusKm > 0) count++;
     if (sortByDistance) count++;
-    if (itemSearch) count++;
-    if (onlyAvailableItems) count++;
-    if (minPrice > 0 || maxPrice < 1000) count++;
+
     return count;
   };
 
@@ -259,27 +214,7 @@ const MapPageOptimized: React.FC = () => {
                 onRemove={() => setSortByDistance(false)}
               />
             )}
-            {itemSearch && (
-              <FilterBadge
-                icon="🔎"
-                label={`Objets: ${itemSearch}`}
-                onRemove={() => setItemSearch('')}
-              />
-            )}
-            {onlyAvailableItems && (
-              <FilterBadge
-                icon="✅"
-                label="Objets: dispo"
-                onRemove={() => setOnlyAvailableItems(false)}
-              />
-            )}
-            {(minPrice > 0 || maxPrice < 1000) && (
-              <FilterBadge
-                icon="💰"
-                label={`Prix: ${minPrice}–${maxPrice}`}
-                onRemove={() => { setMinPrice(0); setMaxPrice(1000); }}
-              />
-            )}
+
 
             <span className="ml-auto text-sm text-slate-500">
               {mapView === 'map' ? `${mapTasks.length} tâches` : `${mapTasks.length} résultats`}
@@ -295,17 +230,10 @@ const MapPageOptimized: React.FC = () => {
                   userLocation={userLocation}
                   onTaskClick={handleTaskClick}
                   onOfferHelp={handleOfferHelp}
-                  rentableItems={rentableItems}
-                  onItemClick={handleItemClick}
                   filterCategory={filterCategory}
                   filterPriority={filterPriority}
                   radiusKm={radiusKm}
-                  itemSearch={itemSearch}
-                  onlyAvailableItems={onlyAvailableItems}
-                  minPrice={minPrice}
-                  maxPrice={maxPrice}
                   isLoading={isLoading}
-                  itemsLoading={itemsLoading}
                   onRecenter={handleRecenter}
                 />
              </div>
@@ -350,34 +278,10 @@ const MapPageOptimized: React.FC = () => {
           onRadiusChange={setRadiusKm}
           sortByDistance={sortByDistance}
           onSortByDistanceChange={setSortByDistance}
-          isItemsSidebarOpen={isItemsSidebarOpen}
-          onItemsSidebarToggle={() => setIsItemsSidebarOpen(!isItemsSidebarOpen)}
-          itemSearch={itemSearch}
-          onItemSearchChange={setItemSearch}
-          onlyAvailableItems={onlyAvailableItems}
-          onOnlyAvailableItemsChange={setOnlyAvailableItems}
-          minPrice={minPrice}
-          onMinPriceChange={setMinPrice}
-          maxPrice={maxPrice}
-          onMaxPriceChange={setMaxPrice}
+
         />
 
-        {/* Modal de location */}
-        {selectedItem && (
-          <RentModal
-            isOpen={isRentModalOpen}
-            item={selectedItem}
-            start=""
-            end=""
-            onClose={() => {
-              setIsRentModalOpen(false);
-              setSelectedItem(null);
-            }}
-            onConfirm={handleRentConfirm}
-            onStartChange={() => {}}
-            onEndChange={() => {}}
-          />
-                   )}
+
     </div>
     </Suspense>
   );
