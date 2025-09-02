@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useTaskStore } from '@/stores/taskStore';
 import { useAuthStore } from '@/stores/authStore';
-// import { useWalletStore } from '@/stores/walletStore';
+import { useWalletStore } from '@/features/wallet/stores/walletStore';
 import { useMarketplaceStore } from '@/stores/marketplaceStore';
 
 // Composants refactorisés
@@ -33,7 +33,7 @@ const DashboardPage: React.FC = () => {
   } = useTaskStore();
 
   const { user } = useAuthStore();
-  // const { balance, reservedCredits, fetchWalletData } = useWalletStore();
+  const { wallet, stats, fetchWallet, fetchWalletStats } = useWalletStore();
   const { items, rentals, fetchItems, fetchRentals } = useMarketplaceStore();
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -42,7 +42,8 @@ const DashboardPage: React.FC = () => {
 
   useEffect(() => {
     fetchAllTasks();
-    // fetchWalletData();
+    fetchWallet();
+    fetchWalletStats();
     fetchItems();
     fetchRentals();
   }, []);
@@ -161,7 +162,7 @@ const DashboardPage: React.FC = () => {
                       <div>
                         <p className="text-sm font-medium text-gray-600 mb-1">Solde wallet</p>
                         <p className="text-2xl font-bold text-green-600">
-                          {user?.credits || 0} crédits
+                          {wallet?.balance || 0} crédits
                         </p>
                       </div>
                       <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
@@ -562,7 +563,7 @@ const DashboardPage: React.FC = () => {
                       <div>
                         <p className="text-blue-100 text-sm font-medium mb-1">Solde disponible</p>
                         <p className="text-3xl font-bold">
-                          {user?.credits || 0} crédits
+                          {wallet?.balance || 0} crédits
                         </p>
                       </div>
                       <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
@@ -585,7 +586,7 @@ const DashboardPage: React.FC = () => {
                       <div>
                         <p className="text-yellow-100 text-sm font-medium mb-1">Crédits réservés</p>
                         <p className="text-3xl font-bold">
-                          0 crédits
+                          {stats?.reserved_credits || 0} crédits
                         </p>
                       </div>
                       <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
@@ -608,7 +609,7 @@ const DashboardPage: React.FC = () => {
                       <div>
                         <p className="text-green-100 text-sm font-medium mb-1">Total</p>
                         <p className="text-3xl font-bold">
-                          {user?.credits || 0} crédits
+                          {(wallet?.balance || 0) + (stats?.reserved_credits || 0)} crédits
                         </p>
                       </div>
                       <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">

@@ -6,6 +6,7 @@ export interface Wallet {
   balance: number;
   total_earned: number;
   total_spent: number;
+  reserved_credits?: number;
   created_at: string;
   updated_at: string;
 }
@@ -63,6 +64,7 @@ export interface WithdrawalRequest {
 
 export interface WalletStats {
   total_balance: number;
+  reserved_credits?: number;
   monthly_earnings: number;
   pending_earnings: number;
   total_transactions: number;
