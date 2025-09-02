@@ -5,6 +5,7 @@ import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
 import { useAuthStore } from '@/stores/authStore';
+import { supabase } from '@/lib/supabase';
 import { useReverseGeocoding } from '@/hooks/useReverseGeocoding';
 import { useGeolocation } from '@/hooks/useGeolocation';
 
@@ -34,19 +35,183 @@ const ProfilePage: React.FC = () => {
     }
   }, [latitude, longitude, user?.id]);
 
-  // Données mockées pour la démonstration
-  const skills = [
+  // État local: compétences et objets prêtables (MVP, à persister plus tard via Supabase)
+  interface SkillEntry { id: number; name: string; level: 'Débutant' | 'Intermédiaire' | 'Avancé' | 'Expert'; }
+  interface LendableItem { id: number; name: string; description: string; available: boolean; }
+
+  const [skills, setSkills] = useState<SkillEntry[]>([
     { id: 1, name: 'Jardinage', level: 'Expert' },
     { id: 2, name: 'Cuisine', level: 'Intermédiaire' },
-    { id: 3, name: 'Informatique', level: 'Avancé' },
-    { id: 4, name: 'Bricolage', level: 'Débutant' },
-  ];
+  ]);
 
-  const items = [
+  const [items, setItems] = useState<LendableItem[]>([
     { id: 1, name: 'Perceuse', description: 'Perceuse sans fil Bosch', available: true },
-    { id: 2, name: 'Livres de cuisine', description: 'Collection de recettes', available: true },
-    { id: 3, name: 'Vélo', description: 'Vélo de ville en bon état', available: false },
-  ];
+    { id: 2, name: 'Vélo', description: 'Vélo de ville en bon état', available: false },
+  ]);
+
+  // Modals d’ajout
+  const [isAddSkillOpen, setIsAddSkillOpen] = useState(false);
+  const [isAddItemOpen, setIsAddItemOpen] = useState(false);
+
+  // Formulaires
+  const [newSkillName, setNewSkillName] = useState('');
+  const [newSkillLevel, setNewSkillLevel] = useState<SkillEntry['level']>('Débutant');
+  const [newItemName, setNewItemName] = useState('');
+  const [newItemDesc, setNewItemDesc] = useState('');
+  const [newItemAvailable, setNewItemAvailable] = useState(true);
+
+  const addSkill = () => {
+    const name = newSkillName.trim();
+    if (!name) return;
+    const currentUserId = user?.id;
+    if (!currentUserId) return;
+    (async () => {
+      const { data, error } = await supabase
+        .from('skills')
+        .insert({ user_id: currentUserId, name, level: newSkillLevel })
+        .select('*')
+        .single();
+      if (error) {
+        console.error('Erreur ajout compétence:', error);
+        return;
+      }
+      setSkills(prev => [
+        ...prev,
+        { id: data.id, name, level: newSkillLevel }
+      ]);
+      setNewSkillName('');
+      setNewSkillLevel('Débutant');
+      setIsAddSkillOpen(false);
+    })();
+  };
+
+  const removeSkill = (id: number) => {
+    const currentUserId = user?.id;
+    if (!currentUserId) return;
+    (async () => {
+      const { error } = await supabase
+        .from('skills')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', currentUserId);
+      if (error) {
+        console.error('Erreur suppression compétence:', error);
+        return;
+      }
+      setSkills(prev => prev.filter(s => s.id !== id));
+    })();
+  };
+
+  const addItem = () => {
+    const name = newItemName.trim();
+    const description = newItemDesc.trim();
+    if (!name) return;
+    const currentUserId = user?.id;
+    if (!currentUserId) return;
+    (async () => {
+      const { data, error } = await supabase
+        .from('items')
+        .insert({
+          user_id: currentUserId,
+          name,
+          item_name: name,
+          description: description || null,
+          available: newItemAvailable,
+        })
+        .select('*')
+        .single();
+      if (error) {
+        console.error('Erreur ajout objet:', error);
+        return;
+      }
+      setItems(prev => [
+        ...prev,
+        { id: data.id, name, description, available: newItemAvailable }
+      ]);
+      setNewItemName('');
+      setNewItemDesc('');
+      setNewItemAvailable(true);
+      setIsAddItemOpen(false);
+    })();
+  };
+
+  const toggleItemAvailability = (id: number) => {
+    const current = items.find(it => it.id === id);
+    if (!current) return;
+    const currentUserId = user?.id;
+    if (!currentUserId) return;
+    const next = !current.available;
+    (async () => {
+      const { error } = await supabase
+        .from('items')
+        .update({ available: next })
+        .eq('id', id)
+        .eq('user_id', currentUserId);
+      if (error) {
+        console.error('Erreur mise à jour disponibilité:', error);
+        return;
+      }
+      setItems(prev => prev.map(it => it.id === id ? { ...it, available: next } : it));
+    })();
+  };
+
+  const removeItem = (id: number) => {
+    const currentUserId = user?.id;
+    if (!currentUserId) return;
+    (async () => {
+      const { error } = await supabase
+        .from('items')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', currentUserId);
+      if (error) {
+        console.error('Erreur suppression objet:', error);
+        return;
+      }
+      setItems(prev => prev.filter(it => it.id !== id));
+    })();
+  };
+
+  // Chargement initial depuis Supabase
+  useEffect(() => {
+    const currentUserId = user?.id;
+    if (!currentUserId) return;
+    (async () => {
+      const { data: skillRows, error: skillsError } = await supabase
+        .from('skills')
+        .select('*')
+        .eq('user_id', currentUserId)
+        .order('id', { ascending: true });
+      if (skillsError) {
+        console.error('Erreur chargement compétences:', skillsError);
+      } else if (skillRows) {
+        setSkills(skillRows.map((row: any) => {
+          const name = (row.name ?? (String(row.skill_name || '').split('|')[0] || '')).trim();
+          const levelRaw = (row.level ?? (String(row.skill_name || '').split('|')[1] || 'Intermédiaire')).trim();
+          const allowed = ['Débutant','Intermédiaire','Avancé','Expert'];
+          const level = allowed.includes(levelRaw) ? levelRaw : 'Intermédiaire';
+          return { id: row.id, name, level } as SkillEntry;
+        }));
+      }
+
+      const { data: itemRows, error: itemsError } = await supabase
+        .from('items')
+        .select('*')
+        .eq('user_id', currentUserId)
+        .order('id', { ascending: true });
+      if (itemsError) {
+        console.error('Erreur chargement objets:', itemsError);
+      } else if (itemRows) {
+        const mapped = itemRows.map((row: any) => ({
+          id: row.id,
+          name: row.name ?? row.item_name,
+          description: row.description || '',
+          available: !!row.available,
+        })) as LendableItem[];
+        setItems(mapped);
+      }
+    })();
+  }, [user?.id]);
 
   const stats = {
     tasksCompleted: 12,
@@ -369,6 +534,7 @@ const ProfilePage: React.FC = () => {
                   variant="outline"
                   size="sm"
                   className="border-slate-300 hover:border-emerald-500 hover:text-emerald-600 px-4 py-2 rounded-xl"
+                  onClick={() => setIsAddSkillOpen(true)}
                 >
                   <Plus size={16} className="mr-2" />
                   Ajouter
@@ -377,6 +543,35 @@ const ProfilePage: React.FC = () => {
             </div>
 
             <div className="p-6">
+              {isAddSkillOpen && (
+                <div className="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <Input
+                      label="Compétence"
+                      value={newSkillName}
+                      onChange={(e) => setNewSkillName(e.target.value)}
+                      placeholder="Ex: Jardinage"
+                    />
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">Niveau</label>
+                      <select
+                        value={newSkillLevel}
+                        onChange={(e) => setNewSkillLevel(e.target.value as any)}
+                        className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                      >
+                        <option>Débutant</option>
+                        <option>Intermédiaire</option>
+                        <option>Avancé</option>
+                        <option>Expert</option>
+                      </select>
+                    </div>
+                    <div className="flex gap-2 items-end">
+                      <Button onClick={addSkill} className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl">Ajouter</Button>
+                      <Button variant="outline" onClick={() => setIsAddSkillOpen(false)} className="flex-1 rounded-xl">Annuler</Button>
+                    </div>
+                  </div>
+                </div>
+              )}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {skills.map((skill) => (
                   <div
@@ -397,13 +592,16 @@ const ProfilePage: React.FC = () => {
                           </div>
                         </div>
                       </div>
+                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <Button 
                         variant="ghost" 
                         size="sm"
-                        className="opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-emerald-100 hover:text-emerald-600 rounded-xl"
+                          className="p-2 hover:bg-emerald-100 hover:text-emerald-600 rounded-xl"
+                          onClick={() => removeSkill(skill.id)}
                       >
-                        <Edit size={16} />
+                          Supprimer
                       </Button>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -445,6 +643,7 @@ const ProfilePage: React.FC = () => {
                   variant="outline"
                   size="sm"
                   className="border-slate-300 hover:border-orange-500 hover:text-orange-600 px-4 py-2 rounded-xl"
+                  onClick={() => setIsAddItemOpen(true)}
                 >
                   <Plus size={16} className="mr-2" />
                   Ajouter
@@ -453,6 +652,39 @@ const ProfilePage: React.FC = () => {
             </div>
 
             <div className="p-6">
+              {isAddItemOpen && (
+                <div className="mb-6 rounded-2xl border border-orange-200 bg-orange-50 p-4">
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                    <Input
+                      label="Nom de l'objet"
+                      value={newItemName}
+                      onChange={(e) => setNewItemName(e.target.value)}
+                      placeholder="Ex: Perceuse"
+                    />
+                    <Input
+                      label="Description"
+                      value={newItemDesc}
+                      onChange={(e) => setNewItemDesc(e.target.value)}
+                      placeholder="Détails..."
+                    />
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">Disponibilité</label>
+                      <select
+                        value={newItemAvailable ? 'oui' : 'non'}
+                        onChange={(e) => setNewItemAvailable(e.target.value === 'oui')}
+                        className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+                      >
+                        <option value="oui">Disponible</option>
+                        <option value="non">Indisponible</option>
+                      </select>
+                    </div>
+                    <div className="flex gap-2 items-end">
+                      <Button onClick={addItem} className="flex-1 bg-orange-600 hover:bg-orange-700 text-white rounded-xl">Ajouter</Button>
+                      <Button variant="outline" onClick={() => setIsAddItemOpen(false)} className="flex-1 rounded-xl">Annuler</Button>
+                    </div>
+                  </div>
+                </div>
+              )}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {items.map((item) => (
                   <div
@@ -471,15 +703,24 @@ const ProfilePage: React.FC = () => {
                           }`}>
                             {item.available ? '✅ Disponible' : '❌ Indisponible'}
                           </span>
+                          <button
+                            onClick={() => toggleItemAvailability(item.id)}
+                            className="text-xs px-2 py-1 rounded-full border border-slate-300 hover:bg-slate-100"
+                          >
+                            {item.available ? 'Rendre indisponible' : 'Rendre disponible'}
+                          </button>
                         </div>
                       </div>
+                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <Button 
                         variant="ghost" 
                         size="sm"
-                        className="opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-orange-100 hover:text-orange-600 rounded-xl"
+                          className="p-2 hover:bg-orange-100 hover:text-orange-600 rounded-xl"
+                          onClick={() => removeItem(item.id)}
                       >
-                        <Edit size={16} />
+                          Supprimer
                       </Button>
+                      </div>
                     </div>
                   </div>
                 ))}

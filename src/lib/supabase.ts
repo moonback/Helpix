@@ -73,38 +73,49 @@ export type Database = {
         Row: {
           id: number;
           user_id: string;
-          skill_name: string;
+          // Schéma rétro-compatible: accepter l'ancien et le nouveau
+          skill_name?: string | null;
+          name?: string | null;
+          level?: 'Débutant' | 'Intermédiaire' | 'Avancé' | 'Expert' | null;
         };
         Insert: {
           id?: number;
           user_id: string;
-          skill_name: string;
+          skill_name?: string | null;
+          name?: string | null;
+          level?: 'Débutant' | 'Intermédiaire' | 'Avancé' | 'Expert' | null;
         };
         Update: {
           id?: number;
           user_id?: string;
-          skill_name?: string;
+          skill_name?: string | null;
+          name?: string | null;
+          level?: 'Débutant' | 'Intermédiaire' | 'Avancé' | 'Expert' | null;
         };
       };
       items: {
         Row: {
           id: number;
           user_id: string;
-          item_name: string;
+          // Rétro-compat: accepter item_name ou name
+          item_name?: string | null;
+          name?: string | null;
           description: string | null;
           available: boolean;
         };
         Insert: {
           id?: number;
           user_id: string;
-          item_name: string;
+          item_name?: string | null;
+          name?: string | null;
           description?: string | null;
           available?: boolean;
         };
         Update: {
           id?: number;
           user_id?: string;
-          item_name?: string;
+          item_name?: string | null;
+          name?: string | null;
           description?: string | null;
           available?: boolean;
         };
