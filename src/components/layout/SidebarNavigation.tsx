@@ -23,7 +23,7 @@ interface SidebarNavigationProps {
 const SidebarNavigation: React.FC<SidebarNavigationProps> = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, logout } = useAuthStore();
+  const { user, signOut } = useAuthStore();
   const { unreadCount } = useMessageStore();
 
   const navigationItems = [
@@ -42,7 +42,7 @@ const SidebarNavigation: React.FC<SidebarNavigationProps> = ({ isOpen, onClose }
   };
 
   const handleLogout = async () => {
-    await logout();
+    await signOut();
     navigate('/landing');
   };
 
