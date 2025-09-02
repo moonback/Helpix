@@ -156,18 +156,31 @@ export const useWalletStore = create<WalletStore>((set, get) => ({
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Utilisateur non connecté');
 
+      // Récupérer les transactions de crédit depuis la table transactions
       const { data, error } = await supabase
-        .from('credit_earnings')
+        .from('transactions')
         .select(`
           *,
-          task:task_id(title, user_id)
+          wallet:wallet_id(user_id)
         `)
-        .eq('user_id', user.id)
+        .eq('wallet.user_id', user.id)
+        .eq('type', 'credit')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
 
-      set({ creditEarnings: data || [] });
+      // Transformer les données pour correspondre au format attendu
+      const creditEarnings = data?.map(transaction => ({
+        id: transaction.id,
+        amount: transaction.amount,
+        status: transaction.status,
+        created_at: transaction.created_at,
+        description: transaction.description,
+        reference_type: transaction.reference_type,
+        reference_id: transaction.reference_id
+      })) || [];
+
+      set({ creditEarnings });
     } catch (error) {
       console.error('Erreur lors de la récupération des gains:', error);
       set({ error: 'Erreur lors de la récupération des gains' });
@@ -183,15 +196,31 @@ export const useWalletStore = create<WalletStore>((set, get) => ({
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Utilisateur non connecté');
 
+      // Récupérer les transactions de retrait depuis la table transactions
       const { data, error } = await supabase
-        .from('withdrawal_requests')
-        .select('*')
-        .eq('user_id', user.id)
+        .from('transactions')
+        .select(`
+          *,
+          wallet:wallet_id(user_id)
+        `)
+        .eq('wallet.user_id', user.id)
+        .eq('type', 'withdrawal')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
 
-      set({ withdrawalRequests: data || [] });
+      // Transformer les données pour correspondre au format attendu
+      const withdrawalRequests = data?.map(transaction => ({
+        id: transaction.id,
+        amount: transaction.amount,
+        status: transaction.status,
+        created_at: transaction.created_at,
+        description: transaction.description,
+        reference_type: transaction.reference_type,
+        reference_id: transaction.reference_id
+      })) || [];
+
+      set({ withdrawalRequests });
     } catch (error) {
       console.error('Erreur lors de la récupération des demandes de retrait:', error);
       set({ error: 'Erreur lors de la récupération des demandes de retrait' });
@@ -207,15 +236,9 @@ export const useWalletStore = create<WalletStore>((set, get) => ({
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Utilisateur non connecté');
 
-      const { data, error } = await supabase
-        .from('payment_methods')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-
-      set({ paymentMethods: data || [] });
+      // Pour l'instant, retourner un tableau vide car la table payment_methods n'existe pas
+      // Cette fonctionnalité peut être implémentée plus tard
+      set({ paymentMethods: [] });
     } catch (error) {
       console.error('Erreur lors de la récupération des méthodes de paiement:', error);
       set({ error: 'Erreur lors de la récupération des méthodes de paiement' });
@@ -265,11 +288,15 @@ export const useWalletStore = create<WalletStore>((set, get) => ({
 
       const monthlyEarningsTotal = monthlyEarnings?.reduce((sum, t) => sum + t.amount, 0) || 0;
 
-      // Récupérer les gains en attente
+      // Récupérer les gains en attente (transactions de crédit en attente)
       const { data: pendingEarnings } = await supabase
-        .from('credit_earnings')
-        .select('amount')
-        .eq('user_id', user.id)
+        .from('transactions')
+        .select(`
+          amount,
+          wallet:wallet_id(user_id)
+        `)
+        .eq('wallet.user_id', user.id)
+        .eq('type', 'credit')
         .eq('status', 'pending');
 
       const pendingEarningsTotal = pendingEarnings?.reduce((sum, e) => sum + e.amount, 0) || 0;
