@@ -262,47 +262,50 @@ const TaskCard: React.FC<TaskCardProps> = React.memo(({
           </div>
         )}
 
-        {/* Actions */}
-        <div className="flex items-center justify-between pt-4 border-t border-slate-200">
-          <div className="flex items-center space-x-3">
+        {/* Actions - Améliorées pour le responsive */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-4 border-t border-slate-200">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
             {user && task.user_id !== user.id ? (
               <>
                 <Button
                   onClick={() => onHelp(task.id)}
-                  className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white px-6 py-2 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+                  className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white px-4 sm:px-6 py-2 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 touch-target"
                   aria-label="Offrir de l'aide"
                 >
-                  <Hand className="w-4 h-4 mr-2" />
-                  Offrir de l'aide
+                  <Hand className="w-4 h-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Offrir de l'aide</span>
+                  <span className="sm:hidden">Aider</span>
                 </Button>
                 <Button
                   onClick={() => onRequest(task.id)}
                   variant="outline"
-                  className="border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 px-6 py-2 rounded-2xl transition-all duration-200"
+                  className="border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 px-4 sm:px-6 py-2 rounded-2xl transition-all duration-200 touch-target"
                   aria-label="Contacter le demandeur"
                 >
-                  <MessageCircle className="w-4 h-4 mr-2" />
-                  Contacter
+                  <MessageCircle className="w-4 h-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Contacter</span>
+                  <span className="sm:hidden">💬</span>
                 </Button>
               </>
             ) : !user ? (
               <Button
                 onClick={() => onNavigate('/login')}
-                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-2 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-4 sm:px-6 py-2 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 touch-target"
                 aria-label="Se connecter pour aider"
               >
-                <UserCheck className="w-4 h-4 mr-2" />
-                Se connecter pour aider
+                <UserCheck className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline">Se connecter pour aider</span>
+                <span className="sm:hidden">Se connecter</span>
               </Button>
             ) : (
-              <div className="text-sm text-slate-500 italic flex items-center">
+              <div className="text-responsive-sm text-slate-500 italic flex items-center">
                 <Award className="w-4 h-4 mr-2" />
                 Votre tâche
               </div>
             )}
           </div>
           
-          <div className="text-right text-sm text-slate-500">
+          <div className="text-left sm:text-right text-responsive-sm text-slate-500">
             <div className="flex items-center space-x-2">
               <Calendar className="w-4 h-4" />
               <span>{new Date(task.created_at).toLocaleDateString('fr-FR', { 

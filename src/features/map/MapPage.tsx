@@ -327,34 +327,52 @@ const MapPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
-      {/* Header */}
+      {/* Header - Amélioré pour le responsive */}
       <motion.header
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white shadow-sm border-b border-gray-200 px-6 py-4"
+        className="bg-white shadow-sm border-b border-gray-200 px-responsive py-4"
       >
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex-1 min-w-0">
+            <h1 className="text-responsive-xl font-bold text-gray-900 truncate">
               Carte d'entraide 🗺️
             </h1>
-            <p className="text-gray-600">
+            <p className="text-responsive-sm text-gray-600 hidden sm:block">
               Découvrez les opportunités près de chez vous
             </p>
           </div>
-          <Button
-            variant="outline"
-            onClick={onMapViewToggle}
-            icon={mapView === 'map' ? <Users size={20} /> : <MapPin size={20} />}
-          >
-            {mapView === 'map' ? 'Liste' : 'Carte'}
-          </Button>
+          <div className="flex items-center gap-3">
+            {/* Bouton de filtres pour mobile */}
+            <button
+              onClick={() => setIsItemsSidebarOpen(!isItemsSidebarOpen)}
+              className="mobile-only touch-target bg-blue-600 text-white rounded-xl px-4 py-2 flex items-center gap-2 shadow-lg"
+              aria-label="Ouvrir les filtres"
+            >
+              <span className="text-lg">🛍️</span>
+              <span className="text-sm font-medium">Filtres</span>
+            </button>
+            
+            <Button
+              variant="outline"
+              onClick={onMapViewToggle}
+              icon={mapView === 'map' ? <Users size={20} /> : <MapPin size={20} />}
+              className="touch-target"
+            >
+              <span className="hidden sm:inline">
+                {mapView === 'map' ? 'Liste' : 'Carte'}
+              </span>
+              <span className="sm:hidden">
+                {mapView === 'map' ? 'Liste' : 'Carte'}
+              </span>
+            </Button>
+          </div>
         </div>
       </motion.header>
 
-             {/* Map View */}
+             {/* Map View - Amélioré pour le responsive */}
        {mapView === 'map' ? (
-         <div className="h-[calc(100vh-200px)] relative">
+         <div className="h-[calc(100vh-140px)] sm:h-[calc(100vh-180px)] lg:h-[calc(100vh-200px)] relative">
            {isLoading ? (
              <div className="h-full flex items-center justify-center bg-gray-50">
                <div className="text-center">
@@ -404,9 +422,11 @@ const MapPage: React.FC = () => {
              </MapContainer>
            )}
 
-          {/* Sidebar gauche: filtres objets louables + tâches */}
-          <div className={`absolute top-4 left-0 h-[calc(100%-2rem)] z-[2100] transition-transform ${isItemsSidebarOpen ? 'translate-x-0' : '-translate-x-[calc(100%-3rem)]'} pointer-events-none`}>
-            <div className="pointer-events-auto w-72 max-w-[85vw] h-full bg-white shadow-2xl border-r border-gray-200 rounded-r-2xl p-4 flex flex-col">
+          {/* Sidebar gauche: filtres objets louables + tâches - Amélioré pour le responsive */}
+          <div className={`absolute top-4 left-0 h-[calc(100%-2rem)] z-[2100] transition-transform duration-300 ease-in-out ${
+            isItemsSidebarOpen ? 'translate-x-0' : '-translate-x-[calc(100%-3rem)]'
+          } pointer-events-none`}>
+            <div className="pointer-events-auto w-72 sm:w-80 lg:w-96 max-w-[90vw] h-full bg-white shadow-2xl border-r border-gray-200 rounded-r-2xl p-responsive flex flex-col overflow-y-auto">
               {/* Switch couches */}
               <div className="mb-3 grid grid-cols-1 gap-2">
                 <label className="flex items-center justify-between text-sm text-gray-700">
@@ -433,7 +453,7 @@ const MapPage: React.FC = () => {
                 value={itemSearch}
                 onChange={(e) => setItemSearch(e.target.value)}
                 placeholder="Rechercher un objet..."
-                className="w-full rounded-md border-gray-300 focus:border-primary-500 focus:ring-primary-500 text-sm mb-3"
+                className="w-full rounded-md border-gray-300 focus:border-primary-500 focus:ring-primary-500 text-responsive-sm mb-3 touch-target"
               />
               <label className="flex items-center gap-2 text-sm text-gray-700 mb-3">
                 <input type="checkbox" checked={onlyAvailableItems} onChange={(e) => setOnlyAvailableItems(e.target.checked)} />
@@ -469,12 +489,12 @@ const MapPage: React.FC = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Rechercher titre, description, tag..."
-                className="w-full rounded-md border-gray-300 focus:border-primary-500 focus:ring-primary-500 text-sm mb-3"
+                className="w-full rounded-md border-gray-300 focus:border-primary-500 focus:ring-primary-500 text-responsive-sm mb-3 touch-target"
               />
 
-              <div className="grid grid-cols-2 gap-2 mb-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-3">
                 <select
-                  className="rounded-md border-gray-300 text-sm"
+                  className="rounded-md border-gray-300 text-responsive-sm touch-target"
                   value={filterCategory}
                   onChange={(e) => setFilterCategory(e.target.value as any)}
                 >
@@ -484,7 +504,7 @@ const MapPage: React.FC = () => {
                 </select>
 
                 <select
-                  className="rounded-md border-gray-300 text-sm"
+                  className="rounded-md border-gray-300 text-responsive-sm touch-target"
                   value={filterPriority}
                   onChange={(e) => setFilterPriority(e.target.value as any)}
                 >
@@ -525,8 +545,12 @@ const MapPage: React.FC = () => {
                 {itemsLoading ? 'Chargement des objets...' : `${filteredRentableItems.length} objet(s)`}
               </div>
             </div>
-            {/* Poignée de toggle */}
-            <button onClick={() => setIsItemsSidebarOpen(v => !v)} className="pointer-events-auto absolute top-1/2 -right-4 -translate-y-1/2 h-10 w-10 rounded-full bg-white shadow-lg border flex items-center justify-center" aria-label="Ouvrir/fermer filtres">
+            {/* Poignée de toggle - Améliorée pour le responsive */}
+            <button 
+              onClick={() => setIsItemsSidebarOpen(v => !v)} 
+              className="pointer-events-auto absolute top-1/2 -right-4 -translate-y-1/2 h-12 w-12 sm:h-10 sm:w-10 rounded-full bg-white shadow-lg border flex items-center justify-center touch-target hover:shadow-xl transition-shadow" 
+              aria-label="Ouvrir/fermer filtres"
+            >
               <span className="text-lg">🛍️</span>
             </button>
           </div>
@@ -534,13 +558,13 @@ const MapPage: React.FC = () => {
           {/* Map Controls supprimés (désormais dans la sidebar gauche) */}
         </div>
       ) : (
-        /* List View */
-        <div className="px-6 py-6">
+        /* List View - Amélioré pour le responsive */
+        <div className="px-responsive py-responsive">
                      <div className="mb-6">
-             <h2 className="text-xl font-semibold text-gray-900 mb-2">
+             <h2 className="text-responsive-xl font-semibold text-gray-900 mb-2">
                Tâches à proximité
              </h2>
-             <p className="text-gray-600">
+             <p className="text-responsive-sm text-gray-600">
                {filteredTasks.length} tâche{filteredTasks.length !== 1 ? 's' : ''} trouvée{filteredTasks.length !== 1 ? 's' : ''}
              </p>
            </div>

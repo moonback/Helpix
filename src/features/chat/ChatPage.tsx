@@ -241,8 +241,8 @@ const ChatPage: React.FC = () => {
       <style>{`html, body { overflow: hidden !important; height: 100% !important; }`}</style>
       <NotificationContainer />
       <div className="fixed top-0 left-0 h-screen w-screen flex bg-gradient-to-br from-gray-50 via-white to-blue-50 dark:from-gray-900 dark:via-slate-800 dark:to-slate-900 overflow-hidden">
-        {/* Enhanced Sidebar */}
-        <div className="w-full md:w-80 lg:w-96 bg-white dark:bg-slate-900 border-r border-gray-200 dark:border-slate-700 shadow-2xl h-full overflow-hidden flex flex-col">
+        {/* Enhanced Sidebar - Amélioré pour le responsive */}
+        <div className="w-full sm:w-80 lg:w-96 bg-white dark:bg-slate-900 border-r border-gray-200 dark:border-slate-700 shadow-2xl h-full overflow-hidden flex flex-col">
           {/* Enhanced Header */}
           <div className="h-16 bg-gradient-to-r from-blue-600 to-indigo-600 flex items-center justify-between px-6">
             <div className="flex items-center space-x-3">
@@ -282,8 +282,8 @@ const ChatPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Enhanced Main Chat Area */}
-        <div className="flex-1 hidden md:block bg-white dark:bg-slate-900 h-full overflow-hidden">
+        {/* Enhanced Main Chat Area - Amélioré pour le responsive */}
+        <div className="flex-1 hidden sm:block bg-white dark:bg-slate-900 h-full overflow-hidden">
           {currentConversation ? (
             <ChatWindow
               conversation={currentConversation}
@@ -308,9 +308,9 @@ const ChatPage: React.FC = () => {
           )}
         </div>
 
-        {/* Enhanced Mobile Chat Window */}
+        {/* Enhanced Mobile Chat Window - Amélioré pour le responsive */}
         {currentConversation && (
-          <div className="fixed inset-0 z-50 bg-white dark:bg-slate-900 md:hidden animate-slideInRight h-screen w-screen overflow-hidden">
+          <div className="fixed inset-0 z-50 bg-white dark:bg-slate-900 sm:hidden animate-slideInRight h-screen w-screen overflow-hidden">
             <ChatWindow
               conversation={currentConversation}
               onBack={handleBack}

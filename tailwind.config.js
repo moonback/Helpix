@@ -6,6 +6,21 @@ export default {
   ],
   theme: {
     extend: {
+      screens: {
+        'xs': '475px',
+        'sm': '640px',
+        'md': '768px',
+        'lg': '1024px',
+        'xl': '1280px',
+        '2xl': '1536px',
+        // Breakpoints personnalisés pour l'application
+        'mobile': '320px',
+        'mobile-lg': '425px',
+        'tablet': '768px',
+        'tablet-lg': '1024px',
+        'desktop': '1280px',
+        'desktop-lg': '1536px',
+      },
       colors: {
         primary: {
           50: '#f0f9ff',
