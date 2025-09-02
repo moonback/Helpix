@@ -194,6 +194,8 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
 
       if (error) throw error;
 
+
+
       // Traiter les données
       const processedItems: Item[] = (data || []).map((item: any) => ({
         ...item,
@@ -952,6 +954,8 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
     const { items, filters, searchQuery } = get();
     let filtered = [...items];
 
+
+
     // Filtre par recherche
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
@@ -989,6 +993,8 @@ export const useMarketplaceStore = create<MarketplaceStore>((set, get) => ({
     if (filters.rating_min) {
       filtered = filtered.filter(item => (item.average_rating || 0) >= filters.rating_min!);
     }
+
+
 
     return filtered;
   },

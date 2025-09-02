@@ -41,17 +41,20 @@ const CategoryGrid: React.FC<CategoryGridProps> = ({
         onClick={() => onCategorySelect('all')}
         className={`relative p-4 rounded-xl transition-all duration-300 ${
           selectedCategory === 'all'
-            ? 'bg-gradient-to-r from-emerald-500 to-green-600 text-white shadow-lg'
+            ? 'bg-gradient-to-r from-emerald-500 to-green-600 text-white shadow-lg ring-2 ring-emerald-300'
             : 'bg-white hover:bg-slate-50 border border-slate-200 hover:border-emerald-300'
         }`}
       >
         <div className="text-center">
           <div className="text-2xl mb-2">🌟</div>
-          <div className="text-sm font-medium">Toutes</div>
+          <div className="text-sm font-medium">Tous les objets</div>
           <div className="text-xs opacity-75">
             {Object.values(stats.categories).reduce((sum, count) => sum + count, 0)}
           </div>
         </div>
+        {selectedCategory === 'all' && (
+          <div className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full"></div>
+        )}
       </motion.button>
 
       {/* Catégories individuelles */}

@@ -71,6 +71,11 @@ const MarketplacePage: React.FC = () => {
 
   // Objets filtrés
   const filteredItems = useMemo(() => {
+    // Ne pas filtrer si on est en train de charger
+    if (isLoading) {
+      return [];
+    }
+    
     let filtered = getFilteredItems();
     
     // Filtre par catégorie sélectionnée
@@ -79,7 +84,7 @@ const MarketplacePage: React.FC = () => {
     }
     
     return filtered;
-  }, [getFilteredItems, selectedCategory]);
+  }, [getFilteredItems, selectedCategory, isLoading]);
 
   // Handlers
   const handleSearch = useCallback((query: string) => {
