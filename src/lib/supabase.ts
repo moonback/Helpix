@@ -102,6 +102,9 @@ export type Database = {
           name?: string | null;
           description: string | null;
           available: boolean;
+          is_rentable: boolean;
+          daily_price: number | null; // crédits / jour
+          deposit: number;
         };
         Insert: {
           id?: number;
@@ -110,6 +113,9 @@ export type Database = {
           name?: string | null;
           description?: string | null;
           available?: boolean;
+          is_rentable?: boolean;
+          daily_price?: number | null;
+          deposit?: number;
         };
         Update: {
           id?: number;
@@ -118,7 +124,41 @@ export type Database = {
           name?: string | null;
           description?: string | null;
           available?: boolean;
+          is_rentable?: boolean;
+          daily_price?: number | null;
+          deposit?: number;
         };
+      };
+      rentals: {
+        Row: {
+          id: string;
+          item_id: number;
+          owner_id: string;
+          renter_id: string;
+          start_date: string; // ISO date
+          end_date: string;   // ISO date
+          daily_price: number;
+          total_credits: number;
+          deposit_credits: number;
+          status: 'requested' | 'accepted' | 'active' | 'completed' | 'cancelled';
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          item_id: number;
+          owner_id: string;
+          renter_id: string;
+          start_date: string;
+          end_date: string;
+          daily_price: number;
+          total_credits: number;
+          deposit_credits?: number;
+          status?: 'requested' | 'accepted' | 'active' | 'completed' | 'cancelled';
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database['public']['Tables']['rentals']['Row']>;
       };
       tasks: {
         Row: {
