@@ -132,10 +132,10 @@ const CreditPurchaseModal: React.FC<CreditPurchaseModalProps> = ({
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 20 }}
-          className="relative w-full max-w-6xl h-[90vh] max-h-[90vh] bg-white rounded-3xl shadow-2xl flex flex-col"
+          className="relative w-full max-w-full sm:max-w-6xl h-[100dvh] max-h-[100dvh] sm:h-[90vh] sm:max-h-[90vh] bg-white rounded-none sm:rounded-3xl shadow-2xl flex flex-col"
         >
           {/* Header */}
-          <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 rounded-t-3xl z-10">
+          <div className="sticky top-0 bg-white border-b border-gray-200 px-4 sm:px-6 py-3 sm:py-4 rounded-t-none sm:rounded-t-3xl z-10">
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
@@ -163,11 +163,11 @@ const CreditPurchaseModal: React.FC<CreditPurchaseModalProps> = ({
           </div>
 
           {/* Contenu principal */}
-          <div className="p-6 flex-1 overflow-y-auto">
+          <div className="p-4 sm:p-6 flex-1 overflow-y-auto">
             {/* Solde actuel */}
             <div className="mb-8">
               <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center">
                       <DollarSign className="w-6 h-6 text-white" />
@@ -196,7 +196,7 @@ const CreditPurchaseModal: React.FC<CreditPurchaseModalProps> = ({
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
                 Choisissez votre package
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                 {creditPackages.map((pkg) => (
                   <motion.div
                     key={pkg.id}
@@ -276,7 +276,7 @@ const CreditPurchaseModal: React.FC<CreditPurchaseModalProps> = ({
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
                   Méthode de paiement
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                   {[
                     { id: 'card', name: 'Carte bancaire', icon: <CreditCard className="w-5 h-5" /> },
                     { id: 'paypal', name: 'PayPal', icon: <span className="w-5 h-5 bg-blue-600 rounded text-white flex items-center justify-center text-xs font-bold">P</span> },
@@ -304,8 +304,8 @@ const CreditPurchaseModal: React.FC<CreditPurchaseModalProps> = ({
 
           {/* Footer avec actions */}
           {selectedPackage && (
-            <div className="sticky bottom-0 bg-white border-t border-gray-200 px-6 py-4 rounded-b-3xl">
-              <div className="flex items-center justify-between">
+            <div className="sticky bottom-0 bg-white border-t border-gray-200 px-4 sm:px-6 py-3 sm:py-4 rounded-b-none sm:rounded-b-3xl">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
                 <div className="text-sm text-gray-600">
                   Package sélectionné: <span className="font-semibold text-gray-900">
                     {creditPackages.find(pkg => pkg.id === selectedPackage)?.name}
@@ -315,14 +315,14 @@ const CreditPurchaseModal: React.FC<CreditPurchaseModalProps> = ({
                   <Button
                     variant="outline"
                     onClick={onClose}
-                    className="px-6 py-2"
+                    className="w-full sm:w-auto px-6 py-2"
                   >
                     Annuler
                   </Button>
                   <Button
                     onClick={handlePurchase}
                     disabled={isProcessing}
-                    className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                    className="w-full sm:w-auto px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
                   >
                     {isProcessing ? 'Traitement...' : 'Acheter maintenant'}
                   </Button>
