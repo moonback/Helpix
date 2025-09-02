@@ -9,8 +9,8 @@ import { Home, Map, Plus, Wallet, User, MessageCircle, BarChart3, MoreHorizontal
 const primaryTabs = [
   { path: '/', icon: Home, label: 'Accueil' },
   { path: '/map', icon: Map, label: 'Carte' },
-  { path: '/marketplace', icon: Package, label: 'Marketplace' },
   { path: '/chat', icon: MessageCircle, label: 'Messages' },
+  { path: '/marketplace', icon: Package, label: 'Marketplace' },
 ];
 
 // Overflow tabs shown in the More menu (keeps all links)
