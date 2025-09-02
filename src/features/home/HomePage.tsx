@@ -292,8 +292,12 @@ const HomePage: React.FC = () => {
           transition={{ duration: 0.6 }}
         >
           <div className="relative mb-8">
-            <div className="w-20 h-20 mx-auto bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center shadow-2xl">
-              <Users className="w-10 h-10 text-white" />
+            <div className="w-20 h-20 mx-auto  rounded-full flex items-center justify-center shadow-2xl p-2">
+              <img 
+                src="/assets/logo.png" 
+                alt="Helpix Logo" 
+                className="w-12 h-12 object-contain"
+              />
             </div>
             <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full animate-ping opacity-20"></div>
           </div>
@@ -324,6 +328,8 @@ const HomePage: React.FC = () => {
             transition={{ duration: 1, ease: "easeOut" }}
             className="text-center"
           >
+            
+
             {/* Titre principal avec effet de dégradé et animation */}
             <motion.h1 
               className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-6 leading-tight"
