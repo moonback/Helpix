@@ -156,7 +156,8 @@ export const useWalletStore = create<WalletStore>((set, get) => ({
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Utilisateur non connecté');
 
-      // Récupérer les transactions de crédit depuis la table transactions (exclure les dépôts)
+      // Récupérer les transactions de crédit depuis la table transactions
+      // SEULEMENT pour les tâches où l'utilisateur est l'aideur (pas le propriétaire)
       const { data, error } = await supabase
         .from('transactions')
         .select(`
@@ -165,22 +166,26 @@ export const useWalletStore = create<WalletStore>((set, get) => ({
         `)
         .eq('wallet.user_id', user.id)
         .eq('type', 'credit')
-        .neq('reference_type', 'rental_deposit') // Exclure les dépôts
+        .eq('reference_type', 'task_completion') // Seulement les paiements de tâches
         .order('created_at', { ascending: false });
 
       if (error) throw error;
 
-      // Transformer les données pour correspondre au format attendu
-      const creditEarnings = data?.map(transaction => ({
+      // Filtrer pour ne garder que les gains (où l'utilisateur est l'aideur, pas le propriétaire)
+      const creditEarnings = data?.filter(transaction => {
+        // Vérifier que l'utilisateur n'est pas le propriétaire de la tâche
+        const taskOwnerId = transaction.metadata?.task_owner;
+        return taskOwnerId && taskOwnerId !== user.id;
+      }).map(transaction => ({
         id: transaction.id,
         user_id: transaction.wallet?.user_id || '',
-        task_id: 0, // À récupérer depuis les métadonnées si nécessaire
+        task_id: transaction.metadata?.task_id || 0,
         help_offer_id: transaction.reference_id || '',
         amount: transaction.amount,
         status: transaction.status,
         created_at: transaction.created_at,
         task_title: transaction.metadata?.task_title || 'Tâche',
-        task_owner: 'Propriétaire'
+        task_owner: 'Propriétaire' // L'utilisateur actuel est l'aideur, pas le propriétaire
       })) || [];
 
       set({ creditEarnings });
@@ -287,28 +292,41 @@ export const useWalletStore = create<WalletStore>((set, get) => ({
 
       const { data: monthlyEarnings } = await supabase
         .from('transactions')
-        .select('amount, reference_type')
+        .select('amount, reference_type, metadata')
         .eq('wallet_id', walletData.id)
         .eq('type', 'credit')
-        .neq('reference_type', 'rental_deposit') // Exclure les dépôts
+        .eq('reference_type', 'task_completion') // Seulement les paiements de tâches
         .gte('created_at', startOfMonth.toISOString());
 
-      const monthlyEarningsTotal = monthlyEarnings?.reduce((sum, t) => sum + t.amount, 0) || 0;
+      // Filtrer pour ne compter que les vrais gains (où l'utilisateur est l'aideur)
+      const filteredMonthlyEarnings = monthlyEarnings?.filter(transaction => {
+        const taskOwnerId = transaction.metadata?.task_owner;
+        return taskOwnerId && taskOwnerId !== user.id;
+      }) || [];
 
-      // Récupérer les gains en attente (transactions de crédit en attente, exclure les dépôts)
+      const monthlyEarningsTotal = filteredMonthlyEarnings.reduce((sum, t) => sum + t.amount, 0);
+
+      // Récupérer les gains en attente (transactions de crédit en attente)
       const { data: pendingEarnings } = await supabase
         .from('transactions')
         .select(`
           amount,
           reference_type,
+          metadata,
           wallet:wallet_id(user_id)
         `)
         .eq('wallet.user_id', user.id)
         .eq('type', 'credit')
-        .neq('reference_type', 'rental_deposit') // Exclure les dépôts
+        .eq('reference_type', 'task_completion') // Seulement les paiements de tâches
         .eq('status', 'pending');
 
-      const pendingEarningsTotal = pendingEarnings?.reduce((sum, e) => sum + e.amount, 0) || 0;
+      // Filtrer pour ne compter que les vrais gains en attente
+      const filteredPendingEarnings = pendingEarnings?.filter(transaction => {
+        const taskOwnerId = transaction.metadata?.task_owner;
+        return taskOwnerId && taskOwnerId !== user.id;
+      }) || [];
+
+      const pendingEarningsTotal = filteredPendingEarnings.reduce((sum, e) => sum + e.amount, 0);
 
       const stats: WalletStats = {
         total_balance: walletData?.balance || 0,

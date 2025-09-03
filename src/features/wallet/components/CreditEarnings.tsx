@@ -120,7 +120,7 @@ const CreditEarnings: React.FC<CreditEarningsProps> = ({
                   <div className="flex items-center space-x-1">
                     <User className="w-3 h-3 text-gray-400" />
                     <span className="text-[10px] text-gray-500">
-                      {earning.task_owner}
+                      Aide apportée
                     </span>
                   </div>
                   <span className="text-[10px] text-gray-500">•</span>
