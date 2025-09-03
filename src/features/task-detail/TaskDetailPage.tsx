@@ -1,22 +1,29 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useTaskStore } from '@/stores/taskStore';
 import { useAuthStore } from '@/stores/authStore';
+import { useHelpOfferStore } from '@/stores/helpOfferStore';
 import TaskTracker from '@/components/ui/TaskTracker';
 import Button from '@/components/ui/Button';
-import { ArrowLeft, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
+import { ArrowLeft, AlertTriangle, CheckCircle, Clock, MessageSquare, Send } from 'lucide-react';
 import { useMessageStore } from '@/stores/messageStore';
 
 const TaskDetailPage: React.FC = () => {
   const { taskId } = useParams<{ taskId: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { tasks, fetchTasks, updateTaskProgress, updateTaskStatus, addTaskComment, addTaskAttachment, removeTaskAttachment, deleteTask } = useTaskStore();
   const { user } = useAuthStore();
   const { createConversation } = useMessageStore();
+  const { createHelpOffer, isLoading: isCreatingOffer } = useHelpOfferStore();
   
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showHelpForm, setShowHelpForm] = useState(false);
+  const [helpMessage, setHelpMessage] = useState('');
+  const [proposedDuration, setProposedDuration] = useState<number | undefined>();
+  const [proposedCredits, setProposedCredits] = useState<number | undefined>();
 
   const task = tasks.find(t => t.id === parseInt(taskId || '0'));
 
@@ -43,6 +50,14 @@ const TaskDetailPage: React.FC = () => {
 
     loadTask();
   }, [taskId, tasks.length, fetchTasks, task]);
+
+  // Vérifier si l'action est "help" pour afficher le formulaire
+  useEffect(() => {
+    const action = searchParams.get('action');
+    if (action === 'help' && user && task && task.user_id !== user.id) {
+      setShowHelpForm(true);
+    }
+  }, [searchParams, user, task]);
 
   const handleUpdateProgress = async (progress: number, step?: string) => {
     if (!task) return;
@@ -129,6 +144,34 @@ const TaskDetailPage: React.FC = () => {
       navigate('/chat');
     } catch (e) {
       console.error('Erreur création conversation de groupe:', e);
+    }
+  };
+
+  const handleSubmitHelpOffer = async () => {
+    if (!task || !user || !helpMessage.trim()) return;
+    
+    try {
+      await createHelpOffer(
+        task.id,
+        helpMessage,
+        proposedDuration,
+        proposedCredits
+      );
+      
+      // Réinitialiser le formulaire
+      setHelpMessage('');
+      setProposedDuration(undefined);
+      setProposedCredits(undefined);
+      setShowHelpForm(false);
+      
+      // Nettoyer l'URL
+      navigate(`/task/${taskId}`, { replace: true });
+      
+      // Afficher un message de succès
+      alert('Votre offre d\'aide a été envoyée avec succès !');
+    } catch (error) {
+      console.error('Erreur lors de l\'envoi de l\'offre:', error);
+      alert('Erreur lors de l\'envoi de l\'offre d\'aide');
     }
   };
 
@@ -236,6 +279,94 @@ const TaskDetailPage: React.FC = () => {
               isOwner={isOwner}
               canEdit={canEdit}
             />
+            
+            {/* Formulaire d'offre d'aide */}
+            {showHelpForm && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mt-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-200"
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
+                    <MessageSquare className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-slate-800">Proposer votre aide</h3>
+                    <p className="text-sm text-slate-600">Expliquez pourquoi vous êtes la bonne personne pour cette tâche</p>
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                      Message de motivation *
+                    </label>
+                    <textarea
+                      value={helpMessage}
+                      onChange={(e) => setHelpMessage(e.target.value)}
+                      placeholder="Expliquez votre expérience, votre disponibilité et pourquoi vous souhaitez aider..."
+                      className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                      rows={4}
+                      required
+                    />
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Durée proposée (heures)
+                      </label>
+                      <input
+                        type="number"
+                        value={proposedDuration || ''}
+                        onChange={(e) => setProposedDuration(e.target.value ? parseInt(e.target.value) : undefined)}
+                        placeholder="Ex: 2"
+                        className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        min="1"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Crédits proposés
+                      </label>
+                      <input
+                        type="number"
+                        value={proposedCredits || ''}
+                        onChange={(e) => setProposedCredits(e.target.value ? parseInt(e.target.value) : undefined)}
+                        placeholder="Ex: 50"
+                        className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        min="1"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-3 pt-2">
+                    <Button
+                      onClick={handleSubmitHelpOffer}
+                      disabled={!helpMessage.trim() || isCreatingOffer}
+                      className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2"
+                    >
+                      <Send className="w-4 h-4" />
+                      {isCreatingOffer ? 'Envoi...' : 'Envoyer l\'offre'}
+                    </Button>
+                    
+                    <Button
+                      onClick={() => {
+                        setShowHelpForm(false);
+                        navigate(`/task/${taskId}`, { replace: true });
+                      }}
+                      variant="outline"
+                      className="border-slate-300 hover:border-slate-400"
+                    >
+                      Annuler
+                    </Button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+            
             <div className="mt-4 flex flex-wrap gap-3">
               <Button onClick={handleCreateGroupConversation} className="bg-emerald-600 hover:bg-emerald-700 text-white">
                 Créer conversation de groupe

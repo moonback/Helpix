@@ -186,32 +186,17 @@ export const processTaskPayment = async (
   try {
     console.log(`🔄 Traitement du paiement pour la tâche "${taskTitle}" (${amount} crédits)`);
     
-    // 1. Débiter le créateur de la tâche
-    const debitSuccess = await debitTaskOwnerForPayment(
-      taskOwnerId,
-      taskId,
-      amount,
-      taskTitle,
-      helperUserId
-    );
+    // Utiliser la fonction atomique de Supabase pour éviter les doublons
+    const { error } = await supabase.rpc('process_task_payment_atomic', {
+      p_task_id: taskId,
+      p_task_owner_id: taskOwnerId,
+      p_helper_id: helperUserId,
+      p_amount: amount,
+      p_task_title: taskTitle
+    });
 
-    if (!debitSuccess) {
-      console.error('❌ Échec du débit du propriétaire de la tâche');
-      return false;
-    }
-
-    // 2. Créditer l'utilisateur qui a aidé
-    const creditSuccess = await creditUserForTaskCompletion(
-      helperUserId,
-      taskId,
-      amount,
-      taskTitle,
-      taskOwnerId
-    );
-
-    if (!creditSuccess) {
-      console.error('❌ Échec du crédit de l\'utilisateur qui a aidé');
-      // TODO: Implémenter un système de rollback si nécessaire
+    if (error) {
+      console.error('❌ Erreur lors du traitement atomique du paiement:', error);
       return false;
     }
 
@@ -231,12 +216,31 @@ export const processTaskPayment = async (
  */
 export const hasTaskPaymentBeenProcessed = async (taskId: number): Promise<boolean> => {
   try {
+    // Vérifier d'abord si la tâche est déjà marquée comme terminée
+    const { data: taskData, error: taskError } = await supabase
+      .from('tasks')
+      .select('status, completion_date')
+      .eq('id', taskId)
+      .single();
+
+    if (taskError) {
+      console.error('Erreur lors de la vérification du statut de la tâche:', taskError);
+      return false;
+    }
+
+    // Si la tâche n'est pas terminée, le paiement ne peut pas avoir été traité
+    if (taskData.status !== 'completed') {
+      return false;
+    }
+
+    // Vérifier s'il y a déjà des transactions pour cette tâche
     const { data, error } = await supabase
       .from('transactions')
-      .select('id, type')
+      .select('id, type, created_at')
       .eq('reference_type', 'task_completion')
       .eq('reference_id', taskId.toString())
-      .in('type', ['credit', 'debit']);
+      .in('type', ['credit', 'debit'])
+      .order('created_at', { ascending: false });
 
     if (error) {
       console.error('Erreur lors de la vérification du paiement:', error);
@@ -247,7 +251,22 @@ export const hasTaskPaymentBeenProcessed = async (taskId: number): Promise<boole
     const hasCredit = data.some(t => t.type === 'credit');
     const hasDebit = data.some(t => t.type === 'debit');
     
-    return hasCredit && hasDebit;
+    if (hasCredit && hasDebit) {
+      console.log(`✅ Paiement déjà traité pour la tâche ${taskId}`);
+      return true;
+    }
+
+    // Vérifier s'il y a des transactions récentes (dans les 5 dernières minutes)
+    // pour éviter les doubles traitements en cas de clics multiples
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+    const recentTransactions = data.filter(t => new Date(t.created_at) > new Date(fiveMinutesAgo));
+    
+    if (recentTransactions.length > 0) {
+      console.log(`⚠️ Transactions récentes détectées pour la tâche ${taskId}, évitant le double traitement`);
+      return true;
+    }
+    
+    return false;
   } catch (error) {
     console.error('Erreur lors de la vérification du paiement:', error);
     return false;

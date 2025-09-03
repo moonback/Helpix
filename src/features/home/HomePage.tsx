@@ -208,7 +208,7 @@ const HomePage: React.FC = () => {
       const task = (tasks as Task[]).find(t => t.id === taskId);
       if (!task || task.user_id === user.id) return;
 
-      navigate(`/task/${taskId}/offers`);
+      navigate(`/task/${taskId}?action=help`);
     } catch (error) {
       console.error('Erreur lors de la navigation vers les offres:', error);
     }

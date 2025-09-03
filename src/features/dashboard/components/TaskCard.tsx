@@ -210,7 +210,11 @@ const TaskCard: React.FC<TaskCardProps> = ({
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => onStatusChange(task.id, 'completed')}
+                    onClick={() => {
+                      if (window.confirm('Êtes-vous sûr de vouloir marquer cette tâche comme terminée ? Le paiement sera traité automatiquement.')) {
+                        onStatusChange(task.id, 'completed');
+                      }
+                    }}
                     className="flex items-center space-x-1 text-xs"
                   >
                     <CheckCircle className="w-3 h-3" />

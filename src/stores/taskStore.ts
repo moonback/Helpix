@@ -435,6 +435,18 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
 
   updateTaskStatus: async (id, status) => {
     try {
+      // Vérifier si la tâche existe et si le statut change réellement
+      const currentTask = get().tasks.find(t => t.id === id);
+      if (!currentTask) {
+        throw new Error('Tâche non trouvée');
+      }
+
+      // Si la tâche est déjà au statut demandé, ne rien faire
+      if (currentTask.status === status) {
+        console.log(`ℹ️ La tâche ${id} est déjà au statut "${status}"`);
+        return;
+      }
+
       const updates: Partial<Task> = {
         status,
         updated_at: new Date().toISOString()
@@ -457,6 +469,8 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
             
             const paymentAlreadyProcessed = await hasTaskPaymentBeenProcessed(id);
             if (!paymentAlreadyProcessed) {
+              console.log(`🔄 Traitement du paiement pour la tâche "${task.title}" (${task.budget_credits} crédits)`);
+              
               const success = await processTaskPayment(
                 task.user_id,        // Propriétaire de la tâche (qui paie)
                 task.assigned_to,    // Utilisateur qui a aidé (qui reçoit)
@@ -477,9 +491,11 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
 
                 // Afficher une notification de succès
                 console.log(`✅ Paiement traité avec succès: ${task.budget_credits} crédits transférés pour "${task.title}"`);
+              } else {
+                console.error(`❌ Échec du traitement du paiement pour la tâche "${task.title}"`);
               }
             } else {
-              console.log(`ℹ️ Le paiement a déjà été traité pour la tâche ${id}`);
+              console.log(`ℹ️ Paiement déjà traité pour la tâche "${task.title}"`);
             }
           } catch (walletError) {
             console.error('Erreur lors du traitement du paiement automatique:', walletError);

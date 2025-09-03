@@ -311,7 +311,11 @@ const TaskTracker: React.FC<TaskTrackerProps> = ({
           
           {task.status === 'in_progress' && canEdit && (
             <Button
-              onClick={() => onUpdateStatus('completed', 'Tâche terminée avec succès')}
+              onClick={() => {
+                if (window.confirm('Êtes-vous sûr de vouloir marquer cette tâche comme terminée ? Le paiement sera traité automatiquement.')) {
+                  onUpdateStatus('completed', 'Tâche terminée avec succès');
+                }
+              }}
               className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
             >
               <CheckCircle className="w-4 h-4 mr-2" />
